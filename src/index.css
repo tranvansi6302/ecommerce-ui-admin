@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol';
+}
+
+/* Overide */
+[aria-label='All items unselected'] {
+    display: none !important;
+}
+[aria-label='All items selected'] {
+    display: none !important;
+}
+
+/* Checkbox */
+[data-pc-section='box'] {
+    color: #fff !important;
+    border-radius: 2px !important;
+    width: 16px !important;
+    height: 16px !important;
+}
+
+[data-pc-section='header'] {
+    background-color: #fff !important;
+    border: none !important;
+}
