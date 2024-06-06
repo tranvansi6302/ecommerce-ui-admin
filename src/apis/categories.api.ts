@@ -4,7 +4,7 @@ import http from '~/utils/http'
 
 const categoriesApi = {
     getAllCategories: () => {
-        return http.get<CategoryResponse>(API.GET_ALL_CATEGORY)
+        return http.get<CategoryResponse>(API.CATEGORY)
     }
 }
 

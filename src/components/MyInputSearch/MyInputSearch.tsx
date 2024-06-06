@@ -8,9 +8,11 @@ interface MyInputSearchProps {
     className?: string
     name: string
     style?: React.CSSProperties
+    value?: string
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
-export default function MyInputSearch({ placeholder, className, name, style, register }: MyInputSearchProps) {
+export default function MyInputSearch({ placeholder, className, name, style, register, value, onChange }: MyInputSearchProps) {
     const registerResult = register && name ? register(name) : null
 
     return (
@@ -22,6 +24,8 @@ export default function MyInputSearch({ placeholder, className, name, style, reg
                     id={name}
                     type='text'
                     placeholder={placeholder}
+                    value={value}
+                    onChange={onChange}
                     className={className}
                     name={name}
                     style={style}

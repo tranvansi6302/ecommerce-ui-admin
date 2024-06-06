@@ -4,7 +4,7 @@ import http from '~/utils/http'
 
 const brandsApi = {
     getAllBrands: () => {
-        return http.get<BrandResponse>(API.GET_ALL_BRAND)
+        return http.get<BrandResponse>(API.BRAND)
     }
 }
 

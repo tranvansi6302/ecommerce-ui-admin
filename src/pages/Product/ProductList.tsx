@@ -1,198 +1,120 @@
 import { Column } from 'primereact/column'
-import { DataTable, DataTableExpandedRows, DataTableValueArray } from 'primereact/datatable'
-import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown'
-import { useEffect, useState } from 'react'
+import {
+    DataTable,
+    DataTableExpandedRows,
+    DataTableSelectionMultipleChangeEvent,
+    DataTableValueArray
+} from 'primereact/datatable'
+import { Dropdown } from 'primereact/dropdown'
+import { useCallback, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import MyButton from '~/components/MyButton'
 
-import { useForm } from 'react-hook-form'
-import MyInputSearch from '~/components/MyInputSearch'
-import { ProductService } from './ProductService'
+import { useQuery } from '@tanstack/react-query'
+import { Brand } from '~/@types/brand'
+import { Category } from '~/@types/category'
+import { Product } from '~/@types/product'
+import brandsApi from '~/apis/brands.api'
+import categoriesApi from '~/apis/categories.api'
+
+import productsApi from '~/apis/products.api'
+import DefaultProductImage from '~/components/DefaultProductImage'
 import PATH from '~/constants/path'
-import MyDropdown from '~/components/MyDrowdown'
-
-interface Variant {
-    id: string
-    name: string
-    stock: number
-    costPrice: number
-    salePrice: number
-}
-
-interface Product {
-    id: string
-    code: string
-    name: string
-    description: string
-    image: string
-    price: number
-    category: string
-    brand: string
-    createdDate: string
-    inventoryStatus: string
-    rating: number
-    variants?: Variant[]
-}
-
-interface Brand {
-    name: string
-    code: string
-}
-
-interface Category {
-    name: string
-    code: string
-}
-
-const brands: Brand[] = [
-    { name: 'Nike', code: 'NI' },
-    { name: 'Adidas', code: 'AD' },
-    { name: 'Pumma', code: 'PU' }
-]
-
-const categories: Brand[] = [
-    { name: 'Áo thun', code: 'AT' },
-    { name: 'Giày thể thao', code: 'GTT' },
-    { name: 'Quần jogger ', code: 'QJ' }
-]
+import FilterProduct from './components/FilterProduct'
+import RowVariant from './components/RowVariant'
 
 export default function ProductList() {
-    const [products, setProducts] = useState<Product[]>([])
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
-    const [selectedProducts, setSelectedProducts] = useState<Product[]>([])
-    const [globalFilter] = useState<string>('')
-
-    const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+    const [selectedProducts, setSelectedProducts] = useState<Product[]>([])
+    const [search, setSearch] = useState<string>('')
+    const [globalFilter] = useState<string>('')
+    const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
 
-    useEffect(() => {
-        ProductService.getProductsWithVariantsSmall().then((data) => setProducts(data))
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    const { data: products } = useQuery({
+        queryKey: ['products'],
+        queryFn: () => productsApi.getAllProducts()
+    })
 
-    const formatCurrency = (value: number) => {
-        return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-    }
+    const { data: brands } = useQuery({
+        queryKey: ['brands'],
+        queryFn: () => brandsApi.getAllBrands()
+    })
 
-    const costPriceBodyTemplate = (rowData: Variant) => {
-        return formatCurrency(rowData.costPrice)
-    }
+    const { data: categories } = useQuery({
+        queryKey: ['categories'],
+        queryFn: () => categoriesApi.getAllCategories()
+    })
 
-    const salePriceBodyTemplate = (rowData: Variant) => {
-        return formatCurrency(rowData.salePrice)
-    }
+    const variantNameTemplate = useCallback((rowData: Variant) => rowData.variant_name, [])
+
+    const warehouseTemplate = useCallback((rowData: Variant) => rowData?.warehouse?.available_quantity ?? 0, [])
+
+    const purchasePriceTemplate = useCallback((rowData: Variant) => rowData?.warehouse?.purchase_price ?? 0, [])
+
+    const salePriceTemplate = useCallback((rowData: Variant) => rowData?.current_price_plan?.sale_price ?? 0, [])
 
     // Xử lý hình ảnh
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const imageBodyTemplate = (rowData: Product) => {
-        return (
-            <svg
-                viewBox='0 0 24 24'
-                fill='none'
-                xmlns='http://www.w3.org/2000/svg'
-                height='35px'
-                className='jss13133'
-                style={{ color: 'rgb(232, 234, 235)', height: 35 }}
-            >
-                <path
-                    d='M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2ZM5 19V5h14l.002 14H5Z'
-                    fill='currentColor'
+    const imageBodyTemplate = useCallback(() => <DefaultProductImage />, [])
+
+    const allowExpansion = useCallback((rowData: Product) => rowData.variants!.length > 0, [])
+
+    const rowVariantTemplate = useCallback(
+        (data: Product) => {
+            return (
+                <RowVariant
+                    data={data}
+                    variantNameTemplate={variantNameTemplate}
+                    warehouseTemplate={warehouseTemplate}
+                    purchasePriceTemplate={purchasePriceTemplate}
+                    salePriceTemplate={salePriceTemplate}
                 />
-                <path d='m10 14-1-1-3 4h12l-5-7-3 4ZM8.5 11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z' fill='currentColor' />
-            </svg>
-        )
-    }
+            )
+        },
+        [variantNameTemplate, warehouseTemplate, purchasePriceTemplate, salePriceTemplate]
+    )
 
-    const allowExpansion = (rowData: Product) => {
-        return rowData.variants!.length > 0
-    }
-
-    const rowExpansionTemplate = (data: Product) => {
-        return (
-            <div className='px-3'>
-                <DataTable value={data.variants} tableStyle={{ fontSize: '14px' }}>
-                    <Column field='name' header='Phiên bản'></Column>
-                    <Column field='stock' header='Tồn kho'></Column>
-                    <Column field='costPrice' header='Giá nhập' body={costPriceBodyTemplate} sortable></Column>
-                    <Column field='salePrice' header='Giá bán' body={salePriceBodyTemplate} sortable></Column>
-                </DataTable>
-            </div>
-        )
-    }
-
-    const nameBodyTemplate = (rowData: Product) => {
+    const productNameTemplate = useCallback((rowData: Product) => {
         return (
             <Link className='text-blue-600' to={`/products/${rowData.id}`}>
                 {rowData.name}
             </Link>
         )
-    }
+    }, [])
 
-    const { register, handleSubmit } = useForm()
+    const categoryNameTemplate = useCallback((rowData: Product) => rowData.category.name, [])
 
-    const onsubmit = handleSubmit((data) => {
-        console.log(data)
-    })
+    const brandNameTemplate = useCallback((rowData: Product) => rowData.brand.name, [])
 
-    const header = (
-        <div className=''>
-            <p className='font-medium text-[14px] text-blue-600 pb-2 border-b-2 border-blue-500 inline-block mb-3'>
-                Tất cả sản phẩm
-            </p>
-            <form onSubmit={onsubmit} className='flex  justify-content-between gap-2'>
-                <div className='w-2/5'>
-                    <MyInputSearch
-                        className='pl-10 py-0 font-normal  h-[40px] w-full flex items-center'
-                        style={{ borderRadius: '2px', fontSize: '13.6px' }}
-                        name='search'
-                        placeholder='Tìm kiếm theo tên sản phẩm, tên sản phẩm'
-                        register={register}
-                    />
-                </div>
-                <div className='flex gap-2'>
-                    <div className='w-[250px]'>
-                        <MyDropdown
-                            value={selectedBrand}
-                            onChange={(e: DropdownChangeEvent) => setSelectedBrand(e.value)}
-                            options={brands}
-                            optionLabel='name'
-                            placeholder='Chọn thương hiệu'
-                            name='brand'
-                        />
-                    </div>
-                    <div className='w-[250px]'>
-                        <MyDropdown
-                            value={selectedCategory}
-                            onChange={(e: DropdownChangeEvent) => setSelectedCategory(e.value)}
-                            options={categories}
-                            optionLabel='name'
-                            placeholder='Chọn loại sản phẩm'
-                            name='category'
-                        />
-                    </div>
-
-                    <MyButton
-                        severity='secondary'
-                        icon='pi pi-filter-slash'
-                        text
-                        className='px-4 py-3 rounded-none text-gray-900 font-semibold'
-                    >
-                        <p className='ml-1 text-[14px]'>Xóa bộ lọc</p>
-                    </MyButton>
-                </div>
-            </form>
-        </div>
+    const header = useMemo(
+        () => (
+            <FilterProduct
+                search={search}
+                setSearch={setSearch}
+                selectedBrand={selectedBrand}
+                setSelectedBrand={setSelectedBrand}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+                brands={brands}
+                categories={categories}
+            />
+        ),
+        [search, setSearch, selectedBrand, selectedCategory, brands, categories]
     )
 
-    const selectedHeader = (
-        <div className='flex flex-wrap justify-content-between gap-2'>
-            <span>Đã chọn {selectedProducts.length} sản phẩm trên trang này</span>
-            <Dropdown options={['Xóa', 'Ngừng kinh doanh']} placeholder='Chọn thao tác' />
-        </div>
+    const selectedHeader = useMemo(
+        () => (
+            <div className='flex flex-wrap justify-content-between gap-2'>
+                <span>Đã chọn {selectedProducts.length} sản phẩm trên trang này</span>
+                <Dropdown options={['Xóa', 'Ngừng kinh doanh']} placeholder='Chọn thao tác' />
+            </div>
+        ),
+        [selectedProducts]
     )
 
-    const onSelectionChange = (e: { value: Product[] }) => {
-        setSelectedProducts(e.value)
-    }
+    const onSelectionChange = useCallback((e: DataTableSelectionMultipleChangeEvent<DataTableValueArray>) => {
+        setSelectedProducts(e.value as Product[])
+    }, [])
 
     return (
         <div className='w-full'>
@@ -212,10 +134,10 @@ export default function ProductList() {
                 </Link>
             </div>
             <DataTable
-                value={products}
+                value={(products?.data.result as unknown as DataTableValueArray) ?? []}
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
-                rowExpansionTemplate={rowExpansionTemplate}
+                rowExpansionTemplate={rowVariantTemplate}
                 dataKey='id'
                 header={selectedProducts.length > 0 ? selectedHeader : header}
                 tableStyle={{ minWidth: '60rem', fontSize: '14px' }}
@@ -228,9 +150,9 @@ export default function ProductList() {
                 <Column className='pr-0 w-[35px]' expander={allowExpansion} />
                 <Column selectionMode='multiple' className='w-[40px]' />
                 <Column header='Ảnh' body={imageBodyTemplate} />
-                <Column className='w-1/3' field='name' header='Sản phẩm' body={nameBodyTemplate} />
-                <Column field='category' header='Loại' />
-                <Column field='brand' header='Thương hiệu' />
+                <Column className='w-1/3' field='name' header='Sản phẩm' body={productNameTemplate} />
+                <Column field='category' header='Loại' body={categoryNameTemplate} />
+                <Column field='brand' header='Thương hiệu' body={brandNameTemplate} />
                 <Column field='createdDate' header='Ngày khởi tạo' sortable />
             </DataTable>
         </div>

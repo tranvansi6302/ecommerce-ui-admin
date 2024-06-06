@@ -1,4 +1,4 @@
-import { ApiResponse } from './util'
+import { PaginatedApiResponse } from './util'
 
 interface Brand {
     id: number
@@ -7,4 +7,4 @@ interface Brand {
     summary: string
 }
 
-export type BrandResponse = ApiResponse<Brand>
+export type BrandResponse = PaginatedApiResponse<Brand>

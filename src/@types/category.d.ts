@@ -1,4 +1,4 @@
-import { ApiResponse } from './util'
+import { PaginatedApiResponse } from './util'
 
 interface Category {
     id: number
@@ -7,4 +7,4 @@ interface Category {
     summary: string
 }
 
-export type CategoryResponse = ApiResponse<Category>
+export type CategoryResponse = PaginatedApiResponse<Category>

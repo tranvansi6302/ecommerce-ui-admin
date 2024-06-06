@@ -1,4 +1,4 @@
-import { LoginResponse } from '~/@types/auth'
+import { ProductResponse } from '~/@types/product'
 import API from '~/constants/api'
 import { ProductSchemaType } from '~/schemas/products.schema'
 import http from '~/utils/http'
@@ -10,8 +10,8 @@ export type CreateProductRequest = ProductSchemaType & {
 }
 
 const productsApi = {
-    login: (body: CreateProductRequest) => {
-        return http.post<LoginResponse>(API.CREATE_PRODUCT, body)
+    getAllProducts: () => {
+        return http.get<ProductResponse>(API.PRODUCT)
     }
 }
 
