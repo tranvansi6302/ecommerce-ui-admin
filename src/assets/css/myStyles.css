@@ -1,0 +1,97 @@
+.eye-icon {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.icon-search {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+/* Overide */
+[aria-label='All items unselected'] {
+    display: none !important;
+}
+[aria-label='All items selected'] {
+    display: none !important;
+}
+
+/* Checkbox */
+[data-pc-section='box'] {
+    color: #fff !important;
+    border-radius: 2px !important;
+    width: 16px !important;
+    height: 16px !important;
+}
+
+[data-pc-section='header'] {
+    background-color: #fff !important;
+    border: none !important;
+}
+
+[data-pc-section='input'] {
+    font-size: 13.6px !important;
+}
+
+[data-pc-name='chips'] > ul {
+    padding: 0 !important;
+    border-radius: 2px !important;
+    height: 40px !important;
+    padding: 0 12px !important;
+}
+[data-pc-name='chips'] > ul > li {
+    font-size: 13px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-radius: 5px !important;
+    color: #0c0b33 !important;
+}
+.p-fileupload-buttonbar {
+    border-top: 1px solid #d1d5db;
+    border-right: 1px solid #d1d5db;
+    border-left: 1px solid #d1d5db;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    border-top-right-radius: 2px;
+    border-top-left-radius: 2px;
+}
+
+.p-fileupload-buttonbar > span {
+    background-color: transparent !important;
+    color: #06b6d4;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none !important;
+}
+.p-fileupload-buttonbar > button {
+    background-color: transparent !important;
+    color: #ef4444;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none !important;
+}
+
+.p-fileupload-content {
+    padding: 0 !important;
+    border-end-end-radius: 2px;
+    border-end-start-radius: 2px;
+}
+
+.p-fileupload-content > [data-pc-name='messages'] {
+    display: none;
+}
+
+.p-fileupload-row {
+    border: none !important;
+    margin: 0;
+}
