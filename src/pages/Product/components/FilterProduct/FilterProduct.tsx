@@ -1,16 +1,22 @@
+import { omit } from 'lodash'
 import { DropdownChangeEvent } from 'primereact/dropdown'
 import { useEffect } from 'react'
+import { createSearchParams, useNavigate } from 'react-router-dom'
+import { Brand } from '~/@types/brand'
+import { Category } from '~/@types/category'
 import MyButton from '~/components/MyButton'
 import MyDropdown from '~/components/MyDrowdown/MyDropdown'
 import MyInputSearch from '~/components/MyInputSearch'
+import PATH from '~/constants/path'
+import useQueryConfig from '~/hooks/useQueryConfig'
 
 interface FilterProductProps {
-    selectedBrand: any
-    setSelectedBrand: (value: any) => void
-    selectedCategory: any
-    setSelectedCategory: (value: any) => void
-    brands: any
-    categories: any
+    selectedBrand: Brand | null
+    setSelectedBrand: (value: Brand | null) => void
+    selectedCategory: Category | null
+    setSelectedCategory: (value: Category | null) => void
+    brands: Brand
+    categories: Category
     search: string
     setSearch: (value: string) => void
 }
@@ -24,14 +30,71 @@ export default function FilterProduct({
     brands,
     categories
 }: FilterProductProps) {
+    const queryConfig = useQueryConfig()
+    const navigate = useNavigate()
+
+    // Active filter
     useEffect(() => {
-        console.log(selectedBrand)
-    }, [selectedBrand])
+        console.log('queryConfig...', queryConfig)
+        if (queryConfig.brand && brands) {
+            setSelectedBrand(brands.find((b) => b.slug === queryConfig.brand))
+        }
+        if (queryConfig.category && categories) {
+            setSelectedCategory(categories.find((c) => c.slug === queryConfig.category))
+        }
+        if (queryConfig.name) {
+            setSearch(queryConfig.name)
+        }
+    }, [brands, categories, queryConfig, setSearch, setSelectedBrand, setSelectedCategory])
+
+    useEffect(() => {
+        if (selectedBrand) {
+            navigate({
+                pathname: PATH.PRODUCT_LIST,
+                search: createSearchParams({
+                    ...queryConfig,
+                    brand: selectedBrand?.slug
+                }).toString()
+            })
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setSelectedBrand, selectedBrand])
+
+    useEffect(() => {
+        if (selectedCategory) {
+            navigate({
+                pathname: PATH.PRODUCT_LIST,
+                search: createSearchParams({
+                    ...queryConfig,
+                    category: selectedCategory?.slug
+                }).toString()
+            })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setSelectedCategory, selectedCategory])
 
     const handleSerach = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        console.log(search)
+        navigate({
+            pathname: PATH.PRODUCT_LIST,
+            search: createSearchParams({
+                ...queryConfig,
+                name: search
+            }).toString()
+        })
     }
+
+    const handleClean = () => {
+        setSelectedBrand(null)
+        setSelectedCategory(null)
+        setSearch('')
+        navigate({
+            pathname: PATH.PRODUCT_LIST,
+            search: createSearchParams(omit(queryConfig, ['category', 'brand', 'name'])).toString()
+        })
+    }
+    console.log('filter')
 
     return (
         <div>
@@ -56,7 +119,7 @@ export default function FilterProduct({
                         <MyDropdown
                             value={selectedBrand}
                             onChange={(e: DropdownChangeEvent) => setSelectedBrand(e.value)}
-                            options={brands?.data.result}
+                            options={brands}
                             optionLabel='name'
                             placeholder='Chọn thương hiệu'
                             name='brand'
@@ -66,7 +129,7 @@ export default function FilterProduct({
                         <MyDropdown
                             value={selectedCategory}
                             onChange={(e: DropdownChangeEvent) => setSelectedCategory(e.value)}
-                            options={categories?.data.result}
+                            options={categories}
                             optionLabel='name'
                             placeholder='Chọn loại sản phẩm'
                             name='category'
@@ -78,6 +141,7 @@ export default function FilterProduct({
                         icon='pi pi-filter-slash'
                         text
                         className='px-4 py-3 rounded-none text-gray-900 font-semibold'
+                        onClick={handleClean}
                     >
                         <p className='ml-1 text-[14px]'>Xóa bộ lọc</p>
                     </MyButton>

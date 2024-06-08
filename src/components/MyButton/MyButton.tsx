@@ -11,6 +11,7 @@ interface MyButtonProps {
     outlined?: boolean
     size?: 'small' | 'large'
     icon?: JSX.Element | string
+    onClick?: () => void
 }
 
 export default function MyButton({
@@ -22,7 +23,8 @@ export default function MyButton({
     outlined,
     className,
     size = 'small',
-    icon
+    icon,
+    onClick
 }: MyButtonProps) {
     return (
         <Button
@@ -34,6 +36,7 @@ export default function MyButton({
             severity={severity}
             size={size}
             className={`flex justify-center  ${className}`}
+            onClick={onClick}
         >
             {loading ? <Spinner /> : children}
         </Button>
