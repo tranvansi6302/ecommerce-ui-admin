@@ -24,6 +24,10 @@ const menuItems: MenuItem[] = [
             {
                 label: 'Danh sách sản phẩm',
                 link: PATH.PRODUCT_LIST
+            },
+            {
+                label: 'Danh sách loại sản phẩm',
+                link: PATH.CATEGORY_LIST
             }
         ]
     }
