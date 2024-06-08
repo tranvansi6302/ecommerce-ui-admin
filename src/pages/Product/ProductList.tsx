@@ -10,18 +10,23 @@ import { useCallback, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import MyButton from '~/components/MyButton'
 
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Brand } from '~/@types/brand'
 import { Category } from '~/@types/category'
-import { Product } from '~/@types/product'
+import { Product, ProductFilter } from '~/@types/product'
 import brandsApi from '~/apis/brands.api'
 import categoriesApi from '~/apis/categories.api'
 
 import productsApi from '~/apis/products.api'
 import DefaultProductImage from '~/components/DefaultProductImage'
 import PATH from '~/constants/path'
+import useQueryConfig from '~/hooks/useQueryConfig'
 import FilterProduct from './components/FilterProduct'
 import RowVariant from './components/RowVariant'
+
+export type QueryConfig = {
+    [key in keyof ProductFilter]: string
+}
 
 export default function ProductList() {
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
@@ -30,10 +35,12 @@ export default function ProductList() {
     const [search, setSearch] = useState<string>('')
     const [globalFilter] = useState<string>('')
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
+    const queryConfig = useQueryConfig()
 
     const { data: products } = useQuery({
-        queryKey: ['products'],
-        queryFn: () => productsApi.getAllProducts()
+        queryKey: ['products', queryConfig],
+        queryFn: () => productsApi.getAllProducts(queryConfig as ProductFilter),
+        placeholderData: keepPreviousData
     })
 
     const { data: brands } = useQuery({
@@ -54,7 +61,7 @@ export default function ProductList() {
 
     const salePriceTemplate = useCallback((rowData: Variant) => rowData?.current_price_plan?.sale_price ?? 0, [])
 
-    // Xử lý hình ảnh
+    // handle image (default)
     const imageBodyTemplate = useCallback(() => <DefaultProductImage />, [])
 
     const allowExpansion = useCallback((rowData: Product) => rowData.variants!.length > 0, [])
@@ -91,15 +98,15 @@ export default function ProductList() {
             <FilterProduct
                 search={search}
                 setSearch={setSearch}
-                selectedBrand={selectedBrand}
+                selectedBrand={selectedBrand as Brand}
                 setSelectedBrand={setSelectedBrand}
-                selectedCategory={selectedCategory}
+                selectedCategory={selectedCategory as Category}
                 setSelectedCategory={setSelectedCategory}
-                brands={brands}
-                categories={categories}
+                brands={brands?.data.result as Brand}
+                categories={categories?.data.result as Category}
             />
         ),
-        [search, setSearch, selectedBrand, selectedCategory, brands, categories]
+        [search, selectedBrand, selectedCategory, brands?.data.result, categories?.data.result]
     )
 
     const selectedHeader = useMemo(

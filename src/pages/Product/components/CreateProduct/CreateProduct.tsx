@@ -7,7 +7,7 @@ import { DropdownChangeEvent } from 'primereact/dropdown'
 import { Editor, EditorTextChangeEvent } from 'primereact/editor'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Brand } from '~/@types/brand'
 import { Category } from '~/@types/category'
@@ -29,6 +29,7 @@ type FormDataCreateProduct = Pick<CreateProductRequest, 'name' | 'sku' | 'brand_
 const createProductSchema = productSchema
 
 export default function CreateProduct() {
+    const navigate = useNavigate()
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
     const [description, setDescription] = useState<string>('')
@@ -48,7 +49,7 @@ export default function CreateProduct() {
     })
 
     const createProductMutation = useMutation({
-        mutationFn: (data: CreateProductRequest) => productsApi.login(data)
+        mutationFn: (data: CreateProductRequest) => productsApi.createProduct(data)
     })
 
     const { data: brands } = useQuery({
@@ -76,8 +77,10 @@ export default function CreateProduct() {
         createProductMutation.mutate(finalData, {
             onSuccess: () => {
                 toast.success(MESSAGE.CREATE_PRODUCT_SUCCESS)
+                navigate(PATH.PRODUCT_LIST)
             },
             onError: (error) => {
+                console.log(error)
                 const errorResponse = (error as AxiosError<MessageResponse>).response?.data
                 setMessage(errorResponse?.message ?? '')
                 toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
