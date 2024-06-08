@@ -4,9 +4,10 @@ import AuthLayout from '~/layouts/AuthLayout'
 import MainLayout from '~/layouts/MainLayout'
 import Dashboard from '~/pages/Dashboard'
 import Login from '~/pages/Login'
-import ProductList from '~/pages/Product/ProductList'
+import ProductList from '~/pages/Products/ProductList'
 import { ProtectedRoute, RejectedRoute } from './protected'
-import CreateProduct from '~/pages/Product/components/CreateProduct'
+import CreateProduct from '~/pages/Products/components/CreateProduct'
+import CategoryList from '~/pages/Categories/CategoryList'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -35,6 +36,14 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <CreateProduct />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.CATEGORY_LIST,
+                    element: (
+                        <MainLayout>
+                            <CategoryList />
                         </MainLayout>
                     )
                 }
