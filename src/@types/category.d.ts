@@ -1,4 +1,4 @@
-import { PaginatedApiResponse } from './util'
+import { ApiResponse, PaginatedApiResponse } from './util'
 
 interface Category {
     find(arg0: (c: any) => boolean): Category | null
@@ -11,3 +11,4 @@ interface Category {
 }
 
 export type CategoryResponse = PaginatedApiResponse<Category>
+export type CreateCategoryResponse = ApiResponse<Category>
