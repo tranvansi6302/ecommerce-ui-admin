@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BsBox } from 'react-icons/bs'
 import { LuLayoutDashboard } from 'react-icons/lu'
+import { LiaWarehouseSolid } from 'react-icons/lia'
 import PATH from '~/constants/path'
 import MenuItem from './components/MenuItem'
 
@@ -32,6 +33,20 @@ const menuItems: MenuItem[] = [
             {
                 label: 'Danh sách thương hiệu',
                 link: PATH.BRAND_LIST
+            }
+        ]
+    },
+    {
+        label: 'Kho hàng',
+        icon: <LiaWarehouseSolid fontSize='18px' />,
+        children: [
+            {
+                label: 'Danh sách nhà cung cấp',
+                link: PATH.SUPPLIER_LIST
+            },
+            {
+                label: 'Nhập hàng',
+                link: PATH.PRODUCT_LIST
             }
         ]
     }
