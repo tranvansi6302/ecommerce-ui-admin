@@ -8,6 +8,7 @@ import ProductList from '~/pages/Products/ProductList'
 import { ProtectedRoute, RejectedRoute } from './protected'
 import CreateProduct from '~/pages/Products/components/CreateProduct'
 import CategoryList from '~/pages/Categories/CategoryList'
+import BrandList from '~/pages/Brands/BrandList'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -44,6 +45,14 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <CategoryList />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.BRAND_LIST,
+                    element: (
+                        <MainLayout>
+                            <BrandList />
                         </MainLayout>
                     )
                 }
