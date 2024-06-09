@@ -12,3 +12,5 @@ interface Category {
 
 export type CategoryResponse = PaginatedApiResponse<Category>
 export type CreateCategoryResponse = ApiResponse<Category>
+export type UpdateCategoryResponse = ApiResponse<Category>
+export type GetCategory = ApiResponse<Category>
