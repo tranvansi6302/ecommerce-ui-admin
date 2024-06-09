@@ -28,6 +28,10 @@ const menuItems: MenuItem[] = [
             {
                 label: 'Danh sách loại sản phẩm',
                 link: PATH.CATEGORY_LIST
+            },
+            {
+                label: 'Danh sách thương hiệu',
+                link: PATH.BRAND_LIST
             }
         ]
     }
