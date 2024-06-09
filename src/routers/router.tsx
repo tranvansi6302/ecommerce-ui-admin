@@ -9,6 +9,7 @@ import { ProtectedRoute, RejectedRoute } from './protected'
 import CreateProduct from '~/pages/Products/components/CreateProduct'
 import CategoryList from '~/pages/Categories/CategoryList'
 import BrandList from '~/pages/Brands/BrandList'
+import SupplierList from '~/pages/Suppliers/SupplierList'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -53,6 +54,14 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <BrandList />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.SUPPLIER_LIST,
+                    element: (
+                        <MainLayout>
+                            <SupplierList />
                         </MainLayout>
                     )
                 }
