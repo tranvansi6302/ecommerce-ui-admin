@@ -7,6 +7,8 @@ const PATH = {
     PRODUCT_CREATE: '/admin/products/create',
     CATEGORY_LIST: '/admin/categories',
     BRAND_LIST: '/admin/brands',
-    SUPPLIER_LIST: '/admin/suppliers'
+    SUPPLIER_LIST: '/admin/suppliers',
+    SUPPLIER_CREATE: '/admin/suppliers/create',
+    SUPPLIER_UPDATE: '/admin/suppliers/:id'
 }
 export default PATH

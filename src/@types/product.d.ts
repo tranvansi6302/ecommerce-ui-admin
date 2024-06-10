@@ -24,4 +24,4 @@ export interface ProductFilter {
     name?: string
 }
 
-export type ProductResponse = PaginatedApiResponse<Product>
+export type ListProductResponse = PaginatedApiResponse<Product>

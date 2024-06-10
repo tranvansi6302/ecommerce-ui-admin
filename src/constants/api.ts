@@ -3,7 +3,8 @@ const API = {
     LOGIN: '/auth/login',
     PRODUCT: '/products',
     BRAND: '/brands',
-    CATEGORY: '/categories'
+    CATEGORY: '/categories',
+    SUPPLIER: '/suppliers'
 }
 
 export default API

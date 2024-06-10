@@ -10,7 +10,7 @@ interface Category {
     updated_at: string
 }
 
-export type CategoryResponse = PaginatedApiResponse<Category>
+export type ListCategoryResponse = PaginatedApiResponse<Category>
 export type CreateCategoryResponse = ApiResponse<Category>
 export type UpdateCategoryResponse = ApiResponse<Category>
-export type GetCategory = ApiResponse<Category>
+export type CategoryResponse = ApiResponse<Category>
