@@ -8,7 +8,7 @@ interface Brand {
     summary: string
 }
 
-export type BrandResponse = PaginatedApiResponse<Brand>
+export type ListBrandResponse = PaginatedApiResponse<Brand>
 export type CreateBrandResponse = ApiResponse<Brand>
 export type UpdateBrandResponse = ApiResponse<Brand>
-export type GetBrand = ApiResponse<Brand>
+export type BrandResponse = ApiResponse<Brand>

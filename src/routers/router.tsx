@@ -2,14 +2,16 @@ import { useRoutes } from 'react-router-dom'
 import PATH from '~/constants/path'
 import AuthLayout from '~/layouts/AuthLayout'
 import MainLayout from '~/layouts/MainLayout'
+import BrandList from '~/pages/Brands/BrandList'
+import CategoryList from '~/pages/Categories/CategoryList'
 import Dashboard from '~/pages/Dashboard'
 import Login from '~/pages/Login'
 import ProductList from '~/pages/Products/ProductList'
-import { ProtectedRoute, RejectedRoute } from './protected'
 import CreateProduct from '~/pages/Products/components/CreateProduct'
-import CategoryList from '~/pages/Categories/CategoryList'
-import BrandList from '~/pages/Brands/BrandList'
+import { ProtectedRoute, RejectedRoute } from './protected'
 import SupplierList from '~/pages/Suppliers/SupplierList'
+import CreateSupplier from '~/pages/Suppliers/components/CreateSupplier'
+import UpdateSupplier from '~/pages/Suppliers/components/UpdateSupplier'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -62,6 +64,22 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <SupplierList />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.SUPPLIER_CREATE,
+                    element: (
+                        <MainLayout>
+                            <CreateSupplier />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.SUPPLIER_UPDATE,
+                    element: (
+                        <MainLayout>
+                            <UpdateSupplier />
                         </MainLayout>
                     )
                 }

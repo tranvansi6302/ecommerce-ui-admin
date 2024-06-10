@@ -38,7 +38,7 @@ export default function MyButton({
             className={`flex justify-center  ${className}`}
             onClick={onClick}
         >
-            {loading ? <Spinner /> : children}
+            <div className='min-w-14  flex justify-center items-center'> {loading ? <Spinner /> : children}</div>
         </Button>
     )
 }

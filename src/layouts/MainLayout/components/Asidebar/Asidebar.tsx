@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { BsBox } from 'react-icons/bs'
 import { LuLayoutDashboard } from 'react-icons/lu'
-import { LiaWarehouseSolid } from 'react-icons/lia'
+import { TbBuildingWarehouse } from 'react-icons/tb'
 import PATH from '~/constants/path'
 import MenuItem from './components/MenuItem'
 
@@ -38,7 +38,7 @@ const menuItems: MenuItem[] = [
     },
     {
         label: 'Kho hàng',
-        icon: <LiaWarehouseSolid fontSize='18px' />,
+        icon: <TbBuildingWarehouse fontSize='18px' />,
         children: [
             {
                 label: 'Danh sách nhà cung cấp',

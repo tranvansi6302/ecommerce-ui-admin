@@ -1,4 +1,4 @@
-import { ProductFilter, ProductResponse } from '~/@types/product'
+import { ProductFilter, ListProductResponse } from '~/@types/product'
 import API from '~/constants/api'
 import { ProductSchemaType } from '~/schemas/products.schema'
 import http from '~/utils/http'
@@ -11,7 +11,7 @@ export type CreateProductRequest = ProductSchemaType & {
 
 const productsApi = {
     getAllProducts: (params: ProductFilter) => {
-        return http.get<ProductResponse>(API.PRODUCT, {
+        return http.get<ListProductResponse>(API.PRODUCT, {
             params
         })
     },
