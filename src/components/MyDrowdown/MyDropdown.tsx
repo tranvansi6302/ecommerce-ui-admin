@@ -32,6 +32,7 @@ export default function MyDropdown({
         <Fragment>
             <Dropdown
                 {...registerResult}
+                filter
                 value={value}
                 onChange={onChange}
                 options={options}

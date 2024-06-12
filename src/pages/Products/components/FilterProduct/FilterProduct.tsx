@@ -5,7 +5,7 @@ import { createSearchParams, useNavigate } from 'react-router-dom'
 import { Brand } from '~/@types/brand'
 import { Category } from '~/@types/category'
 import MyButton from '~/components/MyButton'
-import MyDropdown from '~/components/MyDrowdown/MyDropdown'
+import MyDropdown from '~/components/MyDrowdown'
 import MyInputSearch from '~/components/MyInputSearch'
 import PATH from '~/constants/path'
 import useQueryConfig from '~/hooks/useQueryConfig'
@@ -35,7 +35,6 @@ export default function FilterProduct({
 
     // Active filter
     useEffect(() => {
-        console.log('queryConfig...', queryConfig)
         if (queryConfig.brand && brands) {
             setSelectedBrand(brands.find((b) => b.slug === queryConfig.brand))
         }
@@ -45,7 +44,9 @@ export default function FilterProduct({
         if (queryConfig.name) {
             setSearch(queryConfig.name)
         }
-    }, [brands, categories, queryConfig, setSearch, setSelectedBrand, setSelectedCategory])
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [brands, categories])
 
     useEffect(() => {
         if (selectedBrand) {
@@ -59,7 +60,7 @@ export default function FilterProduct({
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setSelectedBrand, selectedBrand])
+    }, [selectedBrand, setSelectedBrand])
 
     useEffect(() => {
         if (selectedCategory) {
@@ -71,8 +72,9 @@ export default function FilterProduct({
                 }).toString()
             })
         }
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setSelectedCategory, selectedCategory])
+    }, [selectedCategory, setSelectedCategory])
 
     const handleSerach = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()

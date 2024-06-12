@@ -46,7 +46,7 @@ const menuItems: MenuItem[] = [
             },
             {
                 label: 'Nhập hàng',
-                link: PATH.PRODUCT_LIST
+                link: PATH.PURCHASE_LIST
             }
         ]
     }

@@ -1,4 +1,7 @@
+import { PaginatedApiResponse } from './util'
+
 interface Variant {
+    map(arg0: (variant: Variant) => import('react/jsx-runtime').JSX.Element): import('react').ReactNode
     id: number
     sku: string
     color: string
@@ -20,3 +23,5 @@ interface Variant {
         end_date: string
     }
 }
+
+export type ListVariantResponse = PaginatedApiResponse<Variant>

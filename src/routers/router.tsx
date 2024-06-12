@@ -12,6 +12,8 @@ import { ProtectedRoute, RejectedRoute } from './protected'
 import SupplierList from '~/pages/Suppliers/SupplierList'
 import CreateSupplier from '~/pages/Suppliers/components/CreateSupplier'
 import UpdateSupplier from '~/pages/Suppliers/components/UpdateSupplier'
+import PurchaseList from '~/pages/Purchases/PurchaseList'
+import CreatePurchase from '~/pages/Purchases/components/CreatePurchase'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -80,6 +82,22 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <UpdateSupplier />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.PURCHASE_LIST,
+                    element: (
+                        <MainLayout>
+                            <PurchaseList />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.PURCHASE_CREATE,
+                    element: (
+                        <MainLayout>
+                            <CreatePurchase />
                         </MainLayout>
                     )
                 }

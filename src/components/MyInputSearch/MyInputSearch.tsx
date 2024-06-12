@@ -10,9 +10,21 @@ interface MyInputSearchProps {
     style?: React.CSSProperties
     value?: string
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+    onFocus?: () => void
+    onBlur?: () => void
 }
 
-export default function MyInputSearch({ placeholder, className, name, style, register, value, onChange }: MyInputSearchProps) {
+export default function MyInputSearch({
+    placeholder,
+    className,
+    name,
+    style,
+    register,
+    value,
+    onChange,
+    onBlur,
+    onFocus
+}: MyInputSearchProps) {
     const registerResult = register && name ? register(name) : null
 
     return (
@@ -26,10 +38,12 @@ export default function MyInputSearch({ placeholder, className, name, style, reg
                     placeholder={placeholder}
                     value={value}
                     onChange={onChange}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
                     className={className}
                     name={name}
                     style={style}
-                    autoComplete='on'
+                    autoComplete='off'
                 />
             </div>
         </Fragment>
