@@ -10,6 +10,7 @@ interface MyButtonProps {
     raised?: boolean
     outlined?: boolean
     size?: 'small' | 'large'
+    type?: 'button' | 'submit' | 'reset'
     icon?: JSX.Element | string
     onClick?: () => void
 }
@@ -20,6 +21,7 @@ export default function MyButton({
     severity = 'info',
     text,
     raised,
+    type,
     outlined,
     className,
     size = 'small',
@@ -34,6 +36,7 @@ export default function MyButton({
             raised={raised}
             outlined={outlined}
             severity={severity}
+            type={type}
             size={size}
             className={`flex justify-center  ${className}`}
             onClick={onClick}

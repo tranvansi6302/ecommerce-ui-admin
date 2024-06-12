@@ -9,6 +9,8 @@ const PATH = {
     BRAND_LIST: '/admin/brands',
     SUPPLIER_LIST: '/admin/suppliers',
     SUPPLIER_CREATE: '/admin/suppliers/create',
-    SUPPLIER_UPDATE: '/admin/suppliers/:id'
+    SUPPLIER_UPDATE: '/admin/suppliers/:id',
+    PURCHASE_LIST: '/admin/purchases',
+    PURCHASE_CREATE: '/admin/purchases/create'
 }
 export default PATH

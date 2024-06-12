@@ -6,6 +6,8 @@ interface Brand {
     name: string
     slug: string
     summary: string
+    created_at: string
+    updated_at: string
 }
 
 export type ListBrandResponse = PaginatedApiResponse<Brand>

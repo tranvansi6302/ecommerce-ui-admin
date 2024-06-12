@@ -1,19 +1,14 @@
 import { Column } from 'primereact/column'
-import {
-    DataTable,
-    DataTableExpandedRows,
-    DataTableSelectionMultipleChangeEvent,
-    DataTableValueArray
-} from 'primereact/datatable'
+import { DataTable, DataTableSelectionMultipleChangeEvent, DataTableValueArray } from 'primereact/datatable'
 import { Dropdown } from 'primereact/dropdown'
 import { useCallback, useMemo, useState } from 'react'
 import MyButton from '~/components/MyButton'
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { Category } from '~/@types/category'
 import { ProductFilter } from '~/@types/product'
 
 import { Dialog } from 'primereact/dialog'
+import { Brand } from '~/@types/brand'
 import brandsApi from '~/apis/brands.api'
 import { formatDate } from '~/utils/format'
 import CreateBrand from './components/CreateBrand'
@@ -25,8 +20,7 @@ export type QueryConfig = {
 }
 
 export default function BrandList() {
-    const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
-    const [selectedBrand, setSelectedBrand] = useState<Category[]>([])
+    const [selectedBrand, setSelectedBrand] = useState<Brand[]>([])
     const [globalFilter] = useState<string>('')
     const [search, setSearch] = useState<string>('')
     const [open, setOpen] = useState<boolean>(false)
@@ -39,7 +33,7 @@ export default function BrandList() {
         placeholderData: keepPreviousData
     })
 
-    const categoryNameTemplate = useCallback((rowData: Category) => {
+    const brandNameTemplate = useCallback((rowData: Brand) => {
         return (
             <p onClick={() => setBrandUpdate(rowData.id)} className='text-blue-600 cursor-pointer'>
                 {rowData.name}
@@ -48,8 +42,8 @@ export default function BrandList() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const categoryCreatedAtTemplate = useCallback((rowData: Category) => formatDate(rowData.created_at), [])
-    const categoryUpdatedAtTemplate = useCallback((rowData: Category) => formatDate(rowData.updated_at), [])
+    const brandCreatedAtTemplate = useCallback((rowData: Brand) => formatDate(rowData.created_at), [])
+    const brandUpdatedAtTemplate = useCallback((rowData: Brand) => formatDate(rowData.updated_at), [])
 
     const header = useMemo(() => <FilterBrand search={search} setSearch={setSearch} />, [search])
 
@@ -64,7 +58,7 @@ export default function BrandList() {
     )
 
     const onSelectionChange = useCallback((e: DataTableSelectionMultipleChangeEvent<DataTableValueArray>) => {
-        setSelectedBrand(e.value as Category[])
+        setSelectedBrand(e.value as Brand[])
     }, [])
 
     const setBrandUpdate = (id: number) => {
@@ -102,8 +96,6 @@ export default function BrandList() {
             </div>
             <DataTable
                 value={(brands?.data.result as unknown as DataTableValueArray) ?? []}
-                expandedRows={expandedRows}
-                onRowToggle={(e) => setExpandedRows(e.data)}
                 dataKey='id'
                 header={selectedBrand.length > 0 ? selectedHeader : header}
                 tableStyle={{ minWidth: '60rem', fontSize: '14px' }}
@@ -115,9 +107,9 @@ export default function BrandList() {
             >
                 <Column selectionMode='multiple' className='w-[100px]' />
 
-                <Column className='w-2/5' field='name' header='Tên danh mục' body={categoryNameTemplate} />
-                <Column field='created_at' header='Ngày khởi tạo' sortable body={categoryCreatedAtTemplate} />
-                <Column field='updated_at' header='Cập nhật cuối' sortable body={categoryUpdatedAtTemplate} />
+                <Column className='w-2/5' field='name' header='Tên danh mục' body={brandNameTemplate} />
+                <Column field='created_at' header='Ngày khởi tạo' sortable body={brandCreatedAtTemplate} />
+                <Column field='updated_at' header='Cập nhật cuối' sortable body={brandUpdatedAtTemplate} />
             </DataTable>
         </div>
     )

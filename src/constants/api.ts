@@ -4,7 +4,9 @@ const API = {
     PRODUCT: '/products',
     BRAND: '/brands',
     CATEGORY: '/categories',
-    SUPPLIER: '/suppliers'
+    SUPPLIER: '/suppliers',
+    VARIANT: '/variants',
+    PURCHASE_ORDER: '/purchase-orders'
 }
 
 export default API

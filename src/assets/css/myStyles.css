@@ -95,3 +95,21 @@
     border: none !important;
     margin: 0;
 }
+
+.p-dropdown-filter-container > input {
+    padding: 8px 30px !important;
+}
+
+.p-dropdown-filter-container > svg {
+    left: 10px;
+}
+[data-pc-name='inputnumber'] {
+    width: 112px !important;
+}
+.p-inputnumber-input {
+    width: 100% !important;
+    border-top: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-radius: 0 !important;
+}

@@ -1,10 +1,5 @@
 import { Column } from 'primereact/column'
-import {
-    DataTable,
-    DataTableExpandedRows,
-    DataTableSelectionMultipleChangeEvent,
-    DataTableValueArray
-} from 'primereact/datatable'
+import { DataTable, DataTableSelectionMultipleChangeEvent, DataTableValueArray } from 'primereact/datatable'
 import { Dropdown } from 'primereact/dropdown'
 import { useCallback, useMemo, useState } from 'react'
 import MyButton from '~/components/MyButton'
@@ -25,7 +20,6 @@ export type QueryConfig = {
 }
 
 export default function CategoryList() {
-    const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
     const [selectedCategories, setSelectedCategories] = useState<Category[]>([])
     const [globalFilter] = useState<string>('')
     const [search, setSearch] = useState<string>('')
@@ -108,8 +102,6 @@ export default function CategoryList() {
             </div>
             <DataTable
                 value={(categories?.data.result as unknown as DataTableValueArray) ?? []}
-                expandedRows={expandedRows}
-                onRowToggle={(e) => setExpandedRows(e.data)}
                 dataKey='id'
                 header={selectedCategories.length > 0 ? selectedHeader : header}
                 tableStyle={{ minWidth: '60rem', fontSize: '14px' }}

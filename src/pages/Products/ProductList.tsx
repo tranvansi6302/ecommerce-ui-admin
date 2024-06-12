@@ -21,9 +21,11 @@ import productsApi from '~/apis/products.api'
 import DefaultProductImage from '~/components/DefaultProductImage'
 import PATH from '~/constants/path'
 import useQueryConfig from '~/hooks/useQueryConfig'
+import { formatDate } from '~/utils/format'
+
 import FilterProduct from './components/FilterProduct'
 import RowVariant from './components/RowVariant'
-import { formatDate } from '~/utils/format'
+import { Variant } from '~/@types/variant'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
@@ -32,10 +34,10 @@ export type QueryConfig = {
 export default function ProductList() {
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+    const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([])
     const [search, setSearch] = useState<string>('')
     const [globalFilter] = useState<string>('')
-    const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
     const queryConfig = useQueryConfig()
 
     const { data: products } = useQuery({
@@ -46,12 +48,14 @@ export default function ProductList() {
 
     const { data: brands } = useQuery({
         queryKey: ['brands'],
-        queryFn: () => brandsApi.getAllBrands()
+        queryFn: () => brandsApi.getAllBrands(),
+        placeholderData: keepPreviousData
     })
 
     const { data: categories } = useQuery({
         queryKey: ['categories'],
-        queryFn: () => categoriesApi.getAllCategories()
+        queryFn: () => categoriesApi.getAllCategories(),
+        placeholderData: keepPreviousData
     })
 
     const variantNameTemplate = useCallback((rowData: Variant) => rowData.variant_name, [])

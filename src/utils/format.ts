@@ -5,3 +5,7 @@ export const formatDate = (dateString: string) => {
     const year = date.getFullYear()
     return `${day}/${month}/${year}`
 }
+
+export const formatCurrencyVND = (currency: number) => {
+    return currency.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
+}

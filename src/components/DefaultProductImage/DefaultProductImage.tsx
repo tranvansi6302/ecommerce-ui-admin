@@ -1,12 +1,15 @@
-export default function DefaultProductImage() {
+interface DefaultProductImageProps {
+    className?: string
+    height?: string
+}
+export default function DefaultProductImage({ className, height = '35px' }: DefaultProductImageProps) {
     return (
         <svg
             viewBox='0 0 24 24'
             fill='none'
             xmlns='http://www.w3.org/2000/svg'
-            height='35px'
-            className=''
-            style={{ color: 'rgb(232, 234, 235)', height: 35 }}
+            className={className}
+            style={{ color: 'rgb(216, 216, 216)', height: height }}
         >
             <path
                 d='M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2ZM5 19V5h14l.002 14H5Z'

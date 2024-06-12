@@ -5,14 +5,17 @@ import { Fragment } from 'react/jsx-runtime'
 interface MyInputProps {
     register?: UseFormRegister<any>
     type?: 'text' | 'password' | 'email' | 'number'
-    placeholder: string
+    placeholder?: string
     className?: string
     classNameLabel?: string
     name: string
     style?: React.CSSProperties
-    label: string
+    label?: string
     message?: string
     errors?: boolean | any
+    value?: string | number
+    onChange?: (e: any) => void
+    defaultValue?: string | number
     styleMessage?: React.CSSProperties
 }
 
@@ -25,7 +28,10 @@ export default function MyInput({
     style,
     label,
     errors,
+    value,
+    defaultValue,
     styleMessage,
+    onChange,
     register
 }: MyInputProps) {
     const registerResult = register && name ? register(name) : null
@@ -39,9 +45,12 @@ export default function MyInput({
                 {...registerResult}
                 id={name}
                 type={type}
+                value={value?.toString()}
                 placeholder={placeholder}
                 className={`${errorResult ? 'border-red-500' : ''} ${className}`}
                 name={name}
+                onChange={onChange}
+                defaultValue={defaultValue?.toString()}
                 style={style}
                 autoComplete='on'
             />
