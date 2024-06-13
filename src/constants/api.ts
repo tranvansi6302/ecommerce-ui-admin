@@ -6,7 +6,8 @@ const API = {
     CATEGORY: '/categories',
     SUPPLIER: '/suppliers',
     VARIANT: '/variants',
-    PURCHASE_ORDER: '/purchase-orders'
+    PURCHASE_ORDER: '/purchase-orders',
+    WAREHOUSE: '/warehouses'
 }
 
 export default API

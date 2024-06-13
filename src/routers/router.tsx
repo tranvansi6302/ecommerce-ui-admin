@@ -10,11 +10,12 @@ import ProductList from '~/pages/Products/ProductList'
 import CreateProduct from '~/pages/Products/components/CreateProduct'
 import PurchaseOrderList from '~/pages/Purchases/PurchaseOrderList'
 import CreatePurchaseOrder from '~/pages/Purchases/components/CreatePurchaseOrder'
+import UpdatePurchaseOrder from '~/pages/Purchases/components/UpdatePurchaseOrder/UpdatePurchaseOrder'
 import SupplierList from '~/pages/Suppliers/SupplierList'
 import CreateSupplier from '~/pages/Suppliers/components/CreateSupplier'
 import UpdateSupplier from '~/pages/Suppliers/components/UpdateSupplier'
+import WarehouseList from '~/pages/Warehouses/WarehouseList'
 import { ProtectedRoute, RejectedRoute } from './protected'
-import UpdatePurchaseOrder from '~/pages/Purchases/components/UpdatePurchaseOrder/UpdatePurchaseOrder'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -107,6 +108,14 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <UpdatePurchaseOrder />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.WAREHOURSE_LIST,
+                    element: (
+                        <MainLayout>
+                            <WarehouseList />
                         </MainLayout>
                     )
                 }
