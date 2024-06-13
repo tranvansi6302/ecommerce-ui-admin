@@ -19,34 +19,38 @@ const menuItems: MenuItem[] = [
         link: PATH.DASHBOARD
     },
     {
-        label: 'Sản phẩm',
+        label: 'Quản lý Sản phẩm',
         icon: <RiTShirt2Line fontSize='18px' />,
         children: [
             {
-                label: 'Danh sách sản phẩm',
+                label: 'Sản phẩm',
                 link: PATH.PRODUCT_LIST
             },
             {
-                label: 'Danh sách loại sản phẩm',
+                label: 'Loại sản phẩm',
                 link: PATH.CATEGORY_LIST
             },
             {
-                label: 'Danh sách thương hiệu',
+                label: 'Thương hiệu',
                 link: PATH.BRAND_LIST
             }
         ]
     },
     {
-        label: 'Kho hàng',
+        label: 'Quản lý kho',
         icon: <BsBox fontSize='18px' />,
         children: [
             {
-                label: 'Danh sách nhà cung cấp',
+                label: 'Nhà cung cấp',
                 link: PATH.SUPPLIER_LIST
             },
             {
-                label: 'Danh sách đơn nhập',
+                label: 'Đơn nhập hàng',
                 link: PATH.PURCHASE_LIST
+            },
+            {
+                label: 'Tồn kho',
+                link: PATH.WAREHOURSE_LIST
             }
         ]
     }
