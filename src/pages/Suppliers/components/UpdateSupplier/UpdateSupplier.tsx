@@ -17,16 +17,19 @@ import MyTextarea from '~/components/MyTextarea'
 import ShowMessage from '~/components/ShowMessage'
 import MESSAGE from '~/constants/message'
 import PATH from '~/constants/path'
+import { SUPPLIER_STATUS } from '~/constants/status'
+import useSetTitle from '~/hooks/useSetTitle'
 import { supplierSchema } from '~/schemas/supplier.schema'
 
 const supplierStatus: SupplierStatus[] = [
-    { id: 'ACTIVE', status: 'Đang giao dịch' },
-    { id: 'INACTIVE', status: 'Ngừng giao dịch' }
+    { id: SUPPLIER_STATUS.ACTIVE, status: 'Đang giao dịch' },
+    { id: SUPPLIER_STATUS.INACTIVE, status: 'Ngừng giao dịch' }
 ]
 
 type UpdateSupplierForm = UpdateSupplierRequest
 
 export default function UpdateSupplier() {
+    useSetTitle('Cập nhật nhà cung cấp')
     const { id: supplierId } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const [message, setMessage] = useState<string>('')

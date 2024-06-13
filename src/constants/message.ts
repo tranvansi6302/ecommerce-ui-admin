@@ -9,7 +9,9 @@ const MESSAGE = {
     UPDATE_BRAND_SUCCESS: 'Cập nhật thương hiệu thành công',
     CREATE_SUPPLIER_SUCCESS: 'Tạo nhà cung cấp thành công',
     UPDATE_SUPPLIER_SUCCESS: 'Cập nhật nhà cung cấp thành công',
-    CREATE_PURCHASE_SUCCESS: 'Tạo đơn hàng mua thành công'
+    CREATE_PURCHASE_SUCCESS: 'Tạo đơn hàng mua thành công',
+    AUTO_RECEIVED_QUANTITY_SUCCESS: 'Nhập số lượng nhanh thành công',
+    UPDATE_PURCHASE_ORDER_SUCCESS: 'Cập nhật đơn hàng mua thành công'
 }
 
 export default MESSAGE

@@ -9,8 +9,11 @@ interface MyTextareaProps {
     classNameLabel?: string
     name: string
     style?: React.CSSProperties
-    label: string
+    label?: string
     message?: string
+    value?: string
+    defaultValue?: string
+    onChange?: (e: any) => void
     errors?: boolean | any
     styleMessage?: React.CSSProperties
 }
@@ -22,6 +25,9 @@ export default function MyTextarea({
     name,
     style,
     label,
+    value,
+    defaultValue,
+    onChange,
     errors,
     styleMessage,
     register
@@ -38,6 +44,9 @@ export default function MyTextarea({
                 placeholder={placeholder}
                 className={`${errorResult ? 'border-red-500' : ''} ${className}`}
                 id={name}
+                value={value}
+                defaultValue={defaultValue}
+                onChange={onChange}
                 name={name}
                 rows={5}
                 style={style}

@@ -8,12 +8,13 @@ import Dashboard from '~/pages/Dashboard'
 import Login from '~/pages/Login'
 import ProductList from '~/pages/Products/ProductList'
 import CreateProduct from '~/pages/Products/components/CreateProduct'
-import { ProtectedRoute, RejectedRoute } from './protected'
+import PurchaseOrderList from '~/pages/Purchases/PurchaseOrderList'
+import CreatePurchaseOrder from '~/pages/Purchases/components/CreatePurchaseOrder'
 import SupplierList from '~/pages/Suppliers/SupplierList'
 import CreateSupplier from '~/pages/Suppliers/components/CreateSupplier'
 import UpdateSupplier from '~/pages/Suppliers/components/UpdateSupplier'
-import PurchaseList from '~/pages/Purchases/PurchaseList'
-import CreatePurchase from '~/pages/Purchases/components/CreatePurchase'
+import { ProtectedRoute, RejectedRoute } from './protected'
+import UpdatePurchaseOrder from '~/pages/Purchases/components/UpdatePurchaseOrder/UpdatePurchaseOrder'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -89,7 +90,7 @@ export default function useRoutesElement() {
                     path: PATH.PURCHASE_LIST,
                     element: (
                         <MainLayout>
-                            <PurchaseList />
+                            <PurchaseOrderList />
                         </MainLayout>
                     )
                 },
@@ -97,7 +98,15 @@ export default function useRoutesElement() {
                     path: PATH.PURCHASE_CREATE,
                     element: (
                         <MainLayout>
-                            <CreatePurchase />
+                            <CreatePurchaseOrder />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.PURCHASE_UPDATE,
+                    element: (
+                        <MainLayout>
+                            <UpdatePurchaseOrder />
                         </MainLayout>
                     )
                 }

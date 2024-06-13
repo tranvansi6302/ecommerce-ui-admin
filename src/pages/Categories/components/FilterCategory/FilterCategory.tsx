@@ -1,49 +1,23 @@
-import { omit } from 'lodash'
-import { useEffect } from 'react'
-import { createSearchParams, useNavigate } from 'react-router-dom'
 import MyButton from '~/components/MyButton'
 import MyInputSearch from '~/components/MyInputSearch'
-import PATH from '~/constants/path'
-import useQueryConfig from '~/hooks/useQueryConfig'
 
 interface FilterCategoryProps {
     search: string
     setSearch: (value: string) => void
 }
 export default function FilterCategory({ search, setSearch }: FilterCategoryProps) {
-    const queryConfig = useQueryConfig()
-    const navigate = useNavigate()
-
-    // Active filter
-    useEffect(() => {
-        if (queryConfig.name) {
-            setSearch(queryConfig.name)
-        }
-    }, [queryConfig, setSearch])
-
     const handleSerach = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        navigate({
-            pathname: PATH.PRODUCT_LIST,
-            search: createSearchParams({
-                ...queryConfig,
-                name: search
-            }).toString()
-        })
     }
 
     const handleClean = () => {
-        setSearch('')
-        navigate({
-            pathname: PATH.PRODUCT_LIST,
-            search: createSearchParams(omit(queryConfig, ['category', 'brand', 'name'])).toString()
-        })
+        console.log('Clean...')
     }
 
     return (
         <div>
             <p className='font-medium text-[14px] text-blue-600 pb-2 border-b-2 border-blue-500 inline-block mb-3'>
-                Tất cả danh mục sản phẩm
+                Danh sách danh mục sản phẩm
             </p>
             <div className='flex justify-content-between gap-2'>
                 <form className='w-2/5' onSubmit={handleSerach}>

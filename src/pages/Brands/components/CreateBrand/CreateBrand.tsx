@@ -20,8 +20,6 @@ interface CreateBrandProps {
 type CreateBrandForm = BrandSchemaType
 
 export default function CreateBrand({ setOpen }: CreateBrandProps) {
-    console.log('CreateBrand')
-
     const [message, setMessage] = useState<string>('')
     const {
         register,

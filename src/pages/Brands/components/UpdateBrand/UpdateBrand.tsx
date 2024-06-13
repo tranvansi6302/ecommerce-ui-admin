@@ -21,7 +21,6 @@ interface UpdateBrandProps {
 type UpdateBrandForm = BrandSchemaType
 
 export default function UpdateBrand({ setOpen, brandId }: UpdateBrandProps) {
-    console.log('UpdateBrand')
     const [message, setMessage] = useState<string>('')
     const {
         register,

@@ -8,7 +8,7 @@ import MyButton from '~/components/MyButton'
 import MyDropdown from '~/components/MyDrowdown'
 import MyInputSearch from '~/components/MyInputSearch'
 import PATH from '~/constants/path'
-import useQueryConfig from '~/hooks/useQueryConfig'
+import useQueryProducts from '~/hooks/useQueryProducts'
 
 interface FilterProductProps {
     selectedBrand: Brand | null
@@ -30,7 +30,7 @@ export default function FilterProduct({
     brands,
     categories
 }: FilterProductProps) {
-    const queryConfig = useQueryConfig()
+    const queryConfig = useQueryProducts()
     const navigate = useNavigate()
 
     // Active filter
@@ -93,14 +93,14 @@ export default function FilterProduct({
         setSearch('')
         navigate({
             pathname: PATH.PRODUCT_LIST,
-            search: createSearchParams(omit(queryConfig, ['category', 'brand', 'name'])).toString()
+            search: createSearchParams(omit(queryConfig, ['category', 'brand', 'name', 'page', 'limit'])).toString()
         })
     }
 
     return (
         <div>
             <p className='font-medium text-[14px] text-blue-600 pb-2 border-b-2 border-blue-500 inline-block mb-3'>
-                Tất cả sản phẩm
+                Danh sách sản phẩm
             </p>
             <div className='flex justify-content-between gap-2'>
                 <form className='w-2/5' onSubmit={handleSerach}>

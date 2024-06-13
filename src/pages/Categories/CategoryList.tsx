@@ -14,12 +14,14 @@ import { formatDate } from '~/utils/format'
 import CreateCategory from './components/CreateCategory'
 import FilterCategory from './components/FilterCategory'
 import UpdateCategory from './components/UpdateCategory'
+import useSetTitle from '~/hooks/useSetTitle'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
 }
 
 export default function CategoryList() {
+    useSetTitle('Danh sách loại sản phẩm')
     const [selectedCategories, setSelectedCategories] = useState<Category[]>([])
     const [globalFilter] = useState<string>('')
     const [search, setSearch] = useState<string>('')

@@ -3,7 +3,8 @@ import * as yup from 'yup'
 const purchaseDetailSchema = yup.object({
     variant_id: yup.string().required('Sản phẩm không được bỏ trống').trim(),
     quantity: yup.number().required('Số lượng không được bỏ trống').min(1, 'Số lượng tối thiểu là 1'),
-    purchase_price: yup.number().required('Giá mua không được bỏ trống').min(0, 'Giá mua tối thiểu là 0')
+    purchase_price: yup.number().required('Giá mua không được bỏ trống').min(0, 'Giá mua tối thiểu là 0'),
+    note: yup.string().trim()
 })
 
 export const createPurchaseSchema = yup.object({

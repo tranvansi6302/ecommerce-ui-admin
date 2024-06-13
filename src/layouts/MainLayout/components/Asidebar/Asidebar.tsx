@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { BsBox } from 'react-icons/bs'
 import { LuLayoutDashboard } from 'react-icons/lu'
-import { TbBuildingWarehouse } from 'react-icons/tb'
+import { RiTShirt2Line } from 'react-icons/ri'
 import PATH from '~/constants/path'
 import MenuItem from './components/MenuItem'
 
@@ -20,7 +20,7 @@ const menuItems: MenuItem[] = [
     },
     {
         label: 'Sản phẩm',
-        icon: <BsBox fontSize='18px' />,
+        icon: <RiTShirt2Line fontSize='18px' />,
         children: [
             {
                 label: 'Danh sách sản phẩm',
@@ -38,14 +38,14 @@ const menuItems: MenuItem[] = [
     },
     {
         label: 'Kho hàng',
-        icon: <TbBuildingWarehouse fontSize='18px' />,
+        icon: <BsBox fontSize='18px' />,
         children: [
             {
                 label: 'Danh sách nhà cung cấp',
                 link: PATH.SUPPLIER_LIST
             },
             {
-                label: 'Nhập hàng',
+                label: 'Danh sách đơn nhập',
                 link: PATH.PURCHASE_LIST
             }
         ]
