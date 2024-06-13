@@ -14,10 +14,13 @@ import MyTextarea from '~/components/MyTextarea'
 import ShowMessage from '~/components/ShowMessage'
 import MESSAGE from '~/constants/message'
 import PATH from '~/constants/path'
+import useSetTitle from '~/hooks/useSetTitle'
 import { supplierSchema } from '~/schemas/supplier.schema'
 
 type CreateSupplierForm = CreateSupplierRequest
+
 export default function CreateSupplier() {
+    useSetTitle('Thêm mới nhà cung cấp')
     const [message, setMessage] = useState<string>('')
     const navigate = useNavigate()
     const {

@@ -12,20 +12,25 @@ import MyButton from '~/components/MyButton'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { ProductFilter } from '~/@types/product'
 
-import { Supplier } from '~/@types/supplier'
+import { Supplier, SupplierStatus } from '~/@types/supplier'
 import suppliersApi from '~/apis/supplier.api'
-import FilterSupplier from './components/FilterSupplier'
 import { Link } from 'react-router-dom'
 import PATH from '~/constants/path'
+import { convertSupplierStatus } from '~/utils/format'
+import { SUPPLIER_STATUS } from '~/constants/status'
+import FilterSupplier from './components/FilterSupplier'
+import useSetTitle from '~/hooks/useSetTitle'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
 }
 
 export default function SupplierList() {
+    useSetTitle('Danh sách nhà cung cấp')
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
     const [globalFilter] = useState<string>('')
     const [selectedSuppliers, setSelectedSuppliers] = useState<Supplier[]>([])
+    const [selectedSupplierStatus, setSelectedSupplierStatus] = useState<SupplierStatus | null>(null)
     const [search, setSearch] = useState<string>('')
 
     const { data: suppliers } = useQuery({
@@ -47,23 +52,24 @@ export default function SupplierList() {
     const supplierEmailTemplate = useCallback((rowData: Supplier) => rowData.email, [])
     const supplierPhoneTemplate = useCallback((rowData: Supplier) => rowData.phone_number, [])
     const supplierStatusTemplate = useCallback((rowData: Supplier) => {
-        if (rowData.status == 'INACTIVE') {
-            return (
-                <MyButton text severity='danger'>
-                    <p className='text-[13.6px] font-medium'>Ngừng giao dịch</p>
-                </MyButton>
-            )
-        }
-        if (rowData.status == 'ACTIVE') {
-            return (
-                <MyButton text severity='success'>
-                    <p className='text-[13.6px] font-medium'>Đang giao dịch</p>
-                </MyButton>
-            )
-        }
+        return (
+            <MyButton text severity={rowData.status === SUPPLIER_STATUS.INACTIVE ? 'danger' : 'success'}>
+                <p className='text-[13.6px] font-medium'>{convertSupplierStatus(rowData.status).toUpperCase()}</p>
+            </MyButton>
+        )
     }, [])
 
-    const header = useMemo(() => <FilterSupplier search={search} setSearch={setSearch} />, [search])
+    const header = useMemo(
+        () => (
+            <FilterSupplier
+                selectedSupplierStatus={selectedSupplierStatus}
+                setSelectedSupplierStatus={setSelectedSupplierStatus}
+                search={search}
+                setSearch={setSearch}
+            />
+        ),
+        [search, selectedSupplierStatus]
+    )
 
     const selectedHeader = useMemo(
         () => (

@@ -20,25 +20,27 @@ import categoriesApi from '~/apis/categories.api'
 import productsApi from '~/apis/products.api'
 import DefaultProductImage from '~/components/DefaultProductImage'
 import PATH from '~/constants/path'
-import useQueryConfig from '~/hooks/useQueryConfig'
+import useQueryProducts from '~/hooks/useQueryProducts'
 import { formatDate } from '~/utils/format'
 
+import { Variant } from '~/@types/variant'
 import FilterProduct from './components/FilterProduct'
 import RowVariant from './components/RowVariant'
-import { Variant } from '~/@types/variant'
+import useSetTitle from '~/hooks/useSetTitle'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
 }
 
 export default function ProductList() {
+    useSetTitle('Danh sách sản phẩm')
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([])
     const [search, setSearch] = useState<string>('')
     const [globalFilter] = useState<string>('')
-    const queryConfig = useQueryConfig()
+    const queryConfig = useQueryProducts()
 
     const { data: products } = useQuery({
         queryKey: ['products', queryConfig],

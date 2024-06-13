@@ -113,3 +113,11 @@
     border-right: 0 !important;
     border-radius: 0 !important;
 }
+
+[aria-label='Cập nhật trạng thái'] > span {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+[data-pc-name='splitbutton'] {
+    height: 36px !important;
+}

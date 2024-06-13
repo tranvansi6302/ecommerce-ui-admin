@@ -1,4 +1,4 @@
-import { ProductFilter } from './../@types/product.d'
+import { ProductFilter } from '../@types/product'
 import { isUndefined, omitBy } from 'lodash'
 import useQueryParams from './useQueryParams'
 import { useMemo } from 'react'
@@ -7,7 +7,7 @@ type QueryConfig = {
     [key in keyof ProductFilter]: string
 }
 
-export default function useQueryConfig() {
+export default function useQueryProducts() {
     const queryParams: QueryConfig = useQueryParams()
 
     const queryConfig: QueryConfig = useMemo(

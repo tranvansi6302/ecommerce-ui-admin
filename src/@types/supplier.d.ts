@@ -1,6 +1,7 @@
 import { ApiResponse, PaginatedApiResponse } from './util'
 
 export interface Supplier {
+    find(arg0: (supplier: { id: number }) => boolean): Supplier | null
     id: number
     name: string
     email: string

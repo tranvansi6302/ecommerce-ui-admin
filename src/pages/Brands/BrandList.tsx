@@ -5,21 +5,18 @@ import { useCallback, useMemo, useState } from 'react'
 import MyButton from '~/components/MyButton'
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { ProductFilter } from '~/@types/product'
 
 import { Dialog } from 'primereact/dialog'
 import { Brand } from '~/@types/brand'
 import brandsApi from '~/apis/brands.api'
+import useSetTitle from '~/hooks/useSetTitle'
 import { formatDate } from '~/utils/format'
 import CreateBrand from './components/CreateBrand'
 import FilterBrand from './components/FilterBrand'
 import UpdateBrand from './components/UpdateBrand'
 
-export type QueryConfig = {
-    [key in keyof ProductFilter]: string
-}
-
 export default function BrandList() {
+    useSetTitle('Danh sách thương hiệu')
     const [selectedBrand, setSelectedBrand] = useState<Brand[]>([])
     const [globalFilter] = useState<string>('')
     const [search, setSearch] = useState<string>('')

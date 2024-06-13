@@ -23,12 +23,14 @@ import ShowMessage from '~/components/ShowMessage'
 import Upload from '~/components/Upload'
 import MESSAGE from '~/constants/message'
 import PATH from '~/constants/path'
+import useSetTitle from '~/hooks/useSetTitle'
 import { productSchema } from '~/schemas/products.schema'
 
 type FormDataCreateProduct = Pick<CreateProductRequest, 'name' | 'sku' | 'brand_id' | 'category_id'>
 const createProductSchema = productSchema
 
 export default function CreateProduct() {
+    useSetTitle('Tạo sản phẩm')
     const navigate = useNavigate()
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)

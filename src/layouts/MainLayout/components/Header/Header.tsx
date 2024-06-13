@@ -1,9 +1,11 @@
 import { Avatar } from 'primereact/avatar'
 import { Menu } from 'primereact/menu'
 import { MenuItem } from 'primereact/menuitem'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
+import { AppContext } from '~/contexts/app.context'
 
 export default function Header() {
+    const { title } = useContext(AppContext)
     const [openMenu, setOpenMenu] = useState<boolean>(false)
 
     const items: MenuItem[] = [
@@ -17,7 +19,7 @@ export default function Header() {
                 <div className='flex items-center justify-between'>
                     <div className='flex items-center justify-start'>
                         <div className='hidden lg:block lg:pl-6'>
-                            <h2 className='text-[24px] font-semibold'>Tổng quan</h2>
+                            <h2 className='text-[24px] font-semibold'>{title}</h2>
                         </div>
                     </div>
                     <div className='flex items-center'>
