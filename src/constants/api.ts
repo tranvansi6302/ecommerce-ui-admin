@@ -8,7 +8,8 @@ const API = {
     VARIANT: '/variants',
     PURCHASE_ORDER: '/purchase-orders',
     WAREHOUSE: '/warehouses',
-    PRICE_PLAN: '/price-plans'
+    PRICE_PLAN: '/price-plans',
+    PRICE_PLAN_HISTORY: '/price-plans/history'
 }
 
 export default API

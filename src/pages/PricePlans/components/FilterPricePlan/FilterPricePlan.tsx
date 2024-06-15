@@ -19,6 +19,7 @@ interface FilterPricePlanProps {
     categories: Category
     search: string
     setSearch: (value: string) => void
+    isHistory?: boolean
 }
 export default function FilterPricePlan({
     search,
@@ -28,7 +29,8 @@ export default function FilterPricePlan({
     selectedCategory,
     setSelectedCategory,
     brands,
-    categories
+    categories,
+    isHistory
 }: FilterPricePlanProps) {
     const queryConfig = useQueryPricePlan()
     const navigate = useNavigate()
@@ -51,7 +53,7 @@ export default function FilterPricePlan({
     useEffect(() => {
         if (selectedBrand) {
             navigate({
-                pathname: PATH.PRICE_PLAN_LIST,
+                pathname: isHistory ? PATH.PRICE_PLAN_LIST_HISTORY : PATH.PRICE_PLAN_LIST,
                 search: createSearchParams({
                     ...queryConfig,
                     brand: selectedBrand?.slug
@@ -65,7 +67,7 @@ export default function FilterPricePlan({
     useEffect(() => {
         if (selectedCategory) {
             navigate({
-                pathname: PATH.PRICE_PLAN_LIST,
+                pathname: isHistory ? PATH.PRICE_PLAN_LIST_HISTORY : PATH.PRICE_PLAN_LIST,
                 search: createSearchParams({
                     ...queryConfig,
                     category: selectedCategory?.slug
@@ -79,7 +81,7 @@ export default function FilterPricePlan({
     const handleSerach = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         navigate({
-            pathname: PATH.PRICE_PLAN_LIST,
+            pathname: isHistory ? PATH.PRICE_PLAN_LIST_HISTORY : PATH.PRICE_PLAN_LIST,
             search: createSearchParams({
                 ...queryConfig,
                 search
@@ -92,7 +94,7 @@ export default function FilterPricePlan({
         setSelectedCategory(null)
         setSearch('')
         navigate({
-            pathname: PATH.PRICE_PLAN_LIST,
+            pathname: isHistory ? PATH.PRICE_PLAN_LIST_HISTORY : PATH.PRICE_PLAN_LIST,
             search: createSearchParams(omit(queryConfig, ['category', 'brand', 'search', 'page', 'limit'])).toString()
         })
     }
@@ -100,7 +102,7 @@ export default function FilterPricePlan({
     return (
         <div>
             <p className='font-medium text-[14px] text-blue-600 pb-2 border-b-2 border-blue-500 inline-block mb-3'>
-                Danh giá sản phẩm đang áp dụng
+                {isHistory ? 'Lịch sử' : 'Danh giá sản phẩm đang áp dụng'}
             </p>
             <div className='flex justify-content-between gap-2'>
                 <form className='w-2/5' onSubmit={handleSerach}>

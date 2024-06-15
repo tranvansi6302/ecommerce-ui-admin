@@ -21,19 +21,16 @@ import categoriesApi from '~/apis/categories.api'
 import pricesApi from '~/apis/prices.api'
 import DefaultProductImage from '~/components/DefaultProductImage'
 import PATH from '~/constants/path'
+import useQueryPricePlan from '~/hooks/useQueryPricePlan'
 import useSetTitle from '~/hooks/useSetTitle'
 import { formatCurrencyVND, formatDate } from '~/utils/format'
-import FilterPricePlan from './components/FilterPricePlan'
-import useQueryPricePlan from '~/hooks/useQueryPricePlan'
-import HistoryDialog from './components/HistoryDialog'
-import warehousesApi from '~/apis/warehouses.api'
-
+import FilterPricePlan from '../FilterPricePlan'
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
 }
 
-export default function PricePlanList() {
-    useSetTitle('Giá đang áp dụng')
+export default function PricePlanHistory() {
+    useSetTitle('Lịch sử thay đổi')
     const queryConfig = useQueryPricePlan()
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
     const [globalFilter] = useState<string>('')
@@ -41,11 +38,9 @@ export default function PricePlanList() {
     const [search, setSearch] = useState<string>('')
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
-    const [openHistory, setOpenHistory] = useState<boolean>(false)
-    const [warehouseId, setWarehouseId] = useState<number>(0)
-    const { data: pricePlansCurrent } = useQuery({
-        queryKey: ['price-plans-current', queryConfig],
-        queryFn: () => pricesApi.getAllPricePlansCurrent(queryConfig as PricePlanFilter),
+    const { data: pricePlansHistory } = useQuery({
+        queryKey: ['price-plans-history', queryConfig],
+        queryFn: () => pricesApi.getAllPricePlansHistory(queryConfig as PricePlanFilter),
         placeholderData: keepPreviousData
     })
 
@@ -59,10 +54,7 @@ export default function PricePlanList() {
     )
     const variantNameTemplate = useCallback((rowData: PricePlan) => {
         return (
-            <div
-                onClick={() => handleOpenHistory(rowData.variant.warehouse.id)}
-                className='font-normal text-gray-800 flex flex-col gap-1 cursor-pointer'
-            >
+            <div className='font-normal text-gray-800 flex flex-col gap-1'>
                 <p className='text-[13.6px] '>{rowData.variant.variant_name}</p>
                 <p className='text-[13.6px] text-blue-500'>{rowData.variant.sku}</p>
             </div>
@@ -88,6 +80,7 @@ export default function PricePlanList() {
     const header = useMemo(
         () => (
             <FilterPricePlan
+                isHistory
                 search={search}
                 setSearch={setSearch}
                 selectedBrand={selectedBrand as Brand}
@@ -115,17 +108,6 @@ export default function PricePlanList() {
         setSelectedSuppliers(e.value as Supplier[])
     }, [])
 
-    const handleOpenHistory = (id: number) => {
-        setOpenHistory(true)
-        setWarehouseId(id)
-    }
-
-    const { data: warehouse } = useQuery({
-        queryKey: ['warehouse', warehouseId],
-        queryFn: () => warehousesApi.getWarehouseById(warehouseId),
-        enabled: openHistory
-    })
-
     return (
         <div className='w-full'>
             <Link to={PATH.PRICE_PLAN_LIST_CREATE} className='flex items-center justify-end mb-2'>
@@ -134,7 +116,7 @@ export default function PricePlanList() {
                 </MyButton>
             </Link>
             <DataTable
-                value={(pricePlansCurrent?.data.result as unknown as DataTableValueArray) ?? []}
+                value={(pricePlansHistory?.data.result as unknown as DataTableValueArray) ?? []}
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
                 dataKey='id'
@@ -155,7 +137,6 @@ export default function PricePlanList() {
                 <Column className='' field='start_date' header='Ngày hiệu lực' body={startDateTemplate} sortable />
                 <Column className='' field='end_date' header='Ngày kết thúc' body={endDateTemplate} sortable />
             </DataTable>
-            <HistoryDialog warehouse={warehouse} visible={openHistory} onHide={() => setOpenHistory(false)} />
         </div>
     )
 }
