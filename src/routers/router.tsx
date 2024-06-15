@@ -12,12 +12,13 @@ import ProductList from '~/pages/Products'
 import CreateProduct from '~/pages/Products/components/CreateProduct'
 import PurchaseOrderList from '~/pages/Purchases'
 import CreatePurchaseOrder from '~/pages/Purchases/components/CreatePurchaseOrder'
-import UpdatePurchaseOrder from '~/pages/Purchases/components/UpdatePurchaseOrder/UpdatePurchaseOrder'
+import UpdatePurchaseOrder from '~/pages/Purchases/components/UpdatePurchaseOrder'
 import SupplierList from '~/pages/Suppliers'
 import CreateSupplier from '~/pages/Suppliers/components/CreateSupplier'
 import UpdateSupplier from '~/pages/Suppliers/components/UpdateSupplier'
 import WarehouseList from '~/pages/Warehouses'
 import { ProtectedRoute, RejectedRoute } from './protected'
+import PricePlanHistory from '~/pages/PricePlans/components/PricePlanHistory'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -126,6 +127,14 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <PricePlanList />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.PRICE_PLAN_LIST_HISTORY,
+                    element: (
+                        <MainLayout>
+                            <PricePlanHistory />
                         </MainLayout>
                     )
                 },

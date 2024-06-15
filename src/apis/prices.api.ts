@@ -14,6 +14,11 @@ const pricesApi = {
         return http.get<ListPricePlanCurrentResponse>(API.PRICE_PLAN, {
             params
         })
+    },
+    getAllPricePlansHistory: (params: PricePlanFilter) => {
+        return http.get<ListPricePlanCurrentResponse>(API.PRICE_PLAN_HISTORY, {
+            params
+        })
     }
 }
 
