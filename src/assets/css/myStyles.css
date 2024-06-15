@@ -121,3 +121,15 @@
 [data-pc-name='splitbutton'] {
     height: 36px !important;
 }
+
+[data-pc-name='calendar'] > input {
+    font-size: 13.6px;
+    border-top: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-radius: 0 !important;
+}
+
+.p-datepicker {
+    width: 500px !important;
+}

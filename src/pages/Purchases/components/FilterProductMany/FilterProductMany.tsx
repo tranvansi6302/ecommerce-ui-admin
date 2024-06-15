@@ -22,7 +22,7 @@ interface FilterProductProps {
     setRowVariants: (value: Variant[] | any) => void
 }
 
-export default function FilterProductPurchase({ search, setSearch, rowVariants, setRowVariants }: FilterProductProps) {
+export default function FilterProductMany({ search, setSearch, rowVariants, setRowVariants }: FilterProductProps) {
     const [debouncedSearch, setDebouncedSearch] = useState(search)
     const [isFocused, setIsFocused] = useState(false)
     const [isInitialLoad, setIsInitialLoad] = useState(true)
@@ -118,7 +118,7 @@ export default function FilterProductPurchase({ search, setSearch, rowVariants, 
                             className='pl-10 py-0 font-normal h-[40px] w-full flex items-center'
                             style={{ borderRadius: '2px', fontSize: '13.6px' }}
                             name='search'
-                            placeholder='Tìm kiếm theo tên, mã nhà cung cấp'
+                            placeholder='Tìm kiếm theo tên, mã sản phẩm'
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
                             value={search}
                             onFocus={() => setIsFocused(true)}
@@ -163,6 +163,7 @@ export default function FilterProductPurchase({ search, setSearch, rowVariants, 
                     <MdOutlineFilterAlt fontSize='20px' />
                     <p className='text-[14px] font-normal ml-2'> Chọn nhanh</p>
                 </MyButton>
+
                 <Dialog
                     header={<p className='font-normal text-gray-900'>Chọn nhanh sản phẩm</p>}
                     visible={open}
@@ -183,7 +184,7 @@ export default function FilterProductPurchase({ search, setSearch, rowVariants, 
                                     className='pl-10 py-0 font-normal h-[40px] w-full flex items-center'
                                     style={{ borderRadius: '2px', fontSize: '13.6px' }}
                                     name='search'
-                                    placeholder='Tìm kiếm theo tên, mã nhà cung cấp'
+                                    placeholder='Tìm kiếm theo tên, mã sản phẩm'
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
                                     value={search}
                                     onFocus={() => setIsFocused(true)}

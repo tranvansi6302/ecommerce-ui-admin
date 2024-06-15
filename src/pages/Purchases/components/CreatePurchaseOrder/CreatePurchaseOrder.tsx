@@ -31,9 +31,9 @@ import MESSAGE from '~/constants/message'
 import PATH from '~/constants/path'
 import { PurchaseDetailSchemaType, createPurchaseSchema } from '~/schemas/purchase.schema'
 import { formatCurrencyVND } from '~/utils/format'
-import FilterProductPurchase from '../FilterProductPurchase'
 import SupplierInfo from '../SupplierInfo'
 import useSetTitle from '~/hooks/useSetTitle'
+import FilterProductMany from '../FilterProductMany'
 
 type CreatePurchaseOrderForm = CreatePurchaseOrderRequest & { [key: string]: any }
 export default function CreatePurchaseOrder() {
@@ -207,12 +207,7 @@ export default function CreatePurchaseOrder() {
 
     const header = useMemo(
         () => (
-            <FilterProductPurchase
-                rowVariants={rowVariants}
-                setRowVariants={setRowVariants}
-                search={search}
-                setSearch={setSearch}
-            />
+            <FilterProductMany rowVariants={rowVariants} setRowVariants={setRowVariants} search={search} setSearch={setSearch} />
         ),
         [rowVariants, search]
     )

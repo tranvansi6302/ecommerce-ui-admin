@@ -2,19 +2,21 @@ import { useRoutes } from 'react-router-dom'
 import PATH from '~/constants/path'
 import AuthLayout from '~/layouts/AuthLayout'
 import MainLayout from '~/layouts/MainLayout'
-import BrandList from '~/pages/Brands/BrandList'
-import CategoryList from '~/pages/Categories/CategoryList'
+import BrandList from '~/pages/Brands'
+import CategoryList from '~/pages/Categories'
 import Dashboard from '~/pages/Dashboard'
 import Login from '~/pages/Login'
-import ProductList from '~/pages/Products/ProductList'
+import PricePlanList from '~/pages/PricePlans'
+import CreatePricePlan from '~/pages/PricePlans/components/CreatePricePlan'
+import ProductList from '~/pages/Products'
 import CreateProduct from '~/pages/Products/components/CreateProduct'
-import PurchaseOrderList from '~/pages/Purchases/PurchaseOrderList'
+import PurchaseOrderList from '~/pages/Purchases'
 import CreatePurchaseOrder from '~/pages/Purchases/components/CreatePurchaseOrder'
 import UpdatePurchaseOrder from '~/pages/Purchases/components/UpdatePurchaseOrder/UpdatePurchaseOrder'
-import SupplierList from '~/pages/Suppliers/SupplierList'
+import SupplierList from '~/pages/Suppliers'
 import CreateSupplier from '~/pages/Suppliers/components/CreateSupplier'
 import UpdateSupplier from '~/pages/Suppliers/components/UpdateSupplier'
-import WarehouseList from '~/pages/Warehouses/WarehouseList'
+import WarehouseList from '~/pages/Warehouses'
 import { ProtectedRoute, RejectedRoute } from './protected'
 
 export default function useRoutesElement() {
@@ -116,6 +118,22 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <WarehouseList />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.PRICE_PLAN_LIST,
+                    element: (
+                        <MainLayout>
+                            <PricePlanList />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.PRICE_PLAN_LIST_CREATE,
+                    element: (
+                        <MainLayout>
+                            <CreatePricePlan />
                         </MainLayout>
                     )
                 }
