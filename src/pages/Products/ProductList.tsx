@@ -69,7 +69,14 @@ export default function ProductList() {
     const salePriceTemplate = useCallback((rowData: Variant) => rowData?.current_price_plan?.sale_price ?? 0, [])
 
     // handle image (default)
-    const imageBodyTemplate = useCallback(() => <DefaultProductImage />, [])
+    const imageBodyTemplate = useCallback(
+        () => (
+            <div className='w-[40px] h-[40px] bg-gray-100 rounded-md flex justify-center items-center'>
+                <DefaultProductImage height='28px' />
+            </div>
+        ),
+        []
+    )
 
     const allowExpansion = useCallback((rowData: Product) => rowData.variants!.length > 0, [])
 

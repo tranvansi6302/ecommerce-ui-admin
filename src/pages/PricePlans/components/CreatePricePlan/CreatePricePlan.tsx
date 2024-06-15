@@ -32,18 +32,18 @@ export default function CreatePricePlan() {
     const [search, setSearch] = useState<string>('')
     const [rowVariants, setRowVariants] = useState<Variant[]>([])
     const [message, setMessage] = useState<string>('')
-
     const [salePrice, setSalePrice] = useState<{ [key: number]: number }>({})
     const [promotionPrice, setPromotionPrice] = useState<{ [key: number]: number }>({})
     const [startDate, setStartDate] = useState<{ [key: number]: string }>({})
     const [endDate, setEndDate] = useState<{ [key: number]: string }>({})
     const { register, handleSubmit } = useForm()
-
     const [quickApplyVisible, setQuickApplyVisible] = useState(false)
     const [quickApplyStartDate, setQuickApplyStartDate] = useState<Nullable<Date>>(null)
     const [quickApplyEndDate, setQuickApplyEndDate] = useState<Nullable<Date>>(null)
     const [quickApplyPercentage, setQuickApplyPercentage] = useState<number | ''>(0)
     const [quickApplyPercentagePromotion, setQuickApplyPercentagePromotion] = useState<number | ''>(0)
+    const [openHistory, setOpenHistory] = useState<boolean>(false)
+    const [warehouseId, setWarehouseId] = useState<number>(0)
 
     const createPricePlanMutation = useMutation({
         mutationFn: (body: CreatePricePlanRequest) => pricesApi.createPricePlan(body)
@@ -253,9 +253,6 @@ export default function CreatePricePlan() {
         [rowVariants, search]
     )
 
-    // TODO: Test
-    const [openHistory, setOpenHistory] = useState<boolean>(false)
-    const [warehouseId, setWarehouseId] = useState<number>(0)
     const handleOpenHistory = (id: number) => {
         setOpenHistory(true)
         setWarehouseId(id)

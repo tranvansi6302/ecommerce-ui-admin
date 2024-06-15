@@ -111,7 +111,7 @@ export default function SupplierList() {
                 <Column className='' field='name' header='Tên nhà cung cấp' body={supplierNameTemplate} />
                 <Column className='' field='email' header='Email' body={supplierEmailTemplate} />
                 <Column className='' field='phone_number' header='Số điện thoại' body={supplierPhoneTemplate} />
-                <Column className='' field='status' header='Trạng thái' body={supplierStatusTemplate} />
+                <Column className='pl-0' field='status' header='Trạng thái' body={supplierStatusTemplate} />
             </DataTable>
         </div>
     )

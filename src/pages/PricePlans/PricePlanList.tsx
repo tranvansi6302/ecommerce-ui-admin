@@ -70,8 +70,14 @@ export default function PricePlanList() {
     }, [])
     const salePriceTemplate = useCallback((rowData: PricePlan) => formatCurrencyVND(rowData.sale_price), [])
     const promotionPriceTemplate = useCallback((rowData: PricePlan) => formatCurrencyVND(rowData.promotion_price), [])
-    const startDateTemplate = useCallback((rowData: PricePlan) => formatDate(rowData.start_date) ?? 'Không có', [])
-    const endDateTemplate = useCallback((rowData: PricePlan) => formatDate(rowData.end_date) ?? 'Không có', [])
+    const startDateTemplate = useCallback(
+        (rowData: PricePlan) => (rowData.start_date == null ? 'Không có' : formatDate(rowData.start_date)),
+        []
+    )
+    const endDateTemplate = useCallback(
+        (rowData: PricePlan) => (rowData.end_date == null ? 'Không có' : formatDate(rowData.end_date)),
+        []
+    )
 
     const { data: brands } = useQuery({
         queryKey: ['brands'],

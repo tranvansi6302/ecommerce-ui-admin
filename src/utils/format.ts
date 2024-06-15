@@ -35,6 +35,17 @@ export const convertSupplierStatus = (status: string) => {
     }
 }
 
+export const convertUserStatus = (status: string) => {
+    switch (status) {
+        case 'ACTIVE':
+            return 'Hoạt động'
+        case 'BLOCKED':
+            return 'Vô hiệu hóa'
+        default:
+            return ''
+    }
+}
+
 export const convertToLocaleDateTime = (dateString: string) => {
     const date = new Date(dateString)
     const year = date.getFullYear()

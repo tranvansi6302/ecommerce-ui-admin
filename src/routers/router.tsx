@@ -19,6 +19,7 @@ import UpdateSupplier from '~/pages/Suppliers/components/UpdateSupplier'
 import WarehouseList from '~/pages/Warehouses'
 import { ProtectedRoute, RejectedRoute } from './protected'
 import PricePlanHistory from '~/pages/PricePlans/components/PricePlanHistory'
+import UserList from '~/pages/Users'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -143,6 +144,14 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <CreatePricePlan />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.USER_LIST,
+                    element: (
+                        <MainLayout>
+                            <UserList />
                         </MainLayout>
                     )
                 }
