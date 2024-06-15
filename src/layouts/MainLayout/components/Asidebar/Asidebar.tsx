@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { HiOutlineUserGroup } from 'react-icons/hi2'
 import { BsBox } from 'react-icons/bs'
 import { LuLayoutDashboard } from 'react-icons/lu'
 import { RiTShirt2Line } from 'react-icons/ri'
+import { GrMoney } from 'react-icons/gr'
 import PATH from '~/constants/path'
 import MenuItem from './components/MenuItem'
 
@@ -17,6 +19,16 @@ const menuItems: MenuItem[] = [
         label: 'Tổng quan',
         icon: <LuLayoutDashboard fontSize='18px' />,
         link: PATH.DASHBOARD
+    },
+    {
+        label: 'Quản lý người dùng',
+        icon: <HiOutlineUserGroup fontSize='18px' />,
+        children: [
+            {
+                label: 'Khách hàng',
+                link: PATH.USER_LIST
+            }
+        ]
     },
     {
         label: 'Quản lý Sản phẩm',
@@ -51,6 +63,20 @@ const menuItems: MenuItem[] = [
             {
                 label: 'Tồn kho',
                 link: PATH.WAREHOURSE_LIST
+            }
+        ]
+    },
+    {
+        label: 'Quản lý giá bán',
+        icon: <GrMoney fontSize='18px' />,
+        children: [
+            {
+                label: 'Bảng giá',
+                link: PATH.PRICE_PLAN_LIST
+            },
+            {
+                label: 'Lịch sử thay đổi',
+                link: PATH.PRICE_PLAN_LIST_HISTORY
             }
         ]
     }

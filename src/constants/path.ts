@@ -3,6 +3,7 @@ const PATH = {
     ROOT: '/',
     DASHBOARD: '/admin',
     LOGIN: '/admin/login',
+    USER_LIST: '/admin/users',
     PRODUCT_LIST: '/admin/products',
     PRODUCT_CREATE: '/admin/products/create',
     CATEGORY_LIST: '/admin/categories',
@@ -13,6 +14,9 @@ const PATH = {
     PURCHASE_LIST: '/admin/purchases',
     PURCHASE_CREATE: '/admin/purchases/create',
     PURCHASE_UPDATE: '/admin/purchases/:id',
-    WAREHOURSE_LIST: '/admin/warehouses'
+    WAREHOURSE_LIST: '/admin/warehouses',
+    PRICE_PLAN_LIST: '/admin/price-plans',
+    PRICE_PLAN_LIST_CREATE: '/admin/price-plans/create',
+    PRICE_PLAN_LIST_HISTORY: '/admin/price-plans/history'
 }
 export default PATH
