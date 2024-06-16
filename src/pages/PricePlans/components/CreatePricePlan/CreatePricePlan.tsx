@@ -201,7 +201,7 @@ export default function CreatePricePlan() {
                     placeholder='mm/dd/yyyy'
                     name={`start_date_${rowData.id}`}
                     value={startDateValue}
-                    className='h-[40px]'
+                    className='h-[40px] date-price-plan'
                     onChange={(e) => handleStartDateChange(rowData.id, e.value)}
                 />
             )
@@ -216,7 +216,7 @@ export default function CreatePricePlan() {
                     placeholder='mm/dd/yyyy'
                     name={`end_date_${rowData.id}`}
                     value={endDateValue}
-                    className='h-[40px]'
+                    className='h-[40px] date-price-plan'
                     onChange={(e) => handleEndDateChange(rowData.id, e.value)}
                 />
             )

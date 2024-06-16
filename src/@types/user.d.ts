@@ -1,5 +1,5 @@
 import { Role } from './role'
-import { PaginatedApiResponse } from './util'
+import { ApiResponse, PaginatedApiResponse } from './util'
 
 export interface User {
     id: number
@@ -17,6 +17,7 @@ export interface User {
 export interface UserStatus {
     id: number
     status: string
+    db?: string
 }
 
 export interface UserFilter {
@@ -27,3 +28,5 @@ export interface UserFilter {
 }
 
 export type ListUserResponse = PaginatedApiResponse<User>
+export type UserResponse = ApiResponse<User>
+export type UpdateUserResponse = ApiResponse<User>

@@ -20,6 +20,8 @@ import useQueryUsers from '~/hooks/useQueryUsers'
 import useSetTitle from '~/hooks/useSetTitle'
 import { convertUserStatus, formatDate } from '~/utils/format'
 import FilterUser from './components/FilterUser'
+import { Link } from 'react-router-dom'
+import PATH from '~/constants/path'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
@@ -40,9 +42,16 @@ export default function UserList() {
         placeholderData: keepPreviousData
     })
 
-    const avatarTemplate = useCallback(() => <DefaultAvatarUser />, [])
+    const avatarTemplate = useCallback((rowData: User) => {
+        return rowData.avatar ? <img className='w-10 h-10 rounded-full' src={rowData.avatar} alt='' /> : <DefaultAvatarUser />
+    }, [])
     const fullNameTemplate = useCallback(
-        (rowData: User) => <p className='text-blue-500 cursor-pointer'>{rowData.full_name}</p>,
+        (rowData: User) => (
+            <Link to={`${PATH.USER_LIST}/${rowData.id}`} className='text-blue-500 cursor-pointer'>
+                <p> {rowData.full_name}</p>
+                <p className='mt-1'>{rowData.phone_number ?? 'Chưa có liên hệ'}</p>
+            </Link>
+        ),
         []
     )
     const emailTemplate = useCallback((rowData: User) => rowData.email, [])
