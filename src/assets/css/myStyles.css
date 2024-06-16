@@ -124,10 +124,18 @@
 
 [data-pc-name='calendar'] > input {
     font-size: 13.6px;
+    border-radius: 0 !important;
+    border-radius: 3px 0 0 3px !important;
+}
+
+[data-pc-name='calendar'] > button {
+    border-radius: 0 3px 3px 0 !important;
+}
+
+.date-price-plan > input {
     border-top: 0 !important;
     border-left: 0 !important;
     border-right: 0 !important;
-    border-radius: 0 !important;
 }
 
 .p-datepicker {

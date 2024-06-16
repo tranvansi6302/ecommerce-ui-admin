@@ -62,8 +62,15 @@ export default function PricePlanHistory() {
     }, [])
     const salePriceTemplate = useCallback((rowData: PricePlan) => formatCurrencyVND(rowData.sale_price), [])
     const promotionPriceTemplate = useCallback((rowData: PricePlan) => formatCurrencyVND(rowData.promotion_price), [])
-    const startDateTemplate = useCallback((rowData: PricePlan) => formatDate(rowData.start_date) ?? 'Không có', [])
-    const endDateTemplate = useCallback((rowData: PricePlan) => formatDate(rowData.end_date) ?? 'Không có', [])
+    const startDateTemplate = useCallback(
+        (rowData: PricePlan) => (rowData.start_date == null ? 'Không có' : formatDate(rowData.start_date)),
+        []
+    )
+    const endDateTemplate = useCallback(
+        (rowData: PricePlan) => (rowData.end_date == null ? 'Không có' : formatDate(rowData.end_date)),
+        []
+    )
+    const updatedAtTemplate = useCallback((rowData: PricePlan) => formatDate(rowData.updated_at), [])
 
     const { data: brands } = useQuery({
         queryKey: ['brands'],
@@ -131,11 +138,12 @@ export default function PricePlanHistory() {
                 <Column selectionMode='multiple' className='w-[100px]' />
 
                 <Column className='' field='' header='Ảnh' body={variantImageTemplate} />
-                <Column className='w-[30%]' field='' header='Tên sản phẩm' body={variantNameTemplate} />
+                <Column className='w-[20%]' field='' header='Tên sản phẩm' body={variantNameTemplate} />
                 <Column className='' field='sale_price' header='Giá gốc' body={salePriceTemplate} sortable />
                 <Column className='' field='promotion_price' header='Giá khuyến mãi' body={promotionPriceTemplate} sortable />
                 <Column className='' field='start_date' header='Ngày hiệu lực' body={startDateTemplate} sortable />
                 <Column className='' field='end_date' header='Ngày kết thúc' body={endDateTemplate} sortable />
+                <Column className='' field='updated_at' header='Ngày cập nhật' body={updatedAtTemplate} sortable />
             </DataTable>
         </div>
     )

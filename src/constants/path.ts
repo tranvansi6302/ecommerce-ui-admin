@@ -4,6 +4,7 @@ const PATH = {
     DASHBOARD: '/admin',
     LOGIN: '/admin/login',
     USER_LIST: '/admin/users',
+    USER_UPDATE: '/admin/users/:id',
     PRODUCT_LIST: '/admin/products',
     PRODUCT_CREATE: '/admin/products/create',
     CATEGORY_LIST: '/admin/categories',

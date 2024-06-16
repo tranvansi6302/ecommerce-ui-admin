@@ -8,6 +8,7 @@ import Dashboard from '~/pages/Dashboard'
 import Login from '~/pages/Login'
 import PricePlanList from '~/pages/PricePlans'
 import CreatePricePlan from '~/pages/PricePlans/components/CreatePricePlan'
+import PricePlanHistory from '~/pages/PricePlans/components/PricePlanHistory'
 import ProductList from '~/pages/Products'
 import CreateProduct from '~/pages/Products/components/CreateProduct'
 import PurchaseOrderList from '~/pages/Purchases'
@@ -16,9 +17,10 @@ import UpdatePurchaseOrder from '~/pages/Purchases/components/UpdatePurchaseOrde
 import SupplierList from '~/pages/Suppliers'
 import CreateSupplier from '~/pages/Suppliers/components/CreateSupplier'
 import UpdateSupplier from '~/pages/Suppliers/components/UpdateSupplier'
+import UserList from '~/pages/Users'
+import UpdateUser from '~/pages/Users/components/UpdateUser'
 import WarehouseList from '~/pages/Warehouses'
 import { ProtectedRoute, RejectedRoute } from './protected'
-import PricePlanHistory from '~/pages/PricePlans/components/PricePlanHistory'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -143,6 +145,22 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <CreatePricePlan />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.USER_LIST,
+                    element: (
+                        <MainLayout>
+                            <UserList />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.USER_UPDATE,
+                    element: (
+                        <MainLayout>
+                            <UpdateUser />
                         </MainLayout>
                     )
                 }

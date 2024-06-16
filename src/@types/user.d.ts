@@ -1,4 +1,5 @@
 import { Role } from './role'
+import { ApiResponse, PaginatedApiResponse } from './util'
 
 export interface User {
     id: number
@@ -9,4 +10,23 @@ export interface User {
     phone_number: string
     roles: Role[]
     status: string
+    created_at: string
+    updated_at: string
 }
+
+export interface UserStatus {
+    id: number
+    status: string
+    db?: string
+}
+
+export interface UserFilter {
+    page?: number
+    limit?: number
+    status?: string
+    email?: string
+}
+
+export type ListUserResponse = PaginatedApiResponse<User>
+export type UserResponse = ApiResponse<User>
+export type UpdateUserResponse = ApiResponse<User>

@@ -8,3 +8,8 @@ export const SUPPLIER_STATUS = {
     ACTIVE: 'ACTIVE',
     INACTIVE: 'INACTIVE'
 }
+
+export const USER_STATUS = {
+    ACTIVE: 'ACTIVE',
+    BLOCKED: 'BLOCKED'
+}

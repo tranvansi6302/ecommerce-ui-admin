@@ -10,6 +10,8 @@ interface PricePlan {
     promotion_price: number
     start_date: string
     end_date: string
+    created_at: string
+    updated_at: string
 }
 export interface CreatePricePlan {
     variant_id: number
