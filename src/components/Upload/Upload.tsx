@@ -1,53 +1,53 @@
 import { Button } from 'primereact/button'
-import {
-    FileUpload,
-    FileUploadHeaderTemplateOptions,
-    FileUploadSelectEvent,
-    FileUploadUploadEvent,
-    ItemTemplateOptions
-} from 'primereact/fileupload'
-import { Toast } from 'primereact/toast'
+import { FileUpload, FileUploadHeaderTemplateOptions, FileUploadSelectEvent, ItemTemplateOptions } from 'primereact/fileupload'
 import { Tooltip } from 'primereact/tooltip'
 import { useRef, useState } from 'react'
+import { toast } from 'react-toastify'
 
 interface UploadProps {
     id: string
+    onSelectedFiles?: (files: File[]) => void
 }
 
-export default function Upload({ id }: UploadProps) {
-    const toast = useRef<Toast>(null)
+export default function Upload({ id, onSelectedFiles }: UploadProps) {
     const [totalSize, setTotalSize] = useState(0)
+    const [numFiles, setNumFiles] = useState(0) // Add this line
     const fileUploadRef = useRef<FileUpload>(null)
 
     const onTemplateSelect = (e: FileUploadSelectEvent) => {
         let _totalSize = totalSize
-        let files = e.files
+        const files = e.files
+
+        // If the total number of files exceeds 5, prevent the new files from being added
+        if (numFiles + files.length > 5) {
+            e.originalEvent.preventDefault()
+            toast.warn('Số lượng hình ảnh tối đa là 5')
+            return
+        }
+        if (_totalSize > 5 * 1024 * 1024) {
+            e.originalEvent.preventDefault()
+            toast.warn('Dung lượng tối đa là 5MB')
+            return
+        }
 
         for (let i = 0; i < files.length; i++) {
             _totalSize += files[i].size || 0
         }
-
         setTotalSize(_totalSize)
-    }
-
-    const onTemplateUpload = (e: FileUploadUploadEvent) => {
-        let _totalSize = 0
-
-        e.files.forEach((file) => {
-            _totalSize += file.size || 0
-        })
-
-        setTotalSize(_totalSize)
+        setNumFiles(numFiles + files.length) // Update the number of files
+        onSelectedFiles && onSelectedFiles(files)
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-types
     const onTemplateRemove = (file: File, callback: Function) => {
         setTotalSize(totalSize - file.size)
+        setNumFiles(numFiles - 1) // Decrease the number of files
         callback()
     }
 
     const onTemplateClear = () => {
         setTotalSize(0)
+        setNumFiles(0) // Reset the number of files
     }
 
     const headerTemplate = (options: FileUploadHeaderTemplateOptions) => {
@@ -95,7 +95,7 @@ export default function Upload({ id }: UploadProps) {
                     }}
                 ></i>
                 <span style={{ fontSize: '14px', color: 'var(--text-color-secondary)' }} className='my-5'>
-                    Chưa có hình ảnh
+                    Chấp nhận đuôi .jpg, .jpeg, .png, dung lượng tối đa 5MB, tối đa 5 hình ảnh
                 </span>
             </div>
         )
@@ -116,13 +116,10 @@ export default function Upload({ id }: UploadProps) {
             <Tooltip target='.custom-cancel-btn' position='bottom' />
             <FileUpload
                 ref={fileUploadRef}
-                name='demo[]'
+                name='files[]'
                 id={id}
-                url='/api/upload'
                 multiple
                 accept='image/*'
-                maxFileSize={1000000}
-                onUpload={onTemplateUpload}
                 onSelect={onTemplateSelect}
                 onError={onTemplateClear}
                 onClear={onTemplateClear}

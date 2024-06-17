@@ -34,7 +34,7 @@ export default function Header() {
                                 />
                             </div>
                             {openMenu && (
-                                <div className='absolute right-0 mt-2'>
+                                <div className='absolute right-0 mt-2' style={{ zIndex: 99999 }}>
                                     <Menu model={items} />
                                 </div>
                             )}

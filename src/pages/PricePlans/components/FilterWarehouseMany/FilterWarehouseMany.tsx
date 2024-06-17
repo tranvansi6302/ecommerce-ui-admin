@@ -11,10 +11,10 @@ import { Warehouse } from '~/@types/warehouse'
 import brandsApi from '~/apis/brands.api'
 import categoriesApi from '~/apis/categories.api'
 import warehousesApi from '~/apis/warehouses.api'
-import DefaultProductImage from '~/components/DefaultProductImage'
 import MyButton from '~/components/MyButton'
 import MyDrowdown from '~/components/MyDrowdown'
 import MyInputSearch from '~/components/MyInputSearch'
+import SetProductImage from '~/components/SetProductImage'
 
 interface FilterWarehouseProps {
     search: string
@@ -142,9 +142,7 @@ export default function FilterWarehouseMany({
                                     className='flex items-center gap-4 p-2 border-b border-gray-200 cursor-pointer py-3 hover:bg-blue-50'
                                 >
                                     <div className='flex gap-4 w-[80%]'>
-                                        <div className='w-[40px] h-[40px] bg-gray-100 rounded-md flex justify-center items-center'>
-                                            <DefaultProductImage height='28px' />
-                                        </div>
+                                        <SetProductImage productImages={warehouses.variant.product_images} />
                                         <div className='font-normal text-[13.6px] flex flex-col gap-1'>
                                             <p className='text-gray-900'>{warehouses.variant.variant_name}</p>
                                             <p className='text-sm text-blue-500'>{warehouses.variant.sku}</p>
@@ -251,9 +249,7 @@ export default function FilterWarehouseMany({
                                             className='mr-2'
                                         />
                                         <div className='flex gap-4 w-[80%]'>
-                                            <div className='w-[40px] h-[40px] bg-gray-100 rounded-md flex justify-center items-center'>
-                                                <DefaultProductImage height='28px' />
-                                            </div>
+                                            <SetProductImage productImages={warehouse.variant.product_images} />
                                             <div className='font-normal text-[13.6px] flex flex-col gap-1'>
                                                 <p className='text-gray-900'>{warehouse.variant.variant_name}</p>
                                                 <p className='text-sm text-blue-500'>{warehouse.variant.sku}</p>

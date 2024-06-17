@@ -13,11 +13,11 @@ import { Warehouse, WarehouseFilter } from '~/@types/warehouse'
 import brandsApi from '~/apis/brands.api'
 import categoriesApi from '~/apis/categories.api'
 import warehousesApi from '~/apis/warehouses.api'
-import DefaultProductImage from '~/components/DefaultProductImage'
+import SetProductImage from '~/components/SetProductImage'
+import useQueryWarehouse from '~/hooks/useQueryWarehouse'
 import useSetTitle from '~/hooks/useSetTitle'
 import { formatCurrencyVND, formatDate } from '~/utils/format'
 import FilterWarehouse from './components/FilterWarehouse'
-import useQueryWarehouse from '~/hooks/useQueryWarehouse'
 
 export default function WarehouseList() {
     useSetTitle('Tồn kho')
@@ -47,11 +47,7 @@ export default function WarehouseList() {
     })
 
     const warehouseImageTemplate = useCallback(
-        () => (
-            <div className='w-[40px] h-[40px] bg-gray-100 rounded-md flex justify-center items-center'>
-                <DefaultProductImage height='28px' />
-            </div>
-        ),
+        (rowData: Warehouse) => <SetProductImage productImages={rowData.variant.product_images} />,
         []
     )
 

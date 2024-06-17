@@ -40,6 +40,7 @@ export default function CreateProduct() {
     const [sizes, setSizes] = useState<string[]>([])
     const [colors, setColors] = useState<string[]>([])
     const [message, setMessage] = useState<string>('')
+    const [files, setFiles] = useState<File[]>([])
 
     // Handle form
     const {
@@ -52,6 +53,10 @@ export default function CreateProduct() {
 
     const createProductMutation = useMutation({
         mutationFn: (data: CreateProductRequest) => productsApi.createProduct(data)
+    })
+
+    const uploadImagesMutation = useMutation({
+        mutationFn: (payload: { id: number; body: FormData }) => productsApi.uploadImages(payload.id, payload.body)
     })
 
     const { data: brands } = useQuery({
@@ -77,9 +82,30 @@ export default function CreateProduct() {
         }
 
         createProductMutation.mutate(finalData, {
-            onSuccess: () => {
-                toast.success(MESSAGE.CREATE_PRODUCT_SUCCESS)
-                navigate(PATH.PRODUCT_LIST)
+            onSuccess: (data) => {
+                if (files) {
+                    const formData = new FormData()
+                    files.forEach((file) => {
+                        formData.append('files', file)
+                    })
+
+                    const payload = {
+                        id: data.data.result.id,
+                        body: formData
+                    }
+                    uploadImagesMutation.mutate(payload, {
+                        onSuccess: () => {
+                            toast.success(MESSAGE.CREATE_PRODUCT_SUCCESS)
+                            navigate(PATH.PRODUCT_LIST)
+                        },
+                        onError: (error) => {
+                            console.log(error)
+                            const errorResponse = (error as AxiosError<MessageResponse>).response?.data
+                            setMessage(errorResponse?.message ?? '')
+                            toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
+                        }
+                    })
+                }
             },
             onError: (error) => {
                 console.log(error)
@@ -89,6 +115,10 @@ export default function CreateProduct() {
             }
         })
     })
+
+    const handleOnSelectedFiles = (files: File[]) => {
+        setFiles(files)
+    }
 
     return (
         <div className='card w-full'>
@@ -210,7 +240,7 @@ export default function CreateProduct() {
                         <div className='mt-3'>
                             <p className='text-[13.6px] text-gray-900'>Hình ảnh</p>
                             <div className='mt-1'>
-                                <Upload id='upload-product' />
+                                <Upload onSelectedFiles={handleOnSelectedFiles} id='upload-product' />
                             </div>
                         </div>
                     </div>
@@ -221,7 +251,7 @@ export default function CreateProduct() {
                             <p className='font-semibold text-[14px]'>Thoát</p>
                         </MyButton>
                     </Link>
-                    <MyButton loading={createProductMutation.isPending} className='rounded-[3px] h-9 w-36'>
+                    <MyButton loading={uploadImagesMutation.isPending} className='rounded-[3px] h-9 w-36'>
                         <p className='font-semibold text-[14px]'>Lưu sản phẩm</p>
                     </MyButton>
                 </div>

@@ -7,7 +7,7 @@ import { Nullable } from 'primereact/ts-helpers'
 import { useCallback, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { LiaTimesSolid } from 'react-icons/lia'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { MessageResponse } from '~/@types/util'
 import { Variant } from '~/@types/variant'
@@ -295,9 +295,11 @@ export default function CreatePricePlan() {
                 </div>
 
                 <div className='flex justify-end gap-4 pb-14 pt-6'>
-                    <MyButton className='rounded-[3px] h-9' outlined>
-                        <p className='font-semibold text-[14px]'>Thoát</p>
-                    </MyButton>
+                    <Link to={PATH.PRICE_PLAN_LIST}>
+                        <MyButton type='button' className='rounded-[3px] h-9' outlined>
+                            <p className='font-semibold text-[14px]'>Thoát</p>
+                        </MyButton>
+                    </Link>
 
                     <MyButton className='rounded-[3px] h-9 w-36'>
                         <p className='font-semibold text-[14px]'>Lưu giá bán</p>

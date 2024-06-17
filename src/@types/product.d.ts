@@ -1,6 +1,12 @@
 import { Brand } from './brand'
 import { Category } from './category'
-import { PaginatedApiResponse } from './util'
+import { ApiResponse, PaginatedApiResponse } from './util'
+import { Variant } from './variant'
+
+interface ProductImage {
+    id: number
+    url: string
+}
 
 interface Product {
     id: number
@@ -10,7 +16,8 @@ interface Product {
     sold: number
     brand: Brand
     category: Category
-    variants: Variant[]
+    variants: Omit<Variant, 'current_price_plan'>[]
+    product_images: ProductImage[]
     average_rating: number
     created_at: string
     updated_at: string
@@ -25,3 +32,4 @@ export interface ProductFilter {
 }
 
 export type ListProductResponse = PaginatedApiResponse<Product>
+export type CreateProductResponse = ApiResponse<Product>

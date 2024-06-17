@@ -13,7 +13,7 @@ import { FaRegCircleUser } from 'react-icons/fa6'
 import { GoCodeSquare } from 'react-icons/go'
 import { LiaTimesSolid } from 'react-icons/lia'
 import { MdMyLocation, MdOutlineMailOutline, MdOutlinePhoneForwarded } from 'react-icons/md'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Supplier } from '~/@types/supplier'
 import { MessageResponse } from '~/@types/util'
@@ -21,19 +21,19 @@ import { Variant } from '~/@types/variant'
 import purchasesApi, { CreatePurchaseOrderRequest } from '~/apis/purchases.api'
 import suppliersApi from '~/apis/supplier.api'
 import noInfoImage from '~/assets/images/no-info.jpg'
-import DefaultProductImage from '~/components/DefaultProductImage'
 import MyButton from '~/components/MyButton'
 import MyDropdown from '~/components/MyDrowdown/MyDropdown'
 import MyInput from '~/components/MyInput'
 import MyTextarea from '~/components/MyTextarea'
+import SetProductImage from '~/components/SetProductImage'
 import ShowMessage from '~/components/ShowMessage'
 import MESSAGE from '~/constants/message'
 import PATH from '~/constants/path'
+import useSetTitle from '~/hooks/useSetTitle'
 import { PurchaseDetailSchemaType, createPurchaseSchema } from '~/schemas/purchase.schema'
 import { formatCurrencyVND } from '~/utils/format'
-import SupplierInfo from '../SupplierInfo'
-import useSetTitle from '~/hooks/useSetTitle'
 import FilterProductMany from '../FilterProductMany'
+import SupplierInfo from '../SupplierInfo'
 
 type CreatePurchaseOrderForm = CreatePurchaseOrderRequest & { [key: string]: any }
 export default function CreatePurchaseOrder() {
@@ -107,14 +107,7 @@ export default function CreatePurchaseOrder() {
     }
 
     const variantNumberTemplate = useCallback((_: any, index: any) => index.rowIndex + 1, [])
-    const variantImageTemplate = useCallback(
-        () => (
-            <div className='w-[40px] h-[40px] bg-gray-100 rounded-md flex justify-center items-center'>
-                <DefaultProductImage height='28px' />
-            </div>
-        ),
-        []
-    )
+    const variantImageTemplate = useCallback((rowData: Variant) => <SetProductImage productImages={rowData.product_images} />, [])
     const variantNameTemplate = useCallback((rowData: Variant) => {
         return (
             <div className='font-normal text-gray-800 flex flex-col gap-1'>
@@ -388,9 +381,11 @@ export default function CreatePurchaseOrder() {
                 </div>
                 <Divider />
                 <div className='flex justify-end gap-4 pb-14 pt-6'>
-                    <MyButton className='rounded-[3px] h-9' outlined>
-                        <p className='font-semibold text-[14px]'>Thoát</p>
-                    </MyButton>
+                    <Link to={PATH.PURCHASE_LIST}>
+                        <MyButton type='button' className='rounded-[3px] h-9' outlined>
+                            <p className='font-semibold text-[14px]'>Thoát</p>
+                        </MyButton>
+                    </Link>
 
                     <MyButton loading={createPurchaseOrderMutation.isPending} className='rounded-[3px] h-9 w-36'>
                         <p className='font-semibold text-[14px]'>Lưu đơn hàng</p>

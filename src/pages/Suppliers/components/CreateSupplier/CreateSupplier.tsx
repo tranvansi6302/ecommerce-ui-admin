@@ -130,7 +130,7 @@ export default function CreateSupplier() {
                 </div>
                 <div className='flex justify-end gap-4 py-14'>
                     <Link to={PATH.SUPPLIER_LIST}>
-                        <MyButton className='rounded-[3px] h-9' outlined>
+                        <MyButton type='button' className='rounded-[3px] h-9' outlined>
                             <p className='font-semibold text-[14px]'>Thoát</p>
                         </MyButton>
                     </Link>

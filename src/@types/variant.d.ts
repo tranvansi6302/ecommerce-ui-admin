@@ -1,3 +1,4 @@
+import { ProductImage } from './product'
 import { PaginatedApiResponse } from './util'
 
 interface BaseVariant {
@@ -12,6 +13,7 @@ interface BaseVariant {
     }
     variant_name: string
     product_name: string
+    product_images: ProductImage[]
 }
 
 interface PricePlan {

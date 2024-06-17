@@ -12,10 +12,10 @@ interface HistoryDialogProps {
 }
 
 export default function HistoryDialog({ visible, onHide, warehouse }: HistoryDialogProps) {
-    const warehouseSalePriceTemplate = (rowData: PricePlan) => rowData.sale_price ?? 'Không có'
-    const warehousePromotionPriceTemplate = (rowData: PricePlan) => rowData.promotion_price ?? 'Không khuyến mãi'
-    const warehouseStartDateTemplate = (rowData: PricePlan) => formatDate(rowData.start_date) ?? 'Không có'
-    const warehouseEndDateTemplate = (rowData: PricePlan) => formatDate(rowData.end_date) ?? 'Không có'
+    const warehouseSalePriceTemplate = (rowData: PricePlan) => rowData.sale_price ?? 'Không áp dụng'
+    const warehousePromotionPriceTemplate = (rowData: PricePlan) => rowData.promotion_price ?? 'Không áp dụng'
+    const warehouseStartDateTemplate = (rowData: PricePlan) => formatDate(rowData.start_date) ?? 'Không áp dụng'
+    const warehouseEndDateTemplate = (rowData: PricePlan) => formatDate(rowData.end_date) ?? 'Không áp dụng'
 
     return (
         <Dialog

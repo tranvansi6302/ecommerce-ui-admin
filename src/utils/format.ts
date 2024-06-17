@@ -8,7 +8,7 @@ export const formatDate = (dateString: string) => {
 }
 
 export const formatCurrencyVND = (currency: number) => {
-    return currency.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
+    return (currency && currency.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })) ?? 0
 }
 
 export const convertPurchaseOrderStatus = (status: string) => {

@@ -1,5 +1,6 @@
 import { Fragment, useRef } from 'react'
 import { toast } from 'react-toastify'
+import MyButton from '../MyButton'
 
 interface Props {
     onChange?: (file?: File) => void
@@ -12,9 +13,7 @@ export default function InputFile({ onChange }: Props) {
         const fileFromLocal = event.target.files?.[0]
         fileInputRef.current?.setAttribute('value', '')
         if (fileFromLocal && (fileFromLocal.size >= 5 * 1048576 || !fileFromLocal.type.includes('image'))) {
-            toast.error(`Dụng lượng file tối đa 5 MB. Định dạng:.JPEG, .PNG`, {
-                position: 'top-center'
-            })
+            toast.error(`Dung lượng file tối đa 5 MB. Định dạng:.JPG, .JPEG, .PNG`)
         } else {
             onChange && onChange(fileFromLocal)
         }
@@ -36,13 +35,9 @@ export default function InputFile({ onChange }: Props) {
                     ;(event.target as any).value = null
                 }}
             />
-            <button
-                className='flex h-10 items-center justify-end rounded-sm border bg-white px-6 text-sm text-gray-600 shadow-sm'
-                type='button'
-                onClick={handleUpload}
-            >
+            <MyButton outlined className='rounded-sm px-6' onClick={handleUpload} type='button'>
                 Chọn ảnh
-            </button>
+            </MyButton>
         </Fragment>
     )
 }

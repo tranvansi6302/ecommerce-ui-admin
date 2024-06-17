@@ -19,14 +19,14 @@ import { Supplier } from '~/@types/supplier'
 import brandsApi from '~/apis/brands.api'
 import categoriesApi from '~/apis/categories.api'
 import pricesApi from '~/apis/prices.api'
-import DefaultProductImage from '~/components/DefaultProductImage'
+import warehousesApi from '~/apis/warehouses.api'
+import SetProductImage from '~/components/SetProductImage'
 import PATH from '~/constants/path'
+import useQueryPricePlan from '~/hooks/useQueryPricePlan'
 import useSetTitle from '~/hooks/useSetTitle'
 import { formatCurrencyVND, formatDate } from '~/utils/format'
 import FilterPricePlan from './components/FilterPricePlan'
-import useQueryPricePlan from '~/hooks/useQueryPricePlan'
 import HistoryDialog from './components/HistoryDialog'
-import warehousesApi from '~/apis/warehouses.api'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
@@ -50,11 +50,7 @@ export default function PricePlanList() {
     })
 
     const variantImageTemplate = useCallback(
-        () => (
-            <div className='w-[40px] h-[40px] bg-gray-100 rounded-md flex justify-center items-center'>
-                <DefaultProductImage height='28px' />
-            </div>
-        ),
+        (rowData: PricePlan) => <SetProductImage productImages={rowData.variant.product_images} />,
         []
     )
     const variantNameTemplate = useCallback((rowData: PricePlan) => {
@@ -71,11 +67,11 @@ export default function PricePlanList() {
     const salePriceTemplate = useCallback((rowData: PricePlan) => formatCurrencyVND(rowData.sale_price), [])
     const promotionPriceTemplate = useCallback((rowData: PricePlan) => formatCurrencyVND(rowData.promotion_price), [])
     const startDateTemplate = useCallback(
-        (rowData: PricePlan) => (rowData.start_date == null ? 'Không có' : formatDate(rowData.start_date)),
+        (rowData: PricePlan) => (rowData.start_date == null ? 'Không áp dụng' : formatDate(rowData.start_date)),
         []
     )
     const endDateTemplate = useCallback(
-        (rowData: PricePlan) => (rowData.end_date == null ? 'Không có' : formatDate(rowData.end_date)),
+        (rowData: PricePlan) => (rowData.end_date == null ? 'Không áp dụng' : formatDate(rowData.end_date)),
         []
     )
 
@@ -134,11 +130,13 @@ export default function PricePlanList() {
 
     return (
         <div className='w-full'>
-            <Link to={PATH.PRICE_PLAN_LIST_CREATE} className='flex items-center justify-end mb-2'>
-                <MyButton icon='pi pi-plus' className='px-6 py-3 rounded-none'>
-                    <p className='ml-1 text-[16px] '>Lên bảng giá</p>
-                </MyButton>
-            </Link>
+            <div className='flex justify-end'>
+                <Link to={PATH.PRICE_PLAN_LIST_CREATE} className='inline-block  justify-end mb-2'>
+                    <MyButton icon='pi pi-plus' className='px-6 py-3 rounded-none'>
+                        <p className='ml-1 text-[16px] '>Lên bảng giá</p>
+                    </MyButton>
+                </Link>
+            </div>
             <DataTable
                 value={(pricePlansCurrent?.data.result as unknown as DataTableValueArray) ?? []}
                 expandedRows={expandedRows}
