@@ -94,11 +94,13 @@ export default function PurchaseOrderList() {
 
     return (
         <div className='w-full'>
-            <Link to={PATH.PURCHASE_CREATE} className='flex items-center justify-end mb-2'>
-                <MyButton icon='pi pi-plus' className='px-6 py-3 rounded-none'>
-                    <p className='ml-1 text-[16px] '>Tạo đơn hàng</p>
-                </MyButton>
-            </Link>
+            <div className='flex justify-end'>
+                <Link to={PATH.PURCHASE_CREATE} className='inline-block  mb-2'>
+                    <MyButton icon='pi pi-plus' className='px-6 py-3 rounded-none'>
+                        <p className='ml-1 text-[16px] '>Tạo đơn hàng</p>
+                    </MyButton>
+                </Link>
+            </div>
             <DataTable
                 value={(purchaseOrders?.data.result as unknown as DataTableValueArray) ?? []}
                 expandedRows={expandedRows}

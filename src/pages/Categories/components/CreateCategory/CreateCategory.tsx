@@ -68,7 +68,7 @@ export default function CreateCategory({ setOpen }: CreateCategoryProps) {
                 styleMessage={{ fontSize: '13.6px' }}
             />
             <div className='flex justify-end gap-4'>
-                <MyButton onClick={() => setOpen(false)} className='rounded-[3px] h-9' outlined>
+                <MyButton type='button' onClick={() => setOpen(false)} className='rounded-[3px] h-9' outlined>
                     <p className='font-semibold text-[14px]'>Thoát</p>
                 </MyButton>
 

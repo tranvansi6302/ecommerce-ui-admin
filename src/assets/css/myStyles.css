@@ -83,8 +83,7 @@
 
 .p-fileupload-content {
     padding: 0 !important;
-    border-end-end-radius: 2px;
-    border-end-start-radius: 2px;
+    border-radius: 2px !important;
 }
 
 .p-fileupload-content > [data-pc-name='messages'] {

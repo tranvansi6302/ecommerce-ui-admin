@@ -18,15 +18,15 @@ import brandsApi from '~/apis/brands.api'
 import categoriesApi from '~/apis/categories.api'
 
 import productsApi from '~/apis/products.api'
-import DefaultProductImage from '~/components/DefaultProductImage'
 import PATH from '~/constants/path'
 import useQueryProducts from '~/hooks/useQueryProducts'
 import { formatDate } from '~/utils/format'
 
 import { Variant } from '~/@types/variant'
+import SetProductImage from '~/components/SetProductImage'
+import useSetTitle from '~/hooks/useSetTitle'
 import FilterProduct from './components/FilterProduct'
 import RowVariant from './components/RowVariant'
-import useSetTitle from '~/hooks/useSetTitle'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
@@ -69,14 +69,7 @@ export default function ProductList() {
     const salePriceTemplate = useCallback((rowData: Variant) => rowData?.current_price_plan?.sale_price ?? 0, [])
 
     // handle image (default)
-    const imageBodyTemplate = useCallback(
-        () => (
-            <div className='w-[40px] h-[40px] bg-gray-100 rounded-md flex justify-center items-center'>
-                <DefaultProductImage height='28px' />
-            </div>
-        ),
-        []
-    )
+    const imageBodyTemplate = useCallback((rowData: Product) => <SetProductImage productImages={rowData.product_images} />, [])
 
     const allowExpansion = useCallback((rowData: Product) => rowData.variants!.length > 0, [])
 

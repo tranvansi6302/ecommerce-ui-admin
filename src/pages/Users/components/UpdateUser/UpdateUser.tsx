@@ -36,6 +36,7 @@ export default function UpdateUser() {
     const [message, setMessage] = useState<string>('')
     const [selectedStatus, setSelectedStatus] = useState<UserStatus>()
     const [dateOfBirth, setDateOfBirth] = useState<Nullable<Date>>(null)
+    const [file, setFile] = useState<File>()
     const {
         register,
         handleSubmit,
@@ -63,7 +64,6 @@ export default function UpdateUser() {
         setValue('status', status?.id.toString() || '')
     }, [setValue, user])
 
-    const [file, setFile] = useState<File>()
     const previewImage = useMemo(() => {
         return file ? URL.createObjectURL(file) : ''
     }, [file])
@@ -127,9 +127,9 @@ export default function UpdateUser() {
             </Link>
             <h2 className='text-[24px] font-semibold text-gray-900 mb-8'>Cập nhật thông tin khách hàng</h2>
             <form onSubmit={onSubmit}>
-                <div className='bg-white p-5'>
+                <div className='flex gap-4'>
                     {message && <ShowMessage severity='warn' detail={message} />}
-                    <div className='grid grid-cols-2 gap-5'>
+                    <div className='w-1/2 bg-white p-5 '>
                         <div>
                             <MyInput
                                 errors={errors}
@@ -206,6 +206,8 @@ export default function UpdateUser() {
                                 className='mt-1'
                             />
                         </div>
+                    </div>
+                    <div className='w-1/2 bg-white p-5 '>
                         <div className=''>
                             <div className='flex flex-col items-center'>
                                 <div className='my-5 h-24 w-24'>

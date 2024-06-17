@@ -4,8 +4,10 @@ import { BsBox } from 'react-icons/bs'
 import { LuLayoutDashboard } from 'react-icons/lu'
 import { RiTShirt2Line } from 'react-icons/ri'
 import { GrMoney } from 'react-icons/gr'
+import { MdOutlineClear } from 'react-icons/md'
 import PATH from '~/constants/path'
 import MenuItem from './components/MenuItem'
+import { Link } from 'react-router-dom'
 
 interface MenuItem {
     label: string
@@ -90,11 +92,16 @@ export default function Asidebar() {
     }
 
     return (
-        <aside id='sidebar' className='fixed top-0 left-0 z-20 flex-col w-64 h-full bg-[#182537]' aria-label='Sidebar'>
-            <a href='https://flowbite-admin-dashboard.vercel.app/' className='flex ml-2 md:mr-24 pt-5 pl-2'>
-                <img src='https://flowbite-admin-dashboard.vercel.app/images/logo.svg' className='h-8 mr-3' alt='FlowBite Logo' />
+        <aside
+            id='sidebar'
+            className='fixed top-0 left-0 z-20 flex-col w-64 h-full overflow-auto bg-[#182537]'
+            aria-label='Sidebar'
+        >
+            <Link to={PATH.DASHBOARD} className='flex items-center gap-2 ml-2 md:mr-24 pt-5 pl-2 text-white'>
+                <MdOutlineClear fontSize='30px' />
+
                 <span className='self-center text-xl font-semibold sm:text-2xl whitespace-nowrap text-white'>Admin</span>
-            </a>
+            </Link>
             <div className='relative flex flex-col flex-1 min-h-0'>
                 <div className='flex flex-col flex-1 pt-5 pb-4 overflow-y-auto'>
                     <div className='flex-1 px-3 space-y-1 divide-y divide-gray-200'>
