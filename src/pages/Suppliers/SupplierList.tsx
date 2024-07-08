@@ -37,6 +37,7 @@ export default function SupplierList() {
     const { data: suppliers } = useQuery({
         queryKey: ['suppliers', queryConfig],
         queryFn: () => suppliersApi.getAllSuppliers(queryConfig as SupplierFilter),
+        staleTime: 3 * 60 * 1000,
         placeholderData: keepPreviousData
     })
 

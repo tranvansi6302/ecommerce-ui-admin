@@ -50,6 +50,7 @@ export default function PricePlanList() {
     const { data: pricePlansCurrent } = useQuery({
         queryKey: ['price-plans-current', queryConfig],
         queryFn: () => pricesApi.getAllPricePlansCurrent(queryConfig as PricePlanFilter),
+        staleTime: 3 * 60 * 1000,
         placeholderData: keepPreviousData
     })
 

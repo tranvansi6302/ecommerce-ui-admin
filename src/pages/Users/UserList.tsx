@@ -52,6 +52,7 @@ export default function UserList() {
     const { data: users, refetch } = useQuery({
         queryKey: ['users', queryConfig],
         queryFn: () => usersApi.getAllUsers(queryConfig as UserFilter),
+        staleTime: 3 * 60 * 1000,
         placeholderData: keepPreviousData
     })
 
@@ -102,6 +103,7 @@ export default function UserList() {
     const deleteSoftManyUsersMutation = useMutation({
         mutationFn: (body: { user_ids: number[] }) => usersApi.deleteSoftManyUsers(body),
         onSuccess: (data) => {
+            refetch()
             setSelectedUsers([])
             toast.success(data.data.message)
             navigate({
@@ -114,6 +116,7 @@ export default function UserList() {
     const restoreManyUsersMutation = useMutation({
         mutationFn: (body: { user_ids: number[] }) => usersApi.restoreManyUsers(body),
         onSuccess: (data) => {
+            refetch()
             setSelectedUsers([])
             toast.success(data.data.message)
             navigate(PATH.USER_LIST)

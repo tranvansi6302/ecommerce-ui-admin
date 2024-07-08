@@ -36,6 +36,7 @@ export default function PurchaseOrderList() {
     const { data: purchaseOrders } = useQuery({
         queryKey: ['purchaseOrders', queryConfig],
         queryFn: () => purchasesApi.getAllPurchaseOrders(queryConfig as PurchaseOrderFilter),
+        staleTime: 3 * 60 * 1000,
         placeholderData: keepPreviousData
     })
 

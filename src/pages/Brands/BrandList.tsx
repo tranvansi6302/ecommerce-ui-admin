@@ -39,6 +39,7 @@ export default function BrandList() {
     const { data: brands, refetch } = useQuery({
         queryKey: ['brands', queryConfig],
         queryFn: () => brandsApi.getAllBrands(queryConfig as BrandFilter),
+        staleTime: 3 * 60 * 1000,
         placeholderData: keepPreviousData
     })
 

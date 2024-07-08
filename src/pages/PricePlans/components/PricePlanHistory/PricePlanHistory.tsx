@@ -45,6 +45,7 @@ export default function PricePlanHistory() {
     const { data: pricePlansHistory } = useQuery({
         queryKey: ['price-plans-history', queryConfig],
         queryFn: () => pricesApi.getAllPricePlansHistory(queryConfig as PricePlanFilter),
+        staleTime: 3 * 60 * 1000,
         placeholderData: keepPreviousData
     })
 

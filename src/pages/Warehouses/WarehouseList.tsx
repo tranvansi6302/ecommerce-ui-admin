@@ -35,6 +35,7 @@ export default function WarehouseList() {
     const { data: warehouses } = useQuery({
         queryKey: ['warehouses', queryConfig],
         queryFn: () => warehousesApi.getAllWarehouses(queryConfig as WarehouseFilter),
+        staleTime: 3 * 60 * 1000,
         placeholderData: keepPreviousData
     })
 

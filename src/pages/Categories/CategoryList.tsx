@@ -46,6 +46,7 @@ export default function CategoryList() {
     const { data: categories, refetch } = useQuery({
         queryKey: ['categories', queryConfig],
         queryFn: () => categoriesApi.getAllCategories(queryConfig as CategoryFilter),
+        staleTime: 3 * 60 * 1000,
         placeholderData: keepPreviousData
     })
 
