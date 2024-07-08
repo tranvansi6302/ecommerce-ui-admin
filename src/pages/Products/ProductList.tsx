@@ -7,7 +7,7 @@ import {
 } from 'primereact/datatable'
 import { Dropdown } from 'primereact/dropdown'
 import { useCallback, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import MyButton from '~/components/MyButton'
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
@@ -27,6 +27,7 @@ import SetProductImage from '~/components/SetProductImage'
 import useSetTitle from '~/hooks/useSetTitle'
 import FilterProduct from './components/FilterProduct'
 import RowVariant from './components/RowVariant'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
@@ -34,6 +35,7 @@ export type QueryConfig = {
 
 export default function ProductList() {
     useSetTitle('Danh sách sản phẩm')
+    const navigate = useNavigate()
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
@@ -41,6 +43,8 @@ export default function ProductList() {
     const [search, setSearch] = useState<string>('')
     const [globalFilter] = useState<string>('')
     const queryConfig = useQueryProducts()
+    const [first, setFirst] = useState<number>(0)
+    const [rows, setRows] = useState<number>(5)
 
     const { data: products } = useQuery({
         queryKey: ['products', queryConfig],
@@ -131,6 +135,25 @@ export default function ProductList() {
         setSelectedProducts(e.value as Product[])
     }, [])
 
+    // Pagination
+    const onPageChange = (event: PaginatorPageChangeEvent) => {
+        setFirst(event.first)
+        setRows(event.rows)
+
+        navigate({
+            pathname: PATH.PRODUCT_LIST,
+            search: createSearchParams({
+                ...queryConfig,
+                limit: event.rows.toString(),
+                page: (event.page + 1).toString()
+            }).toString()
+        })
+    }
+
+    const totalRecords = useMemo(() => {
+        return (products?.data?.pagination?.limit as number) * (products?.data?.pagination?.total_page as number)
+    }, [products?.data?.pagination?.limit, products?.data?.pagination?.total_page])
+
     return (
         <div className='w-full'>
             <div className='flex items-center justify-between mb-2'>
@@ -170,6 +193,16 @@ export default function ProductList() {
                 <Column field='brand' header='Thương hiệu' body={brandNameTemplate} />
                 <Column field='createdDate' header='Ngày khởi tạo' body={productCreatedAtTemplate} sortable />
             </DataTable>
+            <div className='flex justify-end mt-3'>
+                <Paginator
+                    style={{ backgroundColor: 'transparent', textAlign: 'right' }}
+                    first={first}
+                    rows={rows}
+                    totalRecords={totalRecords}
+                    rowsPerPageOptions={[5, 10, 15]}
+                    onPageChange={onPageChange}
+                />
+            </div>
         </div>
     )
 }

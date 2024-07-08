@@ -10,7 +10,8 @@ const API = {
     WAREHOUSE: '/warehouses',
     PRICE_PLAN: '/price-plans',
     PRICE_PLAN_HISTORY: '/price-plans/history',
-    USER: '/users'
+    USER: '/users',
+    LOGOUT: '/auth/logout'
 }
 
 export default API

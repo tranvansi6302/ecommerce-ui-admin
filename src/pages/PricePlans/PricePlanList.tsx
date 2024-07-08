@@ -6,7 +6,7 @@ import {
     DataTableValueArray
 } from 'primereact/datatable'
 import { Dropdown } from 'primereact/dropdown'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import MyButton from '~/components/MyButton'
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
@@ -49,6 +49,10 @@ export default function PricePlanList() {
         placeholderData: keepPreviousData
     })
 
+    useEffect(() => {
+        console.log(pricePlansCurrent?.data.result)
+    }, [pricePlansCurrent])
+
     const variantImageTemplate = useCallback(
         (rowData: PricePlan) => <SetProductImage productImages={rowData.variant.product_images} />,
         []
@@ -66,10 +70,9 @@ export default function PricePlanList() {
     }, [])
     const salePriceTemplate = useCallback((rowData: PricePlan) => formatCurrencyVND(rowData.sale_price), [])
     const promotionPriceTemplate = useCallback((rowData: PricePlan) => formatCurrencyVND(rowData.promotion_price), [])
-    const startDateTemplate = useCallback(
-        (rowData: PricePlan) => (rowData.start_date == null ? 'Không áp dụng' : formatDate(rowData.start_date)),
-        []
-    )
+    const startDateTemplate = useCallback((rowData: PricePlan) => {
+        return rowData.start_date == null ? 'Không áp dụng' : formatDate(rowData.start_date)
+    }, [])
     const endDateTemplate = useCallback(
         (rowData: PricePlan) => (rowData.end_date == null ? 'Không áp dụng' : formatDate(rowData.end_date)),
         []
@@ -151,7 +154,6 @@ export default function PricePlanList() {
                 globalFilter={globalFilter}
             >
                 <Column selectionMode='multiple' className='w-[100px]' />
-
                 <Column className='' field='' header='Ảnh' body={variantImageTemplate} />
                 <Column className='w-[30%]' field='' header='Tên sản phẩm' body={variantNameTemplate} />
                 <Column className='' field='sale_price' header='Giá gốc' body={salePriceTemplate} sortable />

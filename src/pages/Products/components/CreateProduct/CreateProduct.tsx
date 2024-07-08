@@ -70,7 +70,7 @@ export default function CreateProduct() {
     })
 
     // Submit form
-    const onsubmit = handleSubmit((data) => {
+    const onsubmit = handleSubmit(async (data) => {
         setMessage('')
         const finalData: CreateProductRequest = {
             ...data,
@@ -81,30 +81,11 @@ export default function CreateProduct() {
             category_id: selectedCategory?.id.toString() ?? ''
         }
 
-        createProductMutation.mutate(finalData, {
-            onSuccess: (data) => {
-                if (files) {
-                    const formData = new FormData()
-                    files.forEach((file) => {
-                        formData.append('files', file)
-                    })
-
-                    const payload = {
-                        id: data.data.result.id,
-                        body: formData
-                    }
-                    uploadImagesMutation.mutate(payload, {
-                        onSuccess: () => {
-                            toast.success(MESSAGE.CREATE_PRODUCT_SUCCESS)
-                            navigate(PATH.PRODUCT_LIST)
-                        },
-                        onError: (error) => {
-                            console.log(error)
-                            const errorResponse = (error as AxiosError<MessageResponse>).response?.data
-                            setMessage(errorResponse?.message ?? '')
-                            toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
-                        }
-                    })
+        const product = await createProductMutation.mutateAsync(finalData, {
+            onSuccess: () => {
+                if (files.length === 0) {
+                    toast.success(MESSAGE.CREATE_PRODUCT_SUCCESS)
+                    navigate(PATH.PRODUCT_LIST)
                 }
             },
             onError: (error) => {
@@ -114,6 +95,30 @@ export default function CreateProduct() {
                 toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
             }
         })
+
+        if (files && files.length > 0) {
+            const formData = new FormData()
+            files.forEach((file) => {
+                formData.append('files', file)
+            })
+
+            const payload = {
+                id: product.data.result.id,
+                body: formData
+            }
+            await uploadImagesMutation.mutateAsync(payload, {
+                onSuccess: () => {
+                    toast.success(MESSAGE.CREATE_PRODUCT_SUCCESS)
+                    navigate(PATH.PRODUCT_LIST)
+                },
+                onError: (error) => {
+                    console.log(error)
+                    const errorResponse = (error as AxiosError<MessageResponse>).response?.data
+                    setMessage(errorResponse?.message ?? '')
+                    toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
+                }
+            })
+        }
     })
 
     const handleOnSelectedFiles = (files: File[]) => {

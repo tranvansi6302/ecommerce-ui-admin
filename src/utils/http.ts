@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
-import { getTokenFromLS, saveProfileToLS, saveTokenToLS } from './save'
+import { clearProfileFromLS, clearTokenFromLS, getTokenFromLS, saveProfileToLS, saveTokenToLS } from './save'
 import API from '~/constants/api'
 import { LoginResponse } from '~/@types/auth'
 
@@ -33,7 +33,11 @@ class Http {
                         saveProfileToLS(profile)
                         break
                     }
-                    default:
+                    case API.LOGOUT: {
+                        clearTokenFromLS()
+                        clearProfileFromLS()
+                        break
+                    }
                 }
 
                 return response

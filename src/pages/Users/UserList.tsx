@@ -20,8 +20,9 @@ import useQueryUsers from '~/hooks/useQueryUsers'
 import useSetTitle from '~/hooks/useSetTitle'
 import { convertUserStatus, formatDate } from '~/utils/format'
 import FilterUser from './components/FilterUser'
-import { Link } from 'react-router-dom'
+import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import PATH from '~/constants/path'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
@@ -29,12 +30,15 @@ export type QueryConfig = {
 
 export default function UserList() {
     useSetTitle('Danh sách khách hàng')
+    const navigate = useNavigate()
     const queryConfig = useQueryUsers()
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
     const [globalFilter] = useState<string>('')
     const [selectedUsers, setSelectedUsers] = useState<User[]>([])
     const [selectedUserStatus, setSelectedUserStatus] = useState<UserStatus | null>(null)
     const [search, setSearch] = useState<string>('')
+    const [first, setFirst] = useState<number>(0)
+    const [rows, setRows] = useState<number>(5)
 
     const { data: users } = useQuery({
         queryKey: ['users', queryConfig],
@@ -90,6 +94,25 @@ export default function UserList() {
         setSelectedUsers(e.value as User[])
     }, [])
 
+    // Pagination
+    const onPageChange = (event: PaginatorPageChangeEvent) => {
+        setFirst(event.first)
+        setRows(event.rows)
+
+        navigate({
+            pathname: PATH.USER_LIST,
+            search: createSearchParams({
+                ...queryConfig,
+                limit: event.rows.toString(),
+                page: (event.page + 1).toString()
+            }).toString()
+        })
+    }
+
+    const totalRecords = useMemo(() => {
+        return (users?.data?.pagination?.limit as number) * (users?.data?.pagination?.total_page as number)
+    }, [users?.data?.pagination?.limit, users?.data?.pagination?.total_page])
+
     return (
         <div className='w-full'>
             <DataTable
@@ -113,6 +136,16 @@ export default function UserList() {
                 <Column className='pl-0' field='status' header='Trạng thái' body={statusTemplate} />
                 <Column className='' field='created_at' header='Ngày tham gia' body={createdAtTemplate} />
             </DataTable>
+            <div className='flex justify-end mt-3'>
+                <Paginator
+                    style={{ backgroundColor: 'transparent', textAlign: 'right' }}
+                    first={first}
+                    rows={rows}
+                    totalRecords={totalRecords}
+                    rowsPerPageOptions={[5, 10, 15]}
+                    onPageChange={onPageChange}
+                />
+            </div>
         </div>
     )
 }

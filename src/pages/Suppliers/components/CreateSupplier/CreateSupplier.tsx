@@ -36,6 +36,7 @@ export default function CreateSupplier() {
     })
 
     const onSubmit = handleSubmit((data) => {
+        console.log(data)
         setMessage('')
         createSupplierMutation.mutate(data, {
             onSuccess: () => {
@@ -134,7 +135,7 @@ export default function CreateSupplier() {
                             <p className='font-semibold text-[14px]'>Thoát</p>
                         </MyButton>
                     </Link>
-                    <MyButton loading={false} className='rounded-[3px] h-9 w-36'>
+                    <MyButton type='submit' loading={createSupplierMutation.isPending} className='rounded-[3px] h-9 w-36'>
                         <p className='font-semibold text-[14px]'>Lưu nhà cung cấp</p>
                     </MyButton>
                 </div>

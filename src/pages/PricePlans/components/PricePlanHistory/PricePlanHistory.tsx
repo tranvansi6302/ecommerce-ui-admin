@@ -139,7 +139,7 @@ export default function PricePlanHistory() {
                 onSelectionChange={onSelectionChange}
                 globalFilter={globalFilter}
             >
-                <Column selectionMode='multiple' className='w-[100px]' />
+                <Column selectionMode='multiple' className='w-[80px]' />
 
                 <Column className='' field='' header='Ảnh' body={variantImageTemplate} />
                 <Column className='w-[20%]' field='' header='Tên sản phẩm' body={variantNameTemplate} />

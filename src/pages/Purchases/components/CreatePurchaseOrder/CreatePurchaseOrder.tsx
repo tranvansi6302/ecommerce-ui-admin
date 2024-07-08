@@ -218,7 +218,7 @@ export default function CreatePurchaseOrder() {
         <div className=''>
             {/* Note */}
             <Dialog
-                header={<p className='font-medium text-gray-900'>Ghi chú</p>}
+                header={<p className='font-medium text-gray-900'>Ghi chú cho sản phẩm</p>}
                 visible={openNote}
                 style={{ width: '50vw' }}
                 onHide={() => {
@@ -232,7 +232,7 @@ export default function CreatePurchaseOrder() {
                         <MyTextarea
                             register={register}
                             placeholder='Nhập ghi chú'
-                            className='w-full py-0 font-normal flex items-center'
+                            className='w-full py-0 pt-3 font-normal flex items-center'
                             classNameLabel='font-normal text-gray-800 text-[13.6px] mb-1'
                             value={noteVariant[noteRowId]}
                             onChange={(e) => handleNoteChange(noteRowId, e.target.value)}

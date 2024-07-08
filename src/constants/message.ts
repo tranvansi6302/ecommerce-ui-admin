@@ -13,7 +13,8 @@ const MESSAGE = {
     AUTO_RECEIVED_QUANTITY_SUCCESS: 'Nhập số lượng nhanh thành công',
     UPDATE_PURCHASE_ORDER_SUCCESS: 'Cập nhật đơn hàng mua thành công',
     CREATE_PRICE_PLAN_SUCCESS: 'Tạo bảng giá thành công',
-    UPDATE_USER_SUCCESS: 'Cập nhật thông tin thành công'
+    UPDATE_USER_SUCCESS: 'Cập nhật thông tin thành công',
+    LOGOUT_SUCCESS: 'Đăng xuất thành công'
 }
 
 export default MESSAGE

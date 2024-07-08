@@ -26,10 +26,10 @@ import MyTextarea from '~/components/MyTextarea'
 import ShowMessage from '~/components/ShowMessage'
 import MESSAGE from '~/constants/message'
 import PATH from '~/constants/path'
-import PurchaseOrderInfo from '../PurchaseOrderInfo'
-import SupplierInfo from '../SupplierInfo'
 import { PURCHASE_ORDER_STATUS } from '~/constants/status'
 import useSetTitle from '~/hooks/useSetTitle'
+import PurchaseOrderInfo from '../PurchaseOrderInfo'
+import SupplierInfo from '../SupplierInfo'
 
 export default function UpdatePurchaseOrder() {
     useSetTitle('Cập nhật đơn hàng')
@@ -244,7 +244,7 @@ export default function UpdatePurchaseOrder() {
         <div>
             {message && <ShowMessage severity='warn' detail={message} />}
             <Dialog
-                header={<p className='font-medium text-gray-900'>Ghi chú</p>}
+                header={<p className='font-medium text-gray-900'>Ghi chú cho sản phẩm</p>}
                 visible={openNote}
                 style={{ width: '50vw' }}
                 onHide={() => {
@@ -257,7 +257,7 @@ export default function UpdatePurchaseOrder() {
                         <MyTextarea
                             register={register}
                             placeholder='Nhập ghi chú'
-                            className='w-full py-0 font-normal flex items-center'
+                            className='w-full py-0 pt-2 font-normal flex items-center'
                             classNameLabel='font-normal text-gray-800 text-[13.6px] mb-1'
                             onChange={(e) => handleNoteChange(noteRowId, e.target.value)}
                             value={noteVariant[noteRowId]}
@@ -354,7 +354,7 @@ export default function UpdatePurchaseOrder() {
                                         value={convertPurchaseOrderStatus((purchaseOrder?.data.result.status as string) || '')}
                                     />
                                     <PurchaseOrderInfo title='Số lượng' value={quantityTotal()?.toString() || ''} />
-                                    <PurchaseOrderInfo title='Tổng tiền' value={formatCurrencyVND(totalPrice())} />
+                                    <PurchaseOrderInfo title='Tổng tiền' value={formatCurrencyVND(totalPrice()) || ''} />
                                     <PurchaseOrderInfo title='Ghi chú' value={purchaseOrder?.data.result.note || ''} />
                                 </div>
                             </div>
