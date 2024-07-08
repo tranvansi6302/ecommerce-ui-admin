@@ -58,3 +58,4 @@ export interface ProductFilter {
 
 export type ListProductResponse = PaginatedApiResponse<Product>
 export type CreateProductResponse = ApiResponse<ProductCreate>
+export type UploadImagesResponse = ApiResponse<ProductUploadImages>
