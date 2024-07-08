@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Column } from 'primereact/column'
 import {
     DataTable,
@@ -5,10 +6,10 @@ import {
     DataTableSelectionMultipleChangeEvent,
     DataTableValueArray
 } from 'primereact/datatable'
-import { Dropdown } from 'primereact/dropdown'
+import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown'
 import { useCallback, useMemo, useState } from 'react'
-
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { FaCheckDouble } from 'react-icons/fa6'
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import { ProductFilter } from '~/@types/product'
 
 import { User, UserFilter, UserStatus } from '~/@types/user'
@@ -23,10 +24,16 @@ import FilterUser from './components/FilterUser'
 import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import PATH from '~/constants/path'
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
+import { toast } from 'react-toastify'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
 }
+
+const selectedOptions = [
+    { label: 'Xóa', value: 'delete' },
+    { label: 'Bật tắt vô hiệu hóa', value: 'disable' }
+]
 
 export default function UserList() {
     useSetTitle('Danh sách khách hàng')
@@ -40,7 +47,7 @@ export default function UserList() {
     const [first, setFirst] = useState<number>(0)
     const [rows, setRows] = useState<number>(5)
 
-    const { data: users } = useQuery({
+    const { data: users, refetch } = useQuery({
         queryKey: ['users', queryConfig],
         queryFn: () => usersApi.getAllUsers(queryConfig as UserFilter),
         placeholderData: keepPreviousData
@@ -80,14 +87,48 @@ export default function UserList() {
         [search, selectedUserStatus]
     )
 
+    const updateStatusManyUsersMutation = useMutation({
+        mutationFn: (body: { user_ids: number[] }) => usersApi.updateStatusManyUsers(body),
+        onSuccess: (data) => {
+            setSelectedUsers([])
+            toast.success(data.data.message)
+            refetch()
+        }
+    })
+
+    const handleSelectedOptionChange = (e: DropdownChangeEvent) => {
+        switch (e.value) {
+            case 'delete': {
+                console.log('delete')
+                break
+            }
+            case 'disable': {
+                const body = selectedUsers.map((user) => user.id)
+                updateStatusManyUsersMutation.mutate({ user_ids: body })
+                break
+            }
+
+            default:
+                break
+        }
+    }
+
     const selectedHeader = useMemo(
         () => (
-            <div className='flex flex-wrap justify-content-between gap-2'>
-                <span>Đã chọn {selectedUsers.length} sản phẩm trên trang này</span>
-                <Dropdown options={['Xóa', 'Vô hiệu']} placeholder='Chọn thao tác' />
+            <div className='flex flex-wrap justify-content-between gap-4 items-center'>
+                <span className='text-blue-600 text-[15px] font-normal flex items-center gap-2'>
+                    <FaCheckDouble />
+                    Đã chọn {selectedUsers.length} dòng trên trang này
+                </span>
+                <Dropdown
+                    className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
+                    options={selectedOptions}
+                    onChange={handleSelectedOptionChange}
+                    placeholder='Chọn thao tác'
+                />
             </div>
         ),
-        [selectedUsers]
+        [selectedUsers.length]
     )
 
     const onSelectionChange = useCallback((e: DataTableSelectionMultipleChangeEvent<DataTableValueArray>) => {
