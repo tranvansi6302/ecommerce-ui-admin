@@ -16,6 +16,7 @@ export default function useQueryUsers() {
                 {
                     email: queryParams.email,
                     status: queryParams.status,
+                    is_deleted: queryParams.is_deleted,
                     page: queryParams.page || '1',
                     limit: queryParams.limit || '5'
                 },

@@ -35,6 +35,8 @@ const selectedOptions = [
     { label: 'Bật tắt vô hiệu hóa', value: 'disable' }
 ]
 
+const selectedOptionsDeleted = [{ label: 'Khôi phục', value: 'restore' }]
+
 export default function UserList() {
     useSetTitle('Danh sách khách hàng')
     const navigate = useNavigate()
@@ -73,6 +75,7 @@ export default function UserList() {
             </MyButton>
         )
     }, [])
+    const statusDeletedAt = useCallback((rowData: User) => formatDate(rowData.deleted_at), [])
     const createdAtTemplate = useCallback((rowData: User) => formatDate(rowData.created_at), [])
 
     const header = useMemo(
@@ -101,7 +104,19 @@ export default function UserList() {
         onSuccess: (data) => {
             setSelectedUsers([])
             toast.success(data.data.message)
-            refetch()
+            navigate({
+                pathname: PATH.USER_LIST,
+                search: createSearchParams({ ...queryConfig, is_deleted: '1' }).toString()
+            })
+        }
+    })
+
+    const restoreManyUsersMutation = useMutation({
+        mutationFn: (body: { user_ids: number[] }) => usersApi.restoreManyUsers(body),
+        onSuccess: (data) => {
+            setSelectedUsers([])
+            toast.success(data.data.message)
+            navigate(PATH.USER_LIST)
         }
     })
 
@@ -115,6 +130,11 @@ export default function UserList() {
             case 'disable': {
                 const body = selectedUsers.map((user) => user.id)
                 updateStatusManyUsersMutation.mutate({ user_ids: body })
+                break
+            }
+            case 'restore': {
+                const body = selectedUsers.map((user) => user.id)
+                restoreManyUsersMutation.mutate({ user_ids: body })
                 break
             }
 
@@ -132,7 +152,7 @@ export default function UserList() {
                 </span>
                 <Dropdown
                     className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
-                    options={selectedOptions}
+                    options={queryConfig.is_deleted === '1' ? selectedOptionsDeleted : selectedOptions}
                     onChange={handleSelectedOptionChange}
                     placeholder='Chọn thao tác'
                 />
@@ -184,7 +204,11 @@ export default function UserList() {
                 <Column className='w-[12%]' field='avatar' header='Avatar' body={avatarTemplate} />
                 <Column className='w-[25%]' field='full_name' header='Họ tên' body={fullNameTemplate} />
                 <Column className='' field='email' header='Email' body={emailTemplate} />
-                <Column className='pl-0' field='status' header='Trạng thái' body={statusTemplate} />
+                {queryConfig.is_deleted !== '1' ? (
+                    <Column className='pl-0' field='status' header='Trạng thái' body={statusTemplate} />
+                ) : (
+                    <Column field='status' header='Yêu cầu xóa' body={statusDeletedAt} />
+                )}
                 <Column className='' field='created_at' header='Ngày tham gia' body={createdAtTemplate} />
             </DataTable>
             <div className='flex justify-end mt-3'>

@@ -32,6 +32,9 @@ const usersApi = {
         return http.delete<MessageResponse>(API.USER, {
             data: body
         })
+    },
+    restoreManyUsers: (body: { user_ids: number[] }) => {
+        return http.patch<MessageResponse>(`${API.USER}/restore`, body)
     }
 }
 
