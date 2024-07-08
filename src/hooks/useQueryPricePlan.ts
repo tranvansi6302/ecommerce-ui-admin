@@ -18,7 +18,7 @@ export default function useQueryPricePlan() {
                     brand: queryParams.brand,
                     category: queryParams.category,
                     page: queryParams.page || '1',
-                    limit: queryParams.limit || '20'
+                    limit: queryParams.limit || '5'
                 },
                 isUndefined
             ),

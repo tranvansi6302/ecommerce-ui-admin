@@ -10,7 +10,7 @@ import { useCallback, useMemo, useState } from 'react'
 import MyButton from '~/components/MyButton'
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import { Brand } from '~/@types/brand'
 import { Category } from '~/@types/category'
 import { PricePlan, PricePlanFilter } from '~/@types/price'
@@ -25,12 +25,14 @@ import useQueryPricePlan from '~/hooks/useQueryPricePlan'
 import useSetTitle from '~/hooks/useSetTitle'
 import { formatCurrencyVND, formatDate } from '~/utils/format'
 import FilterPricePlan from '../FilterPricePlan'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
 }
 
 export default function PricePlanHistory() {
     useSetTitle('Lịch sử thay đổi')
+    const navigate = useNavigate()
     const queryConfig = useQueryPricePlan()
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
     const [globalFilter] = useState<string>('')
@@ -38,6 +40,8 @@ export default function PricePlanHistory() {
     const [search, setSearch] = useState<string>('')
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
+    const [first, setFirst] = useState<number>(0)
+    const [rows, setRows] = useState<number>(5)
     const { data: pricePlansHistory } = useQuery({
         queryKey: ['price-plans-history', queryConfig],
         queryFn: () => pricesApi.getAllPricePlansHistory(queryConfig as PricePlanFilter),
@@ -117,6 +121,27 @@ export default function PricePlanHistory() {
         setSelectedSuppliers(e.value as Supplier[])
     }, [])
 
+    // Pagination
+    const onPageChange = (event: PaginatorPageChangeEvent) => {
+        setFirst(event.first)
+        setRows(event.rows)
+
+        navigate({
+            pathname: PATH.PRICE_PLAN_LIST_HISTORY,
+            search: createSearchParams({
+                ...queryConfig,
+                limit: event.rows.toString(),
+                page: (event.page + 1).toString()
+            }).toString()
+        })
+    }
+
+    const totalRecords = useMemo(() => {
+        return (
+            (pricePlansHistory?.data?.pagination?.limit as number) * (pricePlansHistory?.data?.pagination?.total_page as number)
+        )
+    }, [pricePlansHistory?.data?.pagination?.limit, pricePlansHistory?.data?.pagination?.total_page])
+
     return (
         <div className='w-full'>
             <div className='flex justify-end'>
@@ -149,6 +174,16 @@ export default function PricePlanHistory() {
                 <Column className='' field='end_date' header='Ngày kết thúc' body={endDateTemplate} sortable />
                 <Column className='' field='updated_at' header='Ngày cập nhật' body={updatedAtTemplate} sortable />
             </DataTable>
+            <div className='flex justify-end mt-3'>
+                <Paginator
+                    style={{ backgroundColor: 'transparent', textAlign: 'right' }}
+                    first={first}
+                    rows={rows}
+                    totalRecords={totalRecords}
+                    rowsPerPageOptions={[5, 10, 15]}
+                    onPageChange={onPageChange}
+                />
+            </div>
         </div>
     )
 }
