@@ -102,14 +102,15 @@ export default function CreatePricePlan() {
     const applyQuickUpdate = () => {
         const newSalePrices = rowVariants.reduce((acc: { [key: number]: number }, variant) => {
             acc[variant.id] =
-                variant.warehouse.purchase_price + variant.warehouse.purchase_price * (1 - Number(quickApplyPercentage) / 100)
+                variant.warehouse.purchase_price +
+                variant.warehouse.purchase_price * Number((quickApplyPercentage as number) / 100)
             return acc
         }, {})
 
         const newPromotionPrices = rowVariants.reduce((acc: { [key: number]: number }, variant) => {
             acc[variant.id] =
                 variant.warehouse.purchase_price +
-                variant.warehouse.purchase_price * (1 - Number(quickApplyPercentagePromotion) / 100)
+                variant.warehouse.purchase_price * Number((quickApplyPercentagePromotion as number) / 100)
             return acc
         }, {})
 

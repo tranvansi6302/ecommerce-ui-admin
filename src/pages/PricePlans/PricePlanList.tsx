@@ -6,10 +6,11 @@ import {
     DataTableValueArray
 } from 'primereact/datatable'
 import { Dropdown } from 'primereact/dropdown'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import MyButton from '~/components/MyButton'
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import { Brand } from '~/@types/brand'
 import { Category } from '~/@types/category'
@@ -27,7 +28,6 @@ import useSetTitle from '~/hooks/useSetTitle'
 import { formatCurrencyVND, formatDate } from '~/utils/format'
 import FilterPricePlan from './components/FilterPricePlan'
 import HistoryDialog from './components/HistoryDialog'
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
@@ -52,10 +52,6 @@ export default function PricePlanList() {
         queryFn: () => pricesApi.getAllPricePlansCurrent(queryConfig as PricePlanFilter),
         placeholderData: keepPreviousData
     })
-
-    useEffect(() => {
-        console.log(pricePlansCurrent?.data.result)
-    }, [pricePlansCurrent])
 
     const variantImageTemplate = useCallback(
         (rowData: PricePlan) => <SetProductImage productImages={rowData.variant.product_images} />,
