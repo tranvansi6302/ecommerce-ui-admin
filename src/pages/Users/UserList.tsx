@@ -96,10 +96,20 @@ export default function UserList() {
         }
     })
 
+    const deleteSoftManyUsersMutation = useMutation({
+        mutationFn: (body: { user_ids: number[] }) => usersApi.deleteSoftManyUsers(body),
+        onSuccess: (data) => {
+            setSelectedUsers([])
+            toast.success(data.data.message)
+            refetch()
+        }
+    })
+
     const handleSelectedOptionChange = (e: DropdownChangeEvent) => {
         switch (e.value) {
             case 'delete': {
-                console.log('delete')
+                const body = selectedUsers.map((user) => user.id)
+                deleteSoftManyUsersMutation.mutate({ user_ids: body })
                 break
             }
             case 'disable': {
