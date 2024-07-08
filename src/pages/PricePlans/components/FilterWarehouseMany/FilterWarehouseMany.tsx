@@ -107,13 +107,13 @@ export default function FilterWarehouseMany({
 
     const { data: brands } = useQuery({
         queryKey: ['brands'],
-        queryFn: () => brandsApi.getAllBrands(),
+        queryFn: () => brandsApi.getAllBrands({ status: 'ACTIVE' }),
         placeholderData: keepPreviousData
     })
 
     const { data: categories } = useQuery({
         queryKey: ['categories'],
-        queryFn: () => categoriesApi.getAllCategories(),
+        queryFn: () => categoriesApi.getAllCategories({ status: 'ACTIVE' }),
         placeholderData: keepPreviousData
     })
 

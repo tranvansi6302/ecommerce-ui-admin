@@ -1,10 +1,10 @@
 import { Column } from 'primereact/column'
 import { DataTable, DataTableSelectionMultipleChangeEvent, DataTableValueArray } from 'primereact/datatable'
-import { Dropdown } from 'primereact/dropdown'
+import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown'
 import { useCallback, useMemo, useState } from 'react'
 import MyButton from '~/components/MyButton'
 
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 
 import { Dialog } from 'primereact/dialog'
 import { Brand, BrandFilter } from '~/@types/brand'
@@ -18,7 +18,10 @@ import { createSearchParams, useNavigate } from 'react-router-dom'
 import useQueryBrands from '~/hooks/useQueryBrands'
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 import PATH from '~/constants/path'
-
+import { BrandStatus } from './components/FilterBrand/FilterBrand'
+import { FaCheckDouble } from 'react-icons/fa'
+import { toast } from 'react-toastify'
+const selectedOptions = [{ label: 'Chuyển đổi ngừng kinh doanh', value: 'TOGGLE' }]
 export default function BrandList() {
     useSetTitle('Danh sách thương hiệu')
     const navigate = useNavigate()
@@ -31,8 +34,9 @@ export default function BrandList() {
     const [brandId, setBrandId] = useState<number>(0)
     const [first, setFirst] = useState<number>(0)
     const [rows, setRows] = useState<number>(5)
+    const [selectedBrandStatus, setSelectedBrandStatus] = useState<BrandStatus | null>(null)
 
-    const { data: brands } = useQuery({
+    const { data: brands, refetch } = useQuery({
         queryKey: ['brands', queryConfig],
         queryFn: () => brandsApi.getAllBrands(queryConfig as BrandFilter),
         placeholderData: keepPreviousData
@@ -46,20 +50,67 @@ export default function BrandList() {
         )
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
-
+    const brandStatusTemplate = useCallback((rowData: Brand) => {
+        return (
+            <MyButton text severity={rowData.status === 'INACTIVE' ? 'danger' : 'success'}>
+                <p className='text-[13.6px] font-medium'>{rowData.status == 'ACTIVE' ? 'ĐANG KINH DOANH' : 'NGỪNG KINH DOANH'}</p>
+            </MyButton>
+        )
+    }, [])
     const brandCreatedAtTemplate = useCallback((rowData: Brand) => formatDate(rowData.created_at), [])
     const brandUpdatedAtTemplate = useCallback((rowData: Brand) => formatDate(rowData.updated_at), [])
 
-    const header = useMemo(() => <FilterBrand search={search} setSearch={setSearch} />, [search])
+    const header = useMemo(
+        () => (
+            <FilterBrand
+                selectedBrandStatus={selectedBrandStatus}
+                setSelectedBrandStatus={setSelectedBrandStatus}
+                search={search}
+                setSearch={setSearch}
+            />
+        ),
+        [search, selectedBrandStatus]
+    )
+
+    const updateManyStatusBrandMutation = useMutation({
+        mutationFn: (data: { brand_ids: number[] }) => brandsApi.updateManyStatusBrand(data),
+        onSuccess: (data) => {
+            toast.success(data.data.message)
+            refetch()
+            setSelectedBrand([])
+        }
+    })
+
+    const handleSelectedOptionChange = (e: DropdownChangeEvent) => {
+        switch (e.value) {
+            case 'TOGGLE': {
+                const brandIds = selectedBrand.map((brand) => brand.id)
+                updateManyStatusBrandMutation.mutate({ brand_ids: brandIds })
+                break
+            }
+            default:
+                break
+        }
+    }
 
     const selectedHeader = useMemo(
         () => (
-            <div className='flex flex-wrap justify-content-between gap-2'>
-                <span>Đã chọn {selectedBrand.length} sản phẩm trên trang này</span>
-                <Dropdown options={['Xóa', 'Ngừng kinh doanh']} placeholder='Chọn thao tác' />
+            <div className='flex flex-wrap justify-content-between gap-4 items-center'>
+                <span className='text-blue-600 text-[15px] font-normal flex items-center gap-2'>
+                    <FaCheckDouble />
+                    Đã chọn {selectedBrand.length} dòng trên trang này
+                </span>
+                <Dropdown
+                    style={{ width: '300px' }}
+                    className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
+                    options={selectedOptions}
+                    onChange={handleSelectedOptionChange}
+                    placeholder='Chọn thao tác'
+                />
             </div>
         ),
-        [selectedBrand]
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [selectedBrand.length]
     )
 
     const onSelectionChange = useCallback((e: DataTableSelectionMultipleChangeEvent<DataTableValueArray>) => {
@@ -131,6 +182,7 @@ export default function BrandList() {
                 <Column selectionMode='multiple' className='w-[100px]' />
 
                 <Column className='w-2/5' field='name' header='Tên danh mục' body={brandNameTemplate} />
+                <Column className='pl-0' field='status' header='Trạng thái' body={brandStatusTemplate} />
                 <Column field='created_at' header='Ngày khởi tạo' sortable body={brandCreatedAtTemplate} />
                 <Column field='updated_at' header='Cập nhật cuối' sortable body={brandUpdatedAtTemplate} />
             </DataTable>

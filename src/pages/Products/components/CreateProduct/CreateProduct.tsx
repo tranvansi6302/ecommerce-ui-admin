@@ -61,12 +61,12 @@ export default function CreateProduct() {
 
     const { data: brands } = useQuery({
         queryKey: ['brands'],
-        queryFn: () => brandsApi.getAllBrands()
+        queryFn: () => brandsApi.getAllBrands({ status: 'ACTIVE' })
     })
 
     const { data: categories } = useQuery({
         queryKey: ['categories'],
-        queryFn: () => categoriesApi.getAllCategories()
+        queryFn: () => categoriesApi.getAllCategories({ status: 'ACTIVE' })
     })
 
     // Submit form

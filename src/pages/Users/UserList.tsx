@@ -31,11 +31,11 @@ export type QueryConfig = {
 }
 
 const selectedOptions = [
-    { label: 'Xóa', value: 'delete' },
-    { label: 'Bật tắt vô hiệu hóa', value: 'disable' }
+    { label: 'Xóa', value: 'DELETE' },
+    { label: 'Bật tắt vô hiệu hóa', value: 'DISABLE' }
 ]
 
-const selectedOptionsDeleted = [{ label: 'Khôi phục', value: 'restore' }]
+const selectedOptionsDeleted = [{ label: 'Khôi phục', value: 'RESTORE' }]
 
 export default function UserList() {
     useSetTitle('Danh sách khách hàng')
@@ -122,17 +122,17 @@ export default function UserList() {
 
     const handleSelectedOptionChange = (e: DropdownChangeEvent) => {
         switch (e.value) {
-            case 'delete': {
+            case 'DELETE': {
                 const body = selectedUsers.map((user) => user.id)
                 deleteSoftManyUsersMutation.mutate({ user_ids: body })
                 break
             }
-            case 'disable': {
+            case 'DISABLE': {
                 const body = selectedUsers.map((user) => user.id)
                 updateStatusManyUsersMutation.mutate({ user_ids: body })
                 break
             }
-            case 'restore': {
+            case 'RESTORE': {
                 const body = selectedUsers.map((user) => user.id)
                 restoreManyUsersMutation.mutate({ user_ids: body })
                 break
@@ -151,6 +151,7 @@ export default function UserList() {
                     Đã chọn {selectedUsers.length} dòng trên trang này
                 </span>
                 <Dropdown
+                    style={{ width: '300px' }}
                     className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
                     options={queryConfig.is_deleted === '1' ? selectedOptionsDeleted : selectedOptions}
                     onChange={handleSelectedOptionChange}

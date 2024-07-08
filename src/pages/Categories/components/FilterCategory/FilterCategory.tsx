@@ -1,6 +1,9 @@
 import { omit } from 'lodash'
+import { DropdownChangeEvent } from 'primereact/dropdown'
+import { useEffect } from 'react'
 import { createSearchParams, useNavigate } from 'react-router-dom'
 import MyButton from '~/components/MyButton'
+import MyDropdown from '~/components/MyDrowdown/MyDropdown'
 import MyInputSearch from '~/components/MyInputSearch'
 import PATH from '~/constants/path'
 import useQueryCategories from '~/hooks/useQueryCategories'
@@ -8,8 +11,24 @@ import useQueryCategories from '~/hooks/useQueryCategories'
 interface FilterCategoryProps {
     search: string
     setSearch: (value: string) => void
+    selectedCategoryStatus: CategoryStatus | null
+    setSelectedCategoryStatus: (value: CategoryStatus | null) => void
 }
-export default function FilterCategory({ search, setSearch }: FilterCategoryProps) {
+
+export interface CategoryStatus {
+    id: string
+    status: string
+}
+const categoryStatus: CategoryStatus[] = [
+    { id: 'ACTIVE', status: 'Đang kinh doanh' },
+    { id: 'INACTIVE', status: 'Ngừng kinh doanh' }
+]
+export default function FilterCategory({
+    search,
+    setSearch,
+    selectedCategoryStatus,
+    setSelectedCategoryStatus
+}: FilterCategoryProps) {
     const navigate = useNavigate()
     const queryConfig = useQueryCategories()
     const handleSerach = (e: React.FormEvent<HTMLFormElement>) => {
@@ -23,12 +42,25 @@ export default function FilterCategory({ search, setSearch }: FilterCategoryProp
         })
     }
 
+    useEffect(() => {
+        if (selectedCategoryStatus) {
+            navigate({
+                pathname: PATH.CATEGORY_LIST,
+                search: createSearchParams({
+                    ...queryConfig,
+                    status: selectedCategoryStatus.id.toString()
+                }).toString()
+            })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedCategoryStatus, selectedCategoryStatus])
+
     const handleClean = () => {
         setSearch('')
-
+        setSelectedCategoryStatus(null)
         navigate({
             pathname: PATH.CATEGORY_LIST,
-            search: createSearchParams(omit(queryConfig, ['search', 'page', 'limit'])).toString()
+            search: createSearchParams(omit(queryConfig, ['search', 'status', 'page', 'limit'])).toString()
         })
     }
 
@@ -51,6 +83,16 @@ export default function FilterCategory({ search, setSearch }: FilterCategoryProp
                     </div>
                 </form>
                 <div className='flex gap-2'>
+                    <div className='w-[250px]'>
+                        <MyDropdown
+                            value={selectedCategoryStatus}
+                            onChange={(e: DropdownChangeEvent) => setSelectedCategoryStatus(e.value)}
+                            options={categoryStatus}
+                            optionLabel='status'
+                            placeholder='Trạng thái'
+                            name='status'
+                        />
+                    </div>
                     <MyButton
                         severity='secondary'
                         icon='pi pi-filter-slash'

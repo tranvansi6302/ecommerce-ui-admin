@@ -54,13 +54,13 @@ export default function ProductList() {
 
     const { data: brands } = useQuery({
         queryKey: ['brands'],
-        queryFn: () => brandsApi.getAllBrands(),
+        queryFn: () => brandsApi.getAllBrands({ status: 'ACTIVE' }),
         placeholderData: keepPreviousData
     })
 
     const { data: categories } = useQuery({
         queryKey: ['categories'],
-        queryFn: () => categoriesApi.getAllCategories(),
+        queryFn: () => categoriesApi.getAllCategories({ status: 'ACTIVE' }),
         placeholderData: keepPreviousData
     })
 
@@ -101,9 +101,9 @@ export default function ProductList() {
     }, [])
 
     const productCreatedAtTemplate = useCallback((rowData: Product) => formatDate(rowData.created_at), [])
-    const categoryNameTemplate = useCallback((rowData: Product) => rowData.category.name, [])
+    const categoryNameTemplate = useCallback((rowData: Product) => rowData?.category?.name, [])
 
-    const brandNameTemplate = useCallback((rowData: Product) => rowData.brand.name, [])
+    const brandNameTemplate = useCallback((rowData: Product) => rowData?.brand?.name, [])
 
     const header = useMemo(
         () => (

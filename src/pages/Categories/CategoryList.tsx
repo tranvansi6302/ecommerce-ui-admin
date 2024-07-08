@@ -1,10 +1,10 @@
 import { Column } from 'primereact/column'
 import { DataTable, DataTableSelectionMultipleChangeEvent, DataTableValueArray } from 'primereact/datatable'
-import { Dropdown } from 'primereact/dropdown'
+import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown'
 import { useCallback, useMemo, useState } from 'react'
 import MyButton from '~/components/MyButton'
 
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import { Category, CategoryFilter } from '~/@types/category'
 import { ProductFilter } from '~/@types/product'
 import categoriesApi from '~/apis/categories.api'
@@ -19,10 +19,15 @@ import { createSearchParams, useNavigate } from 'react-router-dom'
 import useQueryCategories from '~/hooks/useQueryCategories'
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 import PATH from '~/constants/path'
+import { FaCheckDouble } from 'react-icons/fa'
+import { toast } from 'react-toastify'
+import { CategoryStatus } from './components/FilterCategory/FilterCategory'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
 }
+
+const selectedOptions = [{ label: 'Chuyển đổi ngừng kinh doanh', value: 'TOGGLE' }]
 
 export default function CategoryList() {
     useSetTitle('Danh sách loại sản phẩm')
@@ -36,8 +41,9 @@ export default function CategoryList() {
     const [categoryId, setCategoryId] = useState<number>(0)
     const [first, setFirst] = useState<number>(0)
     const [rows, setRows] = useState<number>(5)
+    const [selectedCategoryStatus, setSelectedCategoryStatus] = useState<CategoryStatus | null>(null)
 
-    const { data: categories } = useQuery({
+    const { data: categories, refetch } = useQuery({
         queryKey: ['categories', queryConfig],
         queryFn: () => categoriesApi.getAllCategories(queryConfig as CategoryFilter),
         placeholderData: keepPreviousData
@@ -51,20 +57,65 @@ export default function CategoryList() {
         )
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
-
+    const categoryStatusTemplate = useCallback((rowData: Category) => {
+        return (
+            <MyButton text severity={rowData.status === 'INACTIVE' ? 'danger' : 'success'}>
+                <p className='text-[13.6px] font-medium'>{rowData.status == 'ACTIVE' ? 'ĐANG KINH DOANH' : 'NGỪNG KINH DOANH'}</p>
+            </MyButton>
+        )
+    }, [])
     const categoryCreatedAtTemplate = useCallback((rowData: Category) => formatDate(rowData.created_at), [])
     const categoryUpdatedAtTemplate = useCallback((rowData: Category) => formatDate(rowData.updated_at), [])
 
-    const header = useMemo(() => <FilterCategory search={search} setSearch={setSearch} />, [search])
+    const header = useMemo(
+        () => (
+            <FilterCategory
+                selectedCategoryStatus={selectedCategoryStatus}
+                setSelectedCategoryStatus={setSelectedCategoryStatus}
+                search={search}
+                setSearch={setSearch}
+            />
+        ),
+        [search, selectedCategoryStatus]
+    )
+    const updateManyStatusCategoryMutation = useMutation({
+        mutationFn: (data: { category_ids: number[] }) => categoriesApi.updateManyStatusCategory(data),
+        onSuccess: (data) => {
+            toast.success(data.data.message)
+            refetch()
+            setSelectedCategories([])
+        }
+    })
+    const handleSelectedOptionChange = (e: DropdownChangeEvent) => {
+        switch (e.value) {
+            case 'TOGGLE': {
+                const categoryIds = selectedCategories.map((category) => category.id)
+                updateManyStatusCategoryMutation.mutate({ category_ids: categoryIds })
+                break
+            }
+            default:
+                break
+        }
+    }
 
     const selectedHeader = useMemo(
         () => (
-            <div className='flex flex-wrap justify-content-between gap-2'>
-                <span>Đã chọn {selectedCategories.length} sản phẩm trên trang này</span>
-                <Dropdown options={['Xóa', 'Ngừng kinh doanh']} placeholder='Chọn thao tác' />
+            <div className='flex flex-wrap justify-content-between gap-4 items-center'>
+                <span className='text-blue-600 text-[15px] font-normal flex items-center gap-2'>
+                    <FaCheckDouble />
+                    Đã chọn {selectedCategories.length} dòng trên trang này
+                </span>
+                <Dropdown
+                    style={{ width: '300px' }}
+                    className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
+                    options={selectedOptions}
+                    onChange={handleSelectedOptionChange}
+                    placeholder='Chọn thao tác'
+                />
             </div>
         ),
-        [selectedCategories]
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [selectedCategories.length]
     )
 
     const onSelectionChange = useCallback((e: DataTableSelectionMultipleChangeEvent<DataTableValueArray>) => {
@@ -142,7 +193,8 @@ export default function CategoryList() {
             >
                 <Column selectionMode='multiple' className='w-[100px]' />
 
-                <Column className='w-2/5' field='name' header='Tên danh mục' body={categoryNameTemplate} />
+                <Column field='name' header='Tên danh mục' body={categoryNameTemplate} />
+                <Column className='pl-0' field='status' header='Trạng thái' body={categoryStatusTemplate} />
                 <Column field='created_at' header='Ngày khởi tạo' sortable body={categoryCreatedAtTemplate} />
                 <Column field='updated_at' header='Cập nhật cuối' sortable body={categoryUpdatedAtTemplate} />
             </DataTable>
