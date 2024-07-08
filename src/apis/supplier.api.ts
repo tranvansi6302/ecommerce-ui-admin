@@ -1,4 +1,10 @@
-import { CreateSupplierResponse, ListSupplierResponse, SupplierResponse, UpdateSupplierResponse } from '~/@types/supplier'
+import {
+    CreateSupplierResponse,
+    ListSupplierResponse,
+    SupplierFilter,
+    SupplierResponse,
+    UpdateSupplierResponse
+} from '~/@types/supplier'
 import API from '~/constants/api'
 import { SupplierSchemaType } from '~/schemas/supplier.schema'
 import http from '~/utils/http'
@@ -12,8 +18,10 @@ const suppliersApi = {
     createSupplier: (data: CreateSupplierRequest) => {
         return http.post<CreateSupplierResponse>(API.SUPPLIER, data)
     },
-    getAllSuppliers: () => {
-        return http.get<ListSupplierResponse>(API.SUPPLIER)
+    getAllSuppliers: (params: SupplierFilter) => {
+        return http.get<ListSupplierResponse>(API.SUPPLIER, {
+            params
+        })
     },
     getSupplierById: (id: number) => {
         return http.get<SupplierResponse>(`${API.SUPPLIER}/${id}`)

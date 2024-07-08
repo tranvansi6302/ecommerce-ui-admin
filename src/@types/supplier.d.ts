@@ -16,6 +16,13 @@ export interface SupplierStatus {
     status: string
 }
 
+export interface SupplierFilter {
+    search?: string
+    status?: string
+    page?: string
+    limit?: string
+}
+
 export type CreateSupplierResponse = ApiResponse<Supplier>
 export type UpdateSupplierResponse = ApiResponse<Supplier>
 export type ListSupplierResponse = PaginatedApiResponse<Supplier>
