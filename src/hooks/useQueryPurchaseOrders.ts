@@ -18,7 +18,7 @@ export default function useQueryPurchaseOrders() {
                     supplier: queryParams.supplier,
                     status: queryParams.status,
                     page: queryParams.page || '1',
-                    limit: queryParams.limit || '10'
+                    limit: queryParams.limit || '5'
                 },
                 isUndefined
             ),

@@ -8,7 +8,7 @@ import {
 } from 'primereact/datatable'
 import { Dropdown } from 'primereact/dropdown'
 import { useCallback, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import { PurchaseOrder, PurchaseOrderFilter, PurchaseOrderStatus } from '~/@types/purchase'
 import purchasesApi from '~/apis/purchases.api'
 import MyButton from '~/components/MyButton'
@@ -19,9 +19,11 @@ import FilterPurchaseOrder from './components/FilterPurchaseOrder'
 import { Supplier } from '~/@types/supplier'
 import useQueryPurchaseOrders from '~/hooks/useQueryPurchaseOrders'
 import useSetTitle from '~/hooks/useSetTitle'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 
 export default function PurchaseOrderList() {
     useSetTitle('Danh sách đơn hàng')
+    const navigate = useNavigate()
     const queryConfig = useQueryPurchaseOrders()
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
     const [globalFilter] = useState<string>('')
@@ -29,7 +31,8 @@ export default function PurchaseOrderList() {
     const [search, setSearch] = useState<string>('')
     const [selectedPurchaseOrderStatus, setSelectedPurchaseOrderStatus] = useState<PurchaseOrderStatus | null>(null)
     const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null)
-
+    const [first, setFirst] = useState<number>(0)
+    const [rows, setRows] = useState<number>(5)
     const { data: purchaseOrders } = useQuery({
         queryKey: ['purchaseOrders', queryConfig],
         queryFn: () => purchasesApi.getAllPurchaseOrders(queryConfig as PurchaseOrderFilter),
@@ -92,6 +95,24 @@ export default function PurchaseOrderList() {
         setSelectedPurchaseOrders(e.value as PurchaseOrder[])
     }, [])
 
+    // Pagination
+    const onPageChange = (event: PaginatorPageChangeEvent) => {
+        setFirst(event.first)
+        setRows(event.rows)
+
+        navigate({
+            pathname: PATH.PURCHASE_LIST,
+            search: createSearchParams({
+                ...queryConfig,
+                limit: event.rows.toString(),
+                page: (event.page + 1).toString()
+            }).toString()
+        })
+    }
+
+    const totalRecords = useMemo(() => {
+        return (purchaseOrders?.data?.pagination?.limit as number) * (purchaseOrders?.data?.pagination?.total_page as number)
+    }, [purchaseOrders?.data?.pagination?.limit, purchaseOrders?.data?.pagination?.total_page])
     return (
         <div className='w-full'>
             <div className='flex justify-end'>
@@ -121,6 +142,16 @@ export default function PurchaseOrderList() {
                 <Column className='' header='Nhà cung cấp' body={purchaseOrdersSupplierTemplate} />
                 <Column className='' header='Trạng thái' body={purchaseOrderStatusTemplate} />
             </DataTable>
+            <div className='flex justify-end mt-3'>
+                <Paginator
+                    style={{ backgroundColor: 'transparent', textAlign: 'right' }}
+                    first={first}
+                    rows={rows}
+                    totalRecords={totalRecords}
+                    rowsPerPageOptions={[5, 10, 15]}
+                    onPageChange={onPageChange}
+                />
+            </div>
         </div>
     )
 }
