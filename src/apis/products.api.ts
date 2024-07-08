@@ -1,4 +1,4 @@
-import { ProductFilter, ListProductResponse, CreateProductResponse } from '~/@types/product'
+import { CreateProductResponse, ListProductResponse, ProductFilter, UploadImagesResponse } from '~/@types/product'
 import API from '~/constants/api'
 import { ProductSchemaType } from '~/schemas/products.schema'
 import http from '~/utils/http'
@@ -19,7 +19,7 @@ const productsApi = {
         return http.post<CreateProductResponse>(API.PRODUCT, body)
     },
     uploadImages: (id: number, body: FormData) => {
-        return http.patch<CreateProductResponse>(`${API.PRODUCT}/${id}/upload-images`, body, {
+        return http.patch<UploadImagesResponse>(`${API.PRODUCT}/${id}/upload-images`, body, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }

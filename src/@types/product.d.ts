@@ -23,6 +23,31 @@ interface Product {
     updated_at: string
 }
 
+interface ProductCreate {
+    id: number
+    name: string
+    description: string
+    sku: string
+    brand: Brand
+    category: Category
+    variants: Variant[]
+    created_at: string
+    updated_at: string
+}
+
+interface ProductUploadImages {
+    id: number
+    name: string
+    description: string
+    sku: string
+    brand: Brand
+    category: Category
+    pending_update: number
+    product_images: ProductImage[]
+    created_at: string
+    updated_at: string
+}
+
 export interface ProductFilter {
     page?: number
     limit?: number
@@ -32,4 +57,4 @@ export interface ProductFilter {
 }
 
 export type ListProductResponse = PaginatedApiResponse<Product>
-export type CreateProductResponse = ApiResponse<Product>
+export type CreateProductResponse = ApiResponse<ProductCreate>
