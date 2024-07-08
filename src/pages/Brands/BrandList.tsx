@@ -7,26 +7,34 @@ import MyButton from '~/components/MyButton'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 import { Dialog } from 'primereact/dialog'
-import { Brand } from '~/@types/brand'
+import { Brand, BrandFilter } from '~/@types/brand'
 import brandsApi from '~/apis/brands.api'
 import useSetTitle from '~/hooks/useSetTitle'
 import { formatDate } from '~/utils/format'
 import CreateBrand from './components/CreateBrand'
 import FilterBrand from './components/FilterBrand'
 import UpdateBrand from './components/UpdateBrand'
+import { createSearchParams, useNavigate } from 'react-router-dom'
+import useQueryBrands from '~/hooks/useQueryBrands'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
+import PATH from '~/constants/path'
 
 export default function BrandList() {
     useSetTitle('Danh sách thương hiệu')
+    const navigate = useNavigate()
+    const queryConfig = useQueryBrands()
     const [selectedBrand, setSelectedBrand] = useState<Brand[]>([])
     const [globalFilter] = useState<string>('')
     const [search, setSearch] = useState<string>('')
     const [open, setOpen] = useState<boolean>(false)
     const [isUpdate, setIsUpdate] = useState<boolean>(false)
     const [brandId, setBrandId] = useState<number>(0)
+    const [first, setFirst] = useState<number>(0)
+    const [rows, setRows] = useState<number>(5)
 
     const { data: brands } = useQuery({
-        queryKey: ['brands'],
-        queryFn: () => brandsApi.getAllBrands(),
+        queryKey: ['brands', queryConfig],
+        queryFn: () => brandsApi.getAllBrands(queryConfig as BrandFilter),
         placeholderData: keepPreviousData
     })
 
@@ -64,6 +72,24 @@ export default function BrandList() {
         setBrandId(id)
     }
 
+    // Pagination
+    const onPageChange = (event: PaginatorPageChangeEvent) => {
+        setFirst(event.first)
+        setRows(event.rows)
+
+        navigate({
+            pathname: PATH.BRAND_LIST,
+            search: createSearchParams({
+                ...queryConfig,
+                limit: event.rows.toString(),
+                page: (event.page + 1).toString()
+            }).toString()
+        })
+    }
+
+    const totalRecords = useMemo(() => {
+        return (brands?.data?.pagination?.limit as number) * (brands?.data?.pagination?.total_page as number)
+    }, [brands?.data?.pagination?.limit, brands?.data?.pagination?.total_page])
     return (
         <div className='w-full'>
             <div className='flex items-center justify-end mb-2'>
@@ -108,6 +134,16 @@ export default function BrandList() {
                 <Column field='created_at' header='Ngày khởi tạo' sortable body={brandCreatedAtTemplate} />
                 <Column field='updated_at' header='Cập nhật cuối' sortable body={brandUpdatedAtTemplate} />
             </DataTable>
+            <div className='flex justify-end mt-3'>
+                <Paginator
+                    style={{ backgroundColor: 'transparent', textAlign: 'right' }}
+                    first={first}
+                    rows={rows}
+                    totalRecords={totalRecords}
+                    rowsPerPageOptions={[5, 10, 15]}
+                    onPageChange={onPageChange}
+                />
+            </div>
         </div>
     )
 }

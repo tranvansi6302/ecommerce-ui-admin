@@ -1,17 +1,35 @@
+import { omit } from 'lodash'
+import { createSearchParams, useNavigate } from 'react-router-dom'
 import MyButton from '~/components/MyButton'
 import MyInputSearch from '~/components/MyInputSearch'
+import PATH from '~/constants/path'
+import useQueryCategories from '~/hooks/useQueryCategories'
 
 interface FilterCategoryProps {
     search: string
     setSearch: (value: string) => void
 }
 export default function FilterCategory({ search, setSearch }: FilterCategoryProps) {
+    const navigate = useNavigate()
+    const queryConfig = useQueryCategories()
     const handleSerach = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        navigate({
+            pathname: PATH.CATEGORY_LIST,
+            search: createSearchParams({
+                ...queryConfig,
+                search
+            }).toString()
+        })
     }
 
     const handleClean = () => {
-        console.log('Clean...')
+        setSearch('')
+
+        navigate({
+            pathname: PATH.CATEGORY_LIST,
+            search: createSearchParams(omit(queryConfig, ['search', 'page', 'limit'])).toString()
+        })
     }
 
     return (

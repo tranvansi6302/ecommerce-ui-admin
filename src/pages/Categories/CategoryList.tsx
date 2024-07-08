@@ -5,7 +5,7 @@ import { useCallback, useMemo, useState } from 'react'
 import MyButton from '~/components/MyButton'
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { Category } from '~/@types/category'
+import { Category, CategoryFilter } from '~/@types/category'
 import { ProductFilter } from '~/@types/product'
 import categoriesApi from '~/apis/categories.api'
 
@@ -15,6 +15,10 @@ import CreateCategory from './components/CreateCategory'
 import FilterCategory from './components/FilterCategory'
 import UpdateCategory from './components/UpdateCategory'
 import useSetTitle from '~/hooks/useSetTitle'
+import { createSearchParams, useNavigate } from 'react-router-dom'
+import useQueryCategories from '~/hooks/useQueryCategories'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
+import PATH from '~/constants/path'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
@@ -22,16 +26,20 @@ export type QueryConfig = {
 
 export default function CategoryList() {
     useSetTitle('Danh sách loại sản phẩm')
+    const navigate = useNavigate()
+    const queryConfig = useQueryCategories()
     const [selectedCategories, setSelectedCategories] = useState<Category[]>([])
     const [globalFilter] = useState<string>('')
     const [search, setSearch] = useState<string>('')
     const [open, setOpen] = useState<boolean>(false)
     const [isUpdate, setIsUpdate] = useState<boolean>(false)
     const [categoryId, setCategoryId] = useState<number>(0)
+    const [first, setFirst] = useState<number>(0)
+    const [rows, setRows] = useState<number>(5)
 
     const { data: categories } = useQuery({
-        queryKey: ['categories'],
-        queryFn: () => categoriesApi.getAllCategories(),
+        queryKey: ['categories', queryConfig],
+        queryFn: () => categoriesApi.getAllCategories(queryConfig as CategoryFilter),
         placeholderData: keepPreviousData
     })
 
@@ -68,6 +76,25 @@ export default function CategoryList() {
         setOpen(true)
         setCategoryId(id)
     }
+
+    // Pagination
+    const onPageChange = (event: PaginatorPageChangeEvent) => {
+        setFirst(event.first)
+        setRows(event.rows)
+
+        navigate({
+            pathname: PATH.CATEGORY_LIST,
+            search: createSearchParams({
+                ...queryConfig,
+                limit: event.rows.toString(),
+                page: (event.page + 1).toString()
+            }).toString()
+        })
+    }
+
+    const totalRecords = useMemo(() => {
+        return (categories?.data?.pagination?.limit as number) * (categories?.data?.pagination?.total_page as number)
+    }, [categories?.data?.pagination?.limit, categories?.data?.pagination?.total_page])
 
     return (
         <div className='w-full'>
@@ -119,6 +146,16 @@ export default function CategoryList() {
                 <Column field='created_at' header='Ngày khởi tạo' sortable body={categoryCreatedAtTemplate} />
                 <Column field='updated_at' header='Cập nhật cuối' sortable body={categoryUpdatedAtTemplate} />
             </DataTable>
+            <div className='flex justify-end mt-3'>
+                <Paginator
+                    style={{ backgroundColor: 'transparent', textAlign: 'right' }}
+                    first={first}
+                    rows={rows}
+                    totalRecords={totalRecords}
+                    rowsPerPageOptions={[5, 10, 15]}
+                    onPageChange={onPageChange}
+                />
+            </div>
         </div>
     )
 }

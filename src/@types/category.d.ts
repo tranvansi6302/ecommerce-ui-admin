@@ -10,6 +10,12 @@ interface Category {
     updated_at: string
 }
 
+export interface CategoryFilter {
+    search?: string
+    page?: number
+    limit?: number
+}
+
 export type ListCategoryResponse = PaginatedApiResponse<Category>
 export type CreateCategoryResponse = ApiResponse<Category>
 export type UpdateCategoryResponse = ApiResponse<Category>

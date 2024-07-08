@@ -1,19 +1,36 @@
+import { omit } from 'lodash'
+import { createSearchParams, useNavigate } from 'react-router-dom'
 import MyButton from '~/components/MyButton'
 import MyInputSearch from '~/components/MyInputSearch'
+import PATH from '~/constants/path'
+import useQueryBrands from '~/hooks/useQueryBrands'
 
 interface FilterBrandProps {
     search: string
     setSearch: (value: string) => void
 }
 export default function FilterBrand({ search, setSearch }: FilterBrandProps) {
+    const navigate = useNavigate()
+    const queryConfig = useQueryBrands()
     const handleSerach = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        navigate({
+            pathname: PATH.BRAND_LIST,
+            search: createSearchParams({
+                ...queryConfig,
+                search
+            }).toString()
+        })
     }
 
     const handleClean = () => {
-        console.log('Clean...')
-    }
+        setSearch('')
 
+        navigate({
+            pathname: PATH.BRAND_LIST,
+            search: createSearchParams(omit(queryConfig, ['search', 'page', 'limit'])).toString()
+        })
+    }
     return (
         <div>
             <p className='font-medium text-[14px] text-blue-600 pb-2 border-b-2 border-blue-500 inline-block mb-3'>

@@ -10,6 +10,12 @@ interface Brand {
     updated_at: string
 }
 
+export interface BrandFilter {
+    search?: string
+    page?: number
+    limit?: number
+}
+
 export type ListBrandResponse = PaginatedApiResponse<Brand>
 export type CreateBrandResponse = ApiResponse<Brand>
 export type UpdateBrandResponse = ApiResponse<Brand>
