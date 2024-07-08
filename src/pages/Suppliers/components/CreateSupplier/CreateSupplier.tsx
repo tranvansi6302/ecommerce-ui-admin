@@ -28,13 +28,13 @@ export default function CreateSupplier() {
         handleSubmit,
         formState: { errors }
     } = useForm<CreateSupplierForm>({
-        resolver: yupResolver(supplierSchema)
+        resolver: yupResolver(supplierSchema.omit(['status']))
     })
 
     const createSupplierMutation = useMutation({
         mutationFn: (data: CreateSupplierForm) => suppliersApi.createSupplier(data)
     })
-
+    console.log(errors)
     const onSubmit = handleSubmit((data) => {
         console.log(data)
         setMessage('')

@@ -9,7 +9,7 @@ import API from '~/constants/api'
 import { SupplierSchemaType } from '~/schemas/supplier.schema'
 import http from '~/utils/http'
 
-export type CreateSupplierRequest = SupplierSchemaType
+export type CreateSupplierRequest = Omit<SupplierSchemaType, 'status'>
 export type UpdateSupplierRequest = SupplierSchemaType & {
     status: string
 }
