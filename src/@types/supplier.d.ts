@@ -9,11 +9,20 @@ export interface Supplier {
     status: string
     tax_code: string
     phone_number: string
+    created_at: string
+    updated_at: string
 }
 
 export interface SupplierStatus {
     id: string
     status: string
+}
+
+export interface SupplierFilter {
+    search?: string
+    status?: string
+    page?: string
+    limit?: string
 }
 
 export type CreateSupplierResponse = ApiResponse<Supplier>

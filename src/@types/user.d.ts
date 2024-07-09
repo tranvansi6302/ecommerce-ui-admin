@@ -10,6 +10,8 @@ export interface User {
     phone_number: string
     roles: Role[]
     status: string
+    is_deleted: number
+    deleted_at: string
     created_at: string
     updated_at: string
 }
@@ -25,6 +27,7 @@ export interface UserFilter {
     limit?: number
     status?: string
     email?: string
+    is_deleted?: number
 }
 
 export type ListUserResponse = PaginatedApiResponse<User>

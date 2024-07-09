@@ -15,6 +15,7 @@ import ShowMessage from '~/components/ShowMessage'
 import MESSAGE from '~/constants/message'
 import PATH from '~/constants/path'
 import useSetTitle from '~/hooks/useSetTitle'
+import { queryClient } from '~/main'
 import { supplierSchema } from '~/schemas/supplier.schema'
 
 type CreateSupplierForm = CreateSupplierRequest
@@ -28,7 +29,7 @@ export default function CreateSupplier() {
         handleSubmit,
         formState: { errors }
     } = useForm<CreateSupplierForm>({
-        resolver: yupResolver(supplierSchema)
+        resolver: yupResolver(supplierSchema.omit(['status']))
     })
 
     const createSupplierMutation = useMutation({
@@ -39,6 +40,9 @@ export default function CreateSupplier() {
         setMessage('')
         createSupplierMutation.mutate(data, {
             onSuccess: () => {
+                queryClient.invalidateQueries({
+                    queryKey: ['suppliers']
+                })
                 toast.success(MESSAGE.CREATE_SUPPLIER_SUCCESS)
                 navigate(PATH.SUPPLIER_LIST)
             },
@@ -59,7 +63,7 @@ export default function CreateSupplier() {
             <h2 className='text-[24px] font-semibold text-gray-900 mb-8'>Thêm mới nhà cung cấp</h2>
             <form onSubmit={onSubmit}>
                 <div className='bg-white p-5'>
-                    {message && <ShowMessage detail={message} />}
+                    {message && <ShowMessage severity='warn' detail={message} />}
                     <div className='grid grid-cols-2 gap-5'>
                         <div>
                             <MyInput
@@ -134,7 +138,7 @@ export default function CreateSupplier() {
                             <p className='font-semibold text-[14px]'>Thoát</p>
                         </MyButton>
                     </Link>
-                    <MyButton loading={false} className='rounded-[3px] h-9 w-36'>
+                    <MyButton type='submit' loading={createSupplierMutation.isPending} className='rounded-[3px] h-9 w-36'>
                         <p className='font-semibold text-[14px]'>Lưu nhà cung cấp</p>
                     </MyButton>
                 </div>

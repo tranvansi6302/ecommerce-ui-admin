@@ -10,7 +10,7 @@ import { useCallback, useMemo, useState } from 'react'
 import MyButton from '~/components/MyButton'
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import { Brand } from '~/@types/brand'
 import { Category } from '~/@types/category'
 import { PricePlan, PricePlanFilter } from '~/@types/price'
@@ -25,22 +25,28 @@ import useQueryPricePlan from '~/hooks/useQueryPricePlan'
 import useSetTitle from '~/hooks/useSetTitle'
 import { formatCurrencyVND, formatDate } from '~/utils/format'
 import FilterPricePlan from '../FilterPricePlan'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
+import { FaCheckDouble } from 'react-icons/fa'
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
 }
 
 export default function PricePlanHistory() {
     useSetTitle('Lịch sử thay đổi')
+    const navigate = useNavigate()
     const queryConfig = useQueryPricePlan()
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
     const [globalFilter] = useState<string>('')
-    const [selectedSuppliers, setSelectedSuppliers] = useState<Supplier[]>([])
+    const [selectedHistoryPlan, setSelectedHistoryPlan] = useState<Supplier[]>([])
     const [search, setSearch] = useState<string>('')
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
+    const [first, setFirst] = useState<number>(0)
+    const [rows, setRows] = useState<number>(5)
     const { data: pricePlansHistory } = useQuery({
         queryKey: ['price-plans-history', queryConfig],
         queryFn: () => pricesApi.getAllPricePlansHistory(queryConfig as PricePlanFilter),
+        staleTime: 3 * 60 * 1000,
         placeholderData: keepPreviousData
     })
 
@@ -76,13 +82,13 @@ export default function PricePlanHistory() {
 
     const { data: brands } = useQuery({
         queryKey: ['brands'],
-        queryFn: () => brandsApi.getAllBrands(),
+        queryFn: () => brandsApi.getAllBrands({ status: 'ACTIVE' }),
         placeholderData: keepPreviousData
     })
 
     const { data: categories } = useQuery({
         queryKey: ['categories'],
-        queryFn: () => categoriesApi.getAllCategories(),
+        queryFn: () => categoriesApi.getAllCategories({ status: 'ACTIVE' }),
         placeholderData: keepPreviousData
     })
 
@@ -105,17 +111,46 @@ export default function PricePlanHistory() {
 
     const selectedHeader = useMemo(
         () => (
-            <div className='flex flex-wrap justify-content-between gap-2'>
-                <span>Đã chọn {selectedSuppliers.length} sản phẩm trên trang này</span>
-                <Dropdown options={['Xóa', 'Ngừng kinh doanh']} placeholder='Chọn thao tác' />
+            <div className='flex flex-wrap justify-content-between gap-4 items-center'>
+                <span className='text-blue-600 text-[15px] font-normal flex items-center gap-2'>
+                    <FaCheckDouble />
+                    Đã chọn {selectedHistoryPlan.length} dòng trên trang này
+                </span>
+                <Dropdown
+                    style={{ width: '300px' }}
+                    className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
+                    placeholder='Chưa có hành động nào trên trang này'
+                />
             </div>
         ),
-        [selectedSuppliers]
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [selectedHistoryPlan.length]
     )
 
     const onSelectionChange = useCallback((e: DataTableSelectionMultipleChangeEvent<DataTableValueArray>) => {
-        setSelectedSuppliers(e.value as Supplier[])
+        setSelectedHistoryPlan(e.value as Supplier[])
     }, [])
+
+    // Pagination
+    const onPageChange = (event: PaginatorPageChangeEvent) => {
+        setFirst(event.first)
+        setRows(event.rows)
+
+        navigate({
+            pathname: PATH.PRICE_PLAN_LIST_HISTORY,
+            search: createSearchParams({
+                ...queryConfig,
+                limit: event.rows.toString(),
+                page: (event.page + 1).toString()
+            }).toString()
+        })
+    }
+
+    const totalRecords = useMemo(() => {
+        return (
+            (pricePlansHistory?.data?.pagination?.limit as number) * (pricePlansHistory?.data?.pagination?.total_page as number)
+        )
+    }, [pricePlansHistory?.data?.pagination?.limit, pricePlansHistory?.data?.pagination?.total_page])
 
     return (
         <div className='w-full'>
@@ -131,24 +166,34 @@ export default function PricePlanHistory() {
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
                 dataKey='id'
-                header={selectedSuppliers.length > 0 ? selectedHeader : header}
+                header={selectedHistoryPlan.length > 0 ? selectedHeader : header}
                 tableStyle={{ minWidth: '60rem', fontSize: '14px' }}
                 selectionMode='checkbox'
-                selection={selectedSuppliers}
+                selection={selectedHistoryPlan}
                 className='shadow'
                 onSelectionChange={onSelectionChange}
                 globalFilter={globalFilter}
             >
-                <Column selectionMode='multiple' className='w-[100px]' />
+                <Column selectionMode='multiple' className='w-[80px]' />
 
                 <Column className='' field='' header='Ảnh' body={variantImageTemplate} />
                 <Column className='w-[20%]' field='' header='Tên sản phẩm' body={variantNameTemplate} />
-                <Column className='' field='sale_price' header='Giá gốc' body={salePriceTemplate} sortable />
+                <Column className='' field='sale_price' header='Giá bán' body={salePriceTemplate} sortable />
                 <Column className='' field='promotion_price' header='Giá khuyến mãi' body={promotionPriceTemplate} sortable />
                 <Column className='' field='start_date' header='Ngày hiệu lực' body={startDateTemplate} sortable />
                 <Column className='' field='end_date' header='Ngày kết thúc' body={endDateTemplate} sortable />
                 <Column className='' field='updated_at' header='Ngày cập nhật' body={updatedAtTemplate} sortable />
             </DataTable>
+            <div className='flex justify-end mt-3'>
+                <Paginator
+                    style={{ backgroundColor: 'transparent', textAlign: 'right' }}
+                    first={first}
+                    rows={rows}
+                    totalRecords={totalRecords}
+                    rowsPerPageOptions={[5, 10, 15]}
+                    onPageChange={onPageChange}
+                />
+            </div>
         </div>
     )
 }

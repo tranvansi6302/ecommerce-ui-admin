@@ -16,9 +16,10 @@ export default function useQueryProducts() {
                 {
                     name: queryParams.name,
                     brand: queryParams.brand,
+                    status: queryParams.status,
                     category: queryParams.category,
                     page: queryParams.page || '1',
-                    limit: queryParams.limit || '10'
+                    limit: queryParams.limit || '5'
                 },
                 isUndefined
             ),

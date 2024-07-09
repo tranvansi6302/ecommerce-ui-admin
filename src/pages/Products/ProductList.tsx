@@ -5,12 +5,12 @@ import {
     DataTableSelectionMultipleChangeEvent,
     DataTableValueArray
 } from 'primereact/datatable'
-import { Dropdown } from 'primereact/dropdown'
-import { useCallback, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown'
+import { Fragment, useCallback, useMemo, useState } from 'react'
+import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import MyButton from '~/components/MyButton'
 
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import { Brand } from '~/@types/brand'
 import { Category } from '~/@types/category'
 import { Product, ProductFilter } from '~/@types/product'
@@ -20,43 +20,65 @@ import categoriesApi from '~/apis/categories.api'
 import productsApi from '~/apis/products.api'
 import PATH from '~/constants/path'
 import useQueryProducts from '~/hooks/useQueryProducts'
-import { formatDate } from '~/utils/format'
+import { convertProductStatus, formatDate } from '~/utils/format'
 
 import { Variant } from '~/@types/variant'
 import SetProductImage from '~/components/SetProductImage'
 import useSetTitle from '~/hooks/useSetTitle'
 import FilterProduct from './components/FilterProduct'
 import RowVariant from './components/RowVariant'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
+import { ProductStatus } from './components/FilterProduct/FilterProduct'
+import { PRODUCT_STATUS } from '~/constants/status'
+import { FaCheckDouble } from 'react-icons/fa'
+import ShowMessage from '~/components/ShowMessage'
+import { toast } from 'react-toastify'
+import MESSAGE from '~/constants/message'
+import { AxiosError } from 'axios'
+import { MessageResponse } from '~/@types/util'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
 }
 
+const selectedOptions = [
+    { label: 'Chuyển đổi trạng thái kinh doanh', value: 'TOGGLE' },
+    {
+        label: 'Xóa vĩnh viễn',
+        value: 'DELETE'
+    }
+]
+
 export default function ProductList() {
     useSetTitle('Danh sách sản phẩm')
+    const navigate = useNavigate()
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([])
+    const [selectedProductStatus, setSelectedProductStatus] = useState<ProductStatus | null>(null)
     const [search, setSearch] = useState<string>('')
     const [globalFilter] = useState<string>('')
     const queryConfig = useQueryProducts()
+    const [first, setFirst] = useState<number>(0)
+    const [rows, setRows] = useState<number>(5)
 
-    const { data: products } = useQuery({
+    const { data: products, refetch } = useQuery({
         queryKey: ['products', queryConfig],
         queryFn: () => productsApi.getAllProducts(queryConfig as ProductFilter),
+        staleTime: 3 * 60 * 1000,
         placeholderData: keepPreviousData
     })
 
     const { data: brands } = useQuery({
         queryKey: ['brands'],
-        queryFn: () => brandsApi.getAllBrands(),
+        queryFn: () => brandsApi.getAllBrands({ status: 'ACTIVE' }),
         placeholderData: keepPreviousData
     })
 
     const { data: categories } = useQuery({
         queryKey: ['categories'],
-        queryFn: () => categoriesApi.getAllCategories(),
+        queryFn: () => categoriesApi.getAllCategories({ status: 'ACTIVE' }),
         placeholderData: keepPreviousData
     })
 
@@ -97,9 +119,17 @@ export default function ProductList() {
     }, [])
 
     const productCreatedAtTemplate = useCallback((rowData: Product) => formatDate(rowData.created_at), [])
-    const categoryNameTemplate = useCallback((rowData: Product) => rowData.category.name, [])
+    // const productUpdatedAtTemplate = useCallback((rowData: Product) => formatDate(rowData.updated_at), [])
+    const categoryNameTemplate = useCallback((rowData: Product) => rowData?.category?.name, [])
 
-    const brandNameTemplate = useCallback((rowData: Product) => rowData.brand.name, [])
+    const brandNameTemplate = useCallback((rowData: Product) => rowData?.brand?.name, [])
+    const productStatusTemplate = useCallback((rowData: Product) => {
+        return (
+            <MyButton text severity={rowData.status === PRODUCT_STATUS.ACTIVE ? 'success' : 'danger'}>
+                <p className='text-[13.6px] font-medium'>{convertProductStatus(rowData.status).toUpperCase()}</p>
+            </MyButton>
+        )
+    }, [])
 
     const header = useMemo(
         () => (
@@ -110,26 +140,106 @@ export default function ProductList() {
                 setSelectedBrand={setSelectedBrand}
                 selectedCategory={selectedCategory as Category}
                 setSelectedCategory={setSelectedCategory}
+                selectedProductStatus={selectedProductStatus}
+                setSelectedProductStatus={setSelectedProductStatus}
                 brands={brands?.data.result as Brand}
                 categories={categories?.data.result as Category}
             />
         ),
-        [search, selectedBrand, selectedCategory, brands?.data.result, categories?.data.result]
+        [search, selectedBrand, selectedCategory, selectedProductStatus, brands?.data.result, categories?.data.result]
     )
 
+    const deleteManyProductsMutation = useMutation({
+        mutationFn: (data: { product_ids: number[] }) => productsApi.deleteManyProducts(data),
+        onSuccess: (data) => {
+            toast.success(`${data.data.message} ${selectedProducts.length} dòng dữ liệu`)
+            refetch()
+            setSelectedProducts([])
+        },
+        onError: () => {
+            toast.error(MESSAGE.NOT_DELETE_CONSTRAINT)
+        }
+    })
+
+    const updateManyStatusProductsMutation = useMutation({
+        mutationFn: (data: { product_ids: number[] }) => productsApi.updateManyStatusProducts(data),
+        onSuccess: (data) => {
+            toast.success(`${data.data.message} ${selectedProducts.length} dòng dữ liệu`)
+            refetch()
+            setSelectedProducts([])
+        },
+        onError: (error) => {
+            const errorResponse = (error as AxiosError<MessageResponse>).response?.data
+            toast.error(errorResponse?.message ?? '')
+        }
+    })
+
+    const handleSelectedOptionChange = (e: DropdownChangeEvent) => {
+        switch (e.value) {
+            case 'TOGGLE': {
+                const productIds = selectedProducts.map((product) => product.id)
+                updateManyStatusProductsMutation.mutate({ product_ids: productIds })
+                break
+            }
+            case 'DELETE': {
+                const productIds = selectedProducts.map((product) => product.id)
+                deleteManyProductsMutation.mutate({ product_ids: productIds })
+                break
+            }
+            default:
+                break
+        }
+    }
     const selectedHeader = useMemo(
         () => (
-            <div className='flex flex-wrap justify-content-between gap-2'>
-                <span>Đã chọn {selectedProducts.length} sản phẩm trên trang này</span>
-                <Dropdown options={['Xóa', 'Ngừng kinh doanh']} placeholder='Chọn thao tác' />
-            </div>
+            <Fragment>
+                <div className='flex flex-wrap justify-content-between gap-4 items-center'>
+                    <span className='text-blue-600 text-[15px] font-normal flex items-center gap-2'>
+                        <FaCheckDouble />
+                        Đã chọn {selectedProducts.length} dòng trên trang này
+                    </span>
+                    <Dropdown
+                        style={{ width: '300px' }}
+                        className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
+                        options={selectedOptions}
+                        onChange={handleSelectedOptionChange}
+                        placeholder='Chọn thao tác'
+                    />
+                </div>
+                <div className='text-[14px] font-normal'>
+                    <ShowMessage
+                        severity='warn'
+                        detail='Lưu ý với trường hợp xóa vĩnh viễn chỉ xóa được sản phẩm nào không có bắt kì ràng buộc dữ liệu nào, sau khi xóa dữ liệu sẽ không được khôi phục'
+                    />
+                </div>
+            </Fragment>
         ),
-        [selectedProducts]
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [selectedProducts.length]
     )
 
     const onSelectionChange = useCallback((e: DataTableSelectionMultipleChangeEvent<DataTableValueArray>) => {
         setSelectedProducts(e.value as Product[])
     }, [])
+
+    // Pagination
+    const onPageChange = (event: PaginatorPageChangeEvent) => {
+        setFirst(event.first)
+        setRows(event.rows)
+
+        navigate({
+            pathname: PATH.PRODUCT_LIST,
+            search: createSearchParams({
+                ...queryConfig,
+                limit: event.rows.toString(),
+                page: (event.page + 1).toString()
+            }).toString()
+        })
+    }
+
+    const totalRecords = useMemo(() => {
+        return (products?.data?.pagination?.limit as number) * (products?.data?.pagination?.total_page as number)
+    }, [products?.data?.pagination?.limit, products?.data?.pagination?.total_page])
 
     return (
         <div className='w-full'>
@@ -165,11 +275,23 @@ export default function ProductList() {
                 <Column className='pr-0 w-[35px]' expander={allowExpansion} />
                 <Column selectionMode='multiple' className='w-[40px]' />
                 <Column header='Ảnh' body={imageBodyTemplate} />
-                <Column className='w-1/3' field='name' header='Sản phẩm' body={productNameTemplate} />
+                <Column className='w-[35%]' field='name' header='Sản phẩm' body={productNameTemplate} />
                 <Column field='category' header='Loại' body={categoryNameTemplate} />
                 <Column field='brand' header='Thương hiệu' body={brandNameTemplate} />
-                <Column field='createdDate' header='Ngày khởi tạo' body={productCreatedAtTemplate} sortable />
+                <Column className='pl-0' field='status' header='Trạng thái' body={productStatusTemplate} />
+                <Column field='createdAt' header='Ngày khởi tạo' body={productCreatedAtTemplate} sortable />
+                {/* <Column field='updatedAt' header='Cập nhật cuối' body={productUpdatedAtTemplate} sortable /> */}
             </DataTable>
+            <div className='flex justify-end mt-3'>
+                <Paginator
+                    style={{ backgroundColor: 'transparent', textAlign: 'right' }}
+                    first={first}
+                    rows={rows}
+                    totalRecords={totalRecords}
+                    rowsPerPageOptions={[5, 10, 15]}
+                    onPageChange={onPageChange}
+                />
+            </div>
         </div>
     )
 }

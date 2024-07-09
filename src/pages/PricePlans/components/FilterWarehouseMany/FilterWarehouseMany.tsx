@@ -79,12 +79,16 @@ export default function FilterWarehouseMany({
         })
     }
 
-    const handleAddRowVariant = (variant: Variant) => {
-        const existingDetail = rowVariants.find((variant) => variant.sku === variant.sku)
-        if (existingDetail?.id === variant.id) return
-        setRowVariants((prevVariants: Variant[]) => [...prevVariants, variant])
-    }
-
+    const handleAddRowVariant = useCallback(
+        (variant: Variant) => {
+            const isVariantExists = rowVariants.some((v) => v.sku === variant.sku)
+            if (!isVariantExists) {
+                setRowVariants((prevVariants: Variant[]) => [...prevVariants, variant])
+            }
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [rowVariants]
+    )
     const handleConfirmSelection = () => {
         const selectedVariants = checkedVariantsDialog
         let updatedRowVariants = [...rowVariants]
@@ -107,13 +111,13 @@ export default function FilterWarehouseMany({
 
     const { data: brands } = useQuery({
         queryKey: ['brands'],
-        queryFn: () => brandsApi.getAllBrands(),
+        queryFn: () => brandsApi.getAllBrands({ status: 'ACTIVE' }),
         placeholderData: keepPreviousData
     })
 
     const { data: categories } = useQuery({
         queryKey: ['categories'],
-        queryFn: () => categoriesApi.getAllCategories(),
+        queryFn: () => categoriesApi.getAllCategories({ status: 'ACTIVE' }),
         placeholderData: keepPreviousData
     })
 

@@ -1,4 +1,6 @@
+import { omit } from 'lodash'
 import { DropdownChangeEvent } from 'primereact/dropdown'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { createSearchParams, useNavigate } from 'react-router-dom'
 import { SupplierStatus } from '~/@types/supplier'
@@ -34,7 +36,7 @@ export default function FilterSupplier({
     const handleSerach = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         navigate({
-            pathname: PATH.PURCHASE_LIST,
+            pathname: PATH.SUPPLIER_LIST,
             search: createSearchParams({
                 ...queryConfig,
                 search
@@ -42,11 +44,27 @@ export default function FilterSupplier({
         })
     }
 
-    const handleClean = () => {
-        console.log('Clean...')
-    }
+    useEffect(() => {
+        if (selectedSupplierStatus) {
+            navigate({
+                pathname: PATH.SUPPLIER_LIST,
+                search: createSearchParams({
+                    ...queryConfig,
+                    status: selectedSupplierStatus.id.toString()
+                }).toString()
+            })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedSupplierStatus, setSelectedSupplierStatus])
 
-    console.log('filter...')
+    const handleClean = () => {
+        setSearch('')
+        setSelectedSupplierStatus(null)
+        navigate({
+            pathname: PATH.USER_LIST,
+            search: createSearchParams(omit(queryConfig, ['search', 'status', 'page', 'limit'])).toString()
+        })
+    }
 
     return (
         <div>
@@ -61,7 +79,7 @@ export default function FilterSupplier({
                             className='pl-10 py-0 font-normal  h-[40px] w-full flex items-center'
                             style={{ borderRadius: '2px', fontSize: '13.6px' }}
                             name='search'
-                            placeholder='Tìm kiếm theo mã đơn hàng'
+                            placeholder='Tìm kiếm theo mã nhà cung cấp, tên nhà cung cấp'
                             onChange={(e) => setSearch(e.target.value)}
                             value={search}
                         />

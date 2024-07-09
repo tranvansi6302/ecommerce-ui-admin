@@ -5,9 +5,17 @@ interface Category {
     id: number
     name: string
     slug: string
+    status: string
     summary: string
     created_at: string
     updated_at: string
+}
+
+export interface CategoryFilter {
+    search?: string
+    page?: number
+    limit?: number
+    status?: string
 }
 
 export type ListCategoryResponse = PaginatedApiResponse<Category>

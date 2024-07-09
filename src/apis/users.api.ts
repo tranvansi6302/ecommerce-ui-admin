@@ -1,4 +1,5 @@
 import { ListUserResponse, UpdateUserResponse, UserFilter, UserResponse } from '~/@types/user'
+import { MessageResponse } from '~/@types/util'
 import API from '~/constants/api'
 import { UserSchemaType } from '~/schemas/user.schema'
 import http from '~/utils/http'
@@ -23,6 +24,17 @@ const usersApi = {
                 'Content-Type': 'multipart/form-data'
             }
         })
+    },
+    updateStatusManyUsers: (body: { user_ids: number[] }) => {
+        return http.patch<MessageResponse>(`${API.USER}/status`, body)
+    },
+    deleteSoftManyUsers: (body: { user_ids: number[] }) => {
+        return http.delete<MessageResponse>(API.USER, {
+            data: body
+        })
+    },
+    restoreManyUsers: (body: { user_ids: number[] }) => {
+        return http.patch<MessageResponse>(`${API.USER}/restore`, body)
     }
 }
 

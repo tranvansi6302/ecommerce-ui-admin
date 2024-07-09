@@ -34,6 +34,9 @@ import { PurchaseDetailSchemaType, createPurchaseSchema } from '~/schemas/purcha
 import { formatCurrencyVND } from '~/utils/format'
 import FilterProductMany from '../FilterProductMany'
 import SupplierInfo from '../SupplierInfo'
+import MyInputNumberV2Blur from '~/components/MyInputNumberV2Blur'
+import { queryClient } from '~/main'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 
 type CreatePurchaseOrderForm = CreatePurchaseOrderRequest & { [key: string]: any }
 export default function CreatePurchaseOrder() {
@@ -49,6 +52,8 @@ export default function CreatePurchaseOrder() {
     const [openNote, setOpenNote] = useState<boolean>(false)
     const [noteVariant, setNoteVariant] = useState<{ [key: number | string]: string | string }>({})
     const [noteRowId, setNoteRowId] = useState<number>(0)
+    const [first, setFirst] = useState<number>(0)
+    const [rows, setRows] = useState<number>(10)
     const {
         register,
         handleSubmit,
@@ -58,7 +63,7 @@ export default function CreatePurchaseOrder() {
     })
     const { data: suppliers } = useQuery({
         queryKey: ['suppliers'],
-        queryFn: () => suppliersApi.getAllSuppliers(),
+        queryFn: () => suppliersApi.getAllSuppliers({ status: 'ACTIVE' }),
         placeholderData: keepPreviousData
     })
 
@@ -68,11 +73,12 @@ export default function CreatePurchaseOrder() {
 
     const onSubmit = handleSubmit((data) => {
         setMessage('')
+
         const rowVariant: PurchaseDetailSchemaType[] = rowVariants.map((row) => {
             return {
                 variant_id: row.id.toString(),
-                quantity: data['quantity' + '_' + row.id] as number,
-                purchase_price: data['purchase_price' + '_' + row.id] as number,
+                quantity: quantity[row.id] as number,
+                purchase_price: purchasePrice[row.id] as number,
                 note: noteVariant[row.id]
             }
         })
@@ -82,8 +88,12 @@ export default function CreatePurchaseOrder() {
             note: data.note,
             purchase_details: rowVariant
         }
+
         createPurchaseOrderMutation.mutate(body, {
             onSuccess: () => {
+                queryClient.invalidateQueries({
+                    queryKey: ['purchaseOrders']
+                })
                 toast.success(MESSAGE.CREATE_PURCHASE_SUCCESS)
                 navigate(PATH.PURCHASE_LIST)
             },
@@ -93,7 +103,6 @@ export default function CreatePurchaseOrder() {
                 toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
             }
         })
-        console.log(body)
     })
 
     // Render
@@ -106,7 +115,11 @@ export default function CreatePurchaseOrder() {
         setPurchasePrice((prev) => ({ ...prev, [id]: value }))
     }
 
-    const variantNumberTemplate = useCallback((_: any, index: any) => index.rowIndex + 1, [])
+    const variantNumberTemplate = (rowData: Variant) => {
+        const index = rowVariants.findIndex((row) => row.id === rowData.id)
+        return index + 1
+    }
+
     const variantImageTemplate = useCallback((rowData: Variant) => <SetProductImage productImages={rowData.product_images} />, [])
     const variantNameTemplate = useCallback((rowData: Variant) => {
         return (
@@ -119,13 +132,14 @@ export default function CreatePurchaseOrder() {
     const variantQuantityTemplate = useCallback(
         (rowData: Variant) => {
             return (
-                <MyInput
+                <MyInputNumberV2Blur
+                    type='number'
                     register={register}
+                    keyfilter='pint'
                     className='w-28 h-[40px] rounded-none border-t-0 border-l-0 border-r-0'
                     name={`quantity_${rowData.id}`}
-                    type='number'
                     value={quantity[rowData.id] || 0}
-                    onChange={(e) => handleQuantityChange(rowData.id, parseInt(e.target.value))}
+                    onBlur={(e) => handleQuantityChange(rowData.id, parseInt(e.target.value))}
                 />
             )
         },
@@ -135,13 +149,14 @@ export default function CreatePurchaseOrder() {
     const variantPriceTemplate = useCallback(
         (rowData: Variant) => {
             return (
-                <MyInput
+                <MyInputNumberV2Blur
                     register={register}
+                    keyfilter='pint'
                     className='w-28 h-[40px] rounded-none border-t-0 border-l-0 border-r-0'
                     name={`purchase_price_${rowData.id}`}
                     style={{ fontSize: '13.6px' }}
                     value={purchasePrice[rowData.id] || 0}
-                    onChange={(e) => handlePriceChange(rowData.id, parseInt(e.target.value))}
+                    onBlur={(e) => handlePriceChange(rowData.id, parseInt(e.target.value))}
                 />
             )
         },
@@ -194,7 +209,6 @@ export default function CreatePurchaseOrder() {
     }
 
     const handleConfirmNote = () => {
-        console.log(noteVariant)
         setOpenNote(false)
     }
 
@@ -206,19 +220,26 @@ export default function CreatePurchaseOrder() {
     )
 
     // Total
-    const quantityTotal = useCallback(() => {
+    const quantityTotal = useMemo(() => {
         return rowVariants.reduce((total, row) => total + (quantity[row.id] || 0), 0)
     }, [quantity, rowVariants])
 
-    const totalPrice = useCallback(() => {
+    const totalPrice = useMemo(() => {
         return rowVariants.reduce((total, row) => total + (quantity[row.id] || 0) * (purchasePrice[row.id] || 0), 0)
     }, [purchasePrice, quantity, rowVariants])
+
+    // Pagination
+
+    const onPageChange = (event: PaginatorPageChangeEvent) => {
+        setFirst(event.first)
+        setRows(event.rows)
+    }
 
     return (
         <div className=''>
             {/* Note */}
             <Dialog
-                header={<p className='font-medium text-gray-900'>Ghi chú</p>}
+                header={<p className='font-medium text-gray-900'>Ghi chú cho sản phẩm</p>}
                 visible={openNote}
                 style={{ width: '50vw' }}
                 onHide={() => {
@@ -232,7 +253,7 @@ export default function CreatePurchaseOrder() {
                         <MyTextarea
                             register={register}
                             placeholder='Nhập ghi chú'
-                            className='w-full py-0 font-normal flex items-center'
+                            className='w-full py-0 pt-3 font-normal flex items-center'
                             classNameLabel='font-normal text-gray-800 text-[13.6px] mb-1'
                             value={noteVariant[noteRowId]}
                             onChange={(e) => handleNoteChange(noteRowId, e.target.value)}
@@ -343,7 +364,7 @@ export default function CreatePurchaseOrder() {
                             <h3 className='text-base font-medium text-gray-900 pt-3'>Thông tin sản phẩm</h3>
                             <div className='my-4'></div>
                             <DataTable
-                                value={(rowVariants as unknown as DataTableValueArray) ?? []}
+                                value={(rowVariants.slice(first, first + rows) as unknown as DataTableValueArray) ?? []}
                                 dataKey='id'
                                 header={header}
                                 tableStyle={{ minWidth: '60rem', fontSize: '14px' }}
@@ -359,16 +380,26 @@ export default function CreatePurchaseOrder() {
                                 <Column body={variantActionTemplate} className='w-[5%]' />
                             </DataTable>
                         </div>
+                        <div className='flex justify-end mt-3'>
+                            <Paginator
+                                style={{ backgroundColor: 'transparent', textAlign: 'right' }}
+                                first={first}
+                                rows={rows}
+                                totalRecords={rowVariants.length}
+                                rowsPerPageOptions={[10, 15, 20]}
+                                onPageChange={onPageChange}
+                            />
+                        </div>
                     </div>
                 </div>
                 <div className='mt-10 px-16 flex flex-col items-end gap-2 justify-end'>
                     <div className='flex items-center justify-between w-[255px] text-[13.6px] text-gray-800'>
                         <span>Số lượng</span>
-                        <span>{quantityTotal() || 0}</span>
+                        <span>{quantityTotal || 0}</span>
                     </div>
                     <div className='flex items-center justify-between w-[255px] text-[13.6px] text-gray-800'>
                         <span>Tổng tiền</span>
-                        <span>{formatCurrencyVND(totalPrice()) || formatCurrencyVND(0)}</span>
+                        <span>{formatCurrencyVND(totalPrice) || formatCurrencyVND(0)}</span>
                     </div>
                     <div className='flex items-center justify-between w-[255px] text-[13.6px] text-blue-500'>
                         <span>Chiết khấu</span>
@@ -376,7 +407,7 @@ export default function CreatePurchaseOrder() {
                     </div>
                     <div className='flex items-center font-medium justify-between w-[255px] text-[13.6px] text-gray-800'>
                         <span>Tiền cần trả</span>
-                        <span>{formatCurrencyVND(totalPrice()) || formatCurrencyVND(0)}</span>
+                        <span>{formatCurrencyVND(totalPrice) || formatCurrencyVND(0)}</span>
                     </div>
                 </div>
                 <Divider />

@@ -24,6 +24,7 @@ import Upload from '~/components/Upload'
 import MESSAGE from '~/constants/message'
 import PATH from '~/constants/path'
 import useSetTitle from '~/hooks/useSetTitle'
+import { queryClient } from '~/main'
 import { productSchema } from '~/schemas/products.schema'
 
 type FormDataCreateProduct = Pick<CreateProductRequest, 'name' | 'sku' | 'brand_id' | 'category_id'>
@@ -61,16 +62,16 @@ export default function CreateProduct() {
 
     const { data: brands } = useQuery({
         queryKey: ['brands'],
-        queryFn: () => brandsApi.getAllBrands()
+        queryFn: () => brandsApi.getAllBrands({ status: 'ACTIVE' })
     })
 
     const { data: categories } = useQuery({
         queryKey: ['categories'],
-        queryFn: () => categoriesApi.getAllCategories()
+        queryFn: () => categoriesApi.getAllCategories({ status: 'ACTIVE' })
     })
 
     // Submit form
-    const onsubmit = handleSubmit((data) => {
+    const onsubmit = handleSubmit(async (data) => {
         setMessage('')
         const finalData: CreateProductRequest = {
             ...data,
@@ -81,30 +82,14 @@ export default function CreateProduct() {
             category_id: selectedCategory?.id.toString() ?? ''
         }
 
-        createProductMutation.mutate(finalData, {
-            onSuccess: (data) => {
-                if (files) {
-                    const formData = new FormData()
-                    files.forEach((file) => {
-                        formData.append('files', file)
+        const product = await createProductMutation.mutateAsync(finalData, {
+            onSuccess: () => {
+                if (files.length === 0) {
+                    queryClient.invalidateQueries({
+                        queryKey: ['products']
                     })
-
-                    const payload = {
-                        id: data.data.result.id,
-                        body: formData
-                    }
-                    uploadImagesMutation.mutate(payload, {
-                        onSuccess: () => {
-                            toast.success(MESSAGE.CREATE_PRODUCT_SUCCESS)
-                            navigate(PATH.PRODUCT_LIST)
-                        },
-                        onError: (error) => {
-                            console.log(error)
-                            const errorResponse = (error as AxiosError<MessageResponse>).response?.data
-                            setMessage(errorResponse?.message ?? '')
-                            toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
-                        }
-                    })
+                    toast.success(MESSAGE.CREATE_PRODUCT_SUCCESS)
+                    navigate(PATH.PRODUCT_LIST)
                 }
             },
             onError: (error) => {
@@ -114,6 +99,33 @@ export default function CreateProduct() {
                 toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
             }
         })
+
+        if (files && files.length > 0) {
+            const formData = new FormData()
+            files.forEach((file) => {
+                formData.append('files', file)
+            })
+
+            const payload = {
+                id: product.data.result.id,
+                body: formData
+            }
+            await uploadImagesMutation.mutateAsync(payload, {
+                onSuccess: () => {
+                    queryClient.invalidateQueries({
+                        queryKey: ['products']
+                    })
+                    toast.success(MESSAGE.CREATE_PRODUCT_SUCCESS)
+                    navigate(PATH.PRODUCT_LIST)
+                },
+                onError: (error) => {
+                    console.log(error)
+                    const errorResponse = (error as AxiosError<MessageResponse>).response?.data
+                    setMessage(errorResponse?.message ?? '')
+                    toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
+                }
+            })
+        }
     })
 
     const handleOnSelectedFiles = (files: File[]) => {

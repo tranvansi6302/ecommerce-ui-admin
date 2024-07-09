@@ -240,7 +240,7 @@ export default function UpdateUser() {
                         </MyButton>
                     </Link>
                     <MyButton loading={false} className='rounded-[3px] h-9 w-36'>
-                        <p className='font-semibold text-[14px]'>Lưu nhà cung cấp</p>
+                        <p className='font-semibold text-[14px]'>Lưu khách hàng</p>
                     </MyButton>
                 </div>
             </form>

@@ -15,7 +15,7 @@ import pricesApi, { CreatePricePlanRequest } from '~/apis/prices.api'
 import warehousesApi from '~/apis/warehouses.api'
 import DefaultProductImage from '~/components/DefaultProductImage'
 import MyButton from '~/components/MyButton'
-import MyInput from '~/components/MyInput'
+import MyInputNumberV2Blur from '~/components/MyInputNumberV2Blur'
 import ShowMessage from '~/components/ShowMessage'
 import MESSAGE from '~/constants/message'
 import PATH from '~/constants/path'
@@ -24,6 +24,8 @@ import { convertToLocaleDateTime } from '~/utils/format'
 import FilterWarehouseMany from '../FilterWarehouseMany'
 import HistoryDialog from '../HistoryDialog'
 import QuickApplyDialog from '../QuickApplyDialog'
+import { queryClient } from '~/main'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 
 export default function CreatePricePlan() {
     useSetTitle('Lên bảng giá')
@@ -44,7 +46,8 @@ export default function CreatePricePlan() {
     const [quickApplyPercentagePromotion, setQuickApplyPercentagePromotion] = useState<number | ''>(0)
     const [openHistory, setOpenHistory] = useState<boolean>(false)
     const [warehouseId, setWarehouseId] = useState<number>(0)
-
+    const [first, setFirst] = useState<number>(0)
+    const [rows, setRows] = useState<number>(10)
     const createPricePlanMutation = useMutation({
         mutationFn: (body: CreatePricePlanRequest) => pricesApi.createPricePlan(body)
     })
@@ -70,6 +73,9 @@ export default function CreatePricePlan() {
 
         createPricePlanMutation.mutate(body, {
             onSuccess: () => {
+                queryClient.invalidateQueries({
+                    queryKey: ['price-plans-current']
+                })
                 toast.success(MESSAGE.CREATE_PRICE_PLAN_SUCCESS)
                 navigate(PATH.PRICE_PLAN_LIST)
             },
@@ -102,14 +108,15 @@ export default function CreatePricePlan() {
     const applyQuickUpdate = () => {
         const newSalePrices = rowVariants.reduce((acc: { [key: number]: number }, variant) => {
             acc[variant.id] =
-                variant.warehouse.purchase_price + variant.warehouse.purchase_price * (1 - Number(quickApplyPercentage) / 100)
+                variant.warehouse.purchase_price +
+                variant.warehouse.purchase_price * Number((quickApplyPercentage as number) / 100)
             return acc
         }, {})
 
         const newPromotionPrices = rowVariants.reduce((acc: { [key: number]: number }, variant) => {
             acc[variant.id] =
                 variant.warehouse.purchase_price +
-                variant.warehouse.purchase_price * (1 - Number(quickApplyPercentagePromotion) / 100)
+                variant.warehouse.purchase_price * Number((quickApplyPercentagePromotion as number) / 100)
             return acc
         }, {})
 
@@ -128,6 +135,10 @@ export default function CreatePricePlan() {
         setStartDate(newStartDates)
         setEndDate(newEndDates)
         setQuickApplyVisible(false)
+    }
+    const variantNumberTemplate = (rowData: Variant) => {
+        const index = rowVariants.findIndex((row) => row.id === rowData.id)
+        return index + 1
     }
 
     const variantImageTemplate = useCallback(
@@ -165,13 +176,14 @@ export default function CreatePricePlan() {
     const variantSalePriceTemplate = useCallback(
         (rowData: Variant) => {
             return (
-                <MyInput
+                <MyInputNumberV2Blur
                     register={register}
                     className='w-28 h-[40px] rounded-none border-t-0 border-l-0 border-r-0'
                     name={`sale_price_${rowData.id}`}
                     style={{ fontSize: '13.6px' }}
                     value={salePrice[rowData.id] || 0}
-                    onChange={(e) => handleSalePriceChange(rowData.id, parseInt(e.target.value))}
+                    keyfilter='pint'
+                    onBlur={(e) => handleSalePriceChange(rowData.id, parseInt(e.target.value))}
                 />
             )
         },
@@ -180,13 +192,14 @@ export default function CreatePricePlan() {
     const variantPromtionPriceTemplate = useCallback(
         (rowData: Variant) => {
             return (
-                <MyInput
+                <MyInputNumberV2Blur
                     register={register}
+                    keyfilter='pint'
                     className='w-28 h-[40px] rounded-none border-t-0 border-l-0 border-r-0'
                     name={`promotion_price_${rowData.id}`}
                     style={{ fontSize: '13.6px' }}
                     value={promotionPrice[rowData.id] || 0}
-                    onChange={(e) => handlePromotionPriceChange(rowData.id, parseInt(e.target.value))}
+                    onBlur={(e) => handlePromotionPriceChange(rowData.id, parseInt(e.target.value))}
                 />
             )
         },
@@ -264,6 +277,12 @@ export default function CreatePricePlan() {
         enabled: openHistory
     })
 
+    // Pagination
+    const onPageChange = (event: PaginatorPageChangeEvent) => {
+        setFirst(event.first)
+        setRows(event.rows)
+    }
+
     return (
         <div className=''>
             <form onSubmit={onSubmit}>
@@ -274,13 +293,14 @@ export default function CreatePricePlan() {
                             <h3 className='text-base font-medium text-gray-900 pt-3'>Thông tin sản phẩm</h3>
                             <div className='my-4'></div>
                             <DataTable
-                                value={(rowVariants as unknown as DataTableValueArray) ?? []}
+                                value={(rowVariants.slice(first, first + rows) as unknown as DataTableValueArray) ?? []}
                                 dataKey='id'
                                 header={header}
                                 tableStyle={{ minWidth: '60rem', fontSize: '14px' }}
                                 className='shadow'
                                 globalFilter={globalFilter}
                             >
+                                <Column body={variantNumberTemplate} header='STT' />
                                 <Column body={variantImageTemplate} header='Ảnh' />
                                 <Column className='w-[20%]' body={variantNameTemplate} header='Tên sản phẩm' />
                                 <Column body={variantPurchasePriceTemplate} header='Giá nhập' />
@@ -290,6 +310,16 @@ export default function CreatePricePlan() {
                                 <Column className='w-[12%]' body={variantEndDateTemplate} header='Ngày kết thúc' />
                                 <Column body={variantActionTemplate} className='w-[5%]' />
                             </DataTable>
+                        </div>
+                        <div className='flex justify-end mt-3'>
+                            <Paginator
+                                style={{ backgroundColor: 'transparent', textAlign: 'right' }}
+                                first={first}
+                                rows={rows}
+                                totalRecords={rowVariants.length}
+                                rowsPerPageOptions={[10, 15, 20]}
+                                onPageChange={onPageChange}
+                            />
                         </div>
                     </div>
                 </div>

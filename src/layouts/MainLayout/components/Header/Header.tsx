@@ -2,15 +2,31 @@ import { Avatar } from 'primereact/avatar'
 import { Menu } from 'primereact/menu'
 import { MenuItem } from 'primereact/menuitem'
 import { useContext, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import MESSAGE from '~/constants/message'
+import PATH from '~/constants/path'
 import { AppContext } from '~/contexts/app.context'
+import { clearProfileFromLS, clearTokenFromLS } from '~/utils/save'
 
 export default function Header() {
-    const { title } = useContext(AppContext)
+    const { title, setIsAuthenticated } = useContext(AppContext)
     const [openMenu, setOpenMenu] = useState<boolean>(false)
-
+    const navigate = useNavigate()
     const items: MenuItem[] = [
         { label: 'Tài khoản của tôi', icon: 'pi pi-user', command: () => setOpenMenu(false) },
-        { label: 'Đăng xuất', icon: 'pi pi-sign-out', command: () => setOpenMenu(false) }
+        {
+            label: 'Đăng xuất',
+            icon: 'pi pi-sign-out',
+            command: () => {
+                setOpenMenu(false)
+                setIsAuthenticated(false)
+                clearTokenFromLS()
+                clearProfileFromLS()
+                navigate(PATH.LOGIN)
+                toast.success(MESSAGE.LOGOUT_SUCCESS)
+            }
+        }
     ]
 
     return (

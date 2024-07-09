@@ -13,7 +13,11 @@ const MESSAGE = {
     AUTO_RECEIVED_QUANTITY_SUCCESS: 'Nhập số lượng nhanh thành công',
     UPDATE_PURCHASE_ORDER_SUCCESS: 'Cập nhật đơn hàng mua thành công',
     CREATE_PRICE_PLAN_SUCCESS: 'Tạo bảng giá thành công',
-    UPDATE_USER_SUCCESS: 'Cập nhật thông tin thành công'
+    UPDATE_USER_SUCCESS: 'Cập nhật thông tin thành công',
+    LOGOUT_SUCCESS: 'Đăng xuất thành công',
+    NOT_DELETE_CONSTRAINT: 'Không thể xóa vì đang có ràng buộc',
+    INVALID_PRICE: 'Phải nhập ít nhất một giá',
+    INVALID_PROMOTION_PRICE_GREATER_THAN_SALE_PRICE: 'Giá khuyến mãi phải nhỏ hơn giá bán'
 }
 
 export default MESSAGE

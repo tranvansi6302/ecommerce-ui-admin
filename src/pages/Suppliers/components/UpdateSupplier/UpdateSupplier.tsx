@@ -59,11 +59,9 @@ export default function UpdateSupplier() {
             setValue('tax_code', supplier.data.result.tax_code)
             setValue('phone_number', supplier.data.result.phone_number)
             setValue('address', supplier.data.result.address)
-            if (supplier.data.result.status === 'ACTIVE') {
-                setSelectedStatus(supplierStatus[0])
-            } else {
-                setSelectedStatus(supplierStatus[1])
-            }
+            const status = supplierStatus.find((status) => status.id === supplier?.data.result.status)
+            setSelectedStatus(status)
+            setValue('status', status?.id.toString() || '')
         }
     }, [setValue, supplier])
 
@@ -80,7 +78,7 @@ export default function UpdateSupplier() {
                 status: selectedStatus?.id || ''
             }
         }
-        console.log(payload)
+
         updateSupplierMutation.mutate(payload, {
             onSuccess: () => {
                 toast.success(MESSAGE.UPDATE_SUPPLIER_SUCCESS)

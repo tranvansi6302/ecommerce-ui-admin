@@ -1,6 +1,6 @@
 import { InputTextarea } from 'primereact/inputtextarea'
 import { UseFormRegister } from 'react-hook-form'
-import { Fragment } from 'react/jsx-runtime'
+import { Fragment, useEffect, useState } from 'react'
 
 interface MyTextareaProps {
     register?: UseFormRegister<any>
@@ -32,8 +32,20 @@ export default function MyTextarea({
     styleMessage,
     register
 }: MyTextareaProps) {
+    const [tempValue, setTempValue] = useState<string>(value || defaultValue || '')
     const registerResult = register && name ? register(name) : null
     const errorResult = errors && name ? Boolean(errors[name]) : false
+
+    useEffect(() => {
+        setTempValue(value || defaultValue || '')
+    }, [value, defaultValue])
+
+    const handleBlur = (e: any) => {
+        if (onChange) {
+            onChange(e)
+        }
+    }
+
     return (
         <Fragment>
             <label htmlFor={name} className={`block  ${classNameLabel}`}>
@@ -44,9 +56,9 @@ export default function MyTextarea({
                 placeholder={placeholder}
                 className={`${errorResult ? 'border-red-500' : ''} ${className}`}
                 id={name}
-                value={value}
-                defaultValue={defaultValue}
-                onChange={onChange}
+                value={tempValue}
+                onChange={(e) => setTempValue(e.target.value)}
+                onBlur={handleBlur}
                 name={name}
                 rows={5}
                 style={style}
