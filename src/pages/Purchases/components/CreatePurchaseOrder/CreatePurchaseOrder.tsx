@@ -36,6 +36,7 @@ import FilterProductMany from '../FilterProductMany'
 import SupplierInfo from '../SupplierInfo'
 import MyInputNumberV2Blur from '~/components/MyInputNumberV2Blur'
 import { queryClient } from '~/main'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 
 type CreatePurchaseOrderForm = CreatePurchaseOrderRequest & { [key: string]: any }
 export default function CreatePurchaseOrder() {
@@ -51,6 +52,8 @@ export default function CreatePurchaseOrder() {
     const [openNote, setOpenNote] = useState<boolean>(false)
     const [noteVariant, setNoteVariant] = useState<{ [key: number | string]: string | string }>({})
     const [noteRowId, setNoteRowId] = useState<number>(0)
+    const [first, setFirst] = useState<number>(0)
+    const [rows, setRows] = useState<number>(10)
     const {
         register,
         handleSubmit,
@@ -103,7 +106,7 @@ export default function CreatePurchaseOrder() {
     })
 
     // Render
-    console.log('ren-render')
+
     const handleQuantityChange = (id: number, value: number) => {
         setQuantity((prev) => ({ ...prev, [id]: value }))
     }
@@ -112,7 +115,11 @@ export default function CreatePurchaseOrder() {
         setPurchasePrice((prev) => ({ ...prev, [id]: value }))
     }
 
-    const variantNumberTemplate = useCallback((_: any, index: any) => index.rowIndex + 1, [])
+    const variantNumberTemplate = (rowData: Variant) => {
+        const index = rowVariants.findIndex((row) => row.id === rowData.id)
+        return index + 1
+    }
+
     const variantImageTemplate = useCallback((rowData: Variant) => <SetProductImage productImages={rowData.product_images} />, [])
     const variantNameTemplate = useCallback((rowData: Variant) => {
         return (
@@ -220,6 +227,13 @@ export default function CreatePurchaseOrder() {
     const totalPrice = useMemo(() => {
         return rowVariants.reduce((total, row) => total + (quantity[row.id] || 0) * (purchasePrice[row.id] || 0), 0)
     }, [purchasePrice, quantity, rowVariants])
+
+    // Pagination
+
+    const onPageChange = (event: PaginatorPageChangeEvent) => {
+        setFirst(event.first)
+        setRows(event.rows)
+    }
 
     return (
         <div className=''>
@@ -350,7 +364,7 @@ export default function CreatePurchaseOrder() {
                             <h3 className='text-base font-medium text-gray-900 pt-3'>Thông tin sản phẩm</h3>
                             <div className='my-4'></div>
                             <DataTable
-                                value={(rowVariants as unknown as DataTableValueArray) ?? []}
+                                value={(rowVariants.slice(first, first + rows) as unknown as DataTableValueArray) ?? []}
                                 dataKey='id'
                                 header={header}
                                 tableStyle={{ minWidth: '60rem', fontSize: '14px' }}
@@ -365,6 +379,16 @@ export default function CreatePurchaseOrder() {
                                 <Column body={variantTotalPriceTemplate} header='Thành tiền' />
                                 <Column body={variantActionTemplate} className='w-[5%]' />
                             </DataTable>
+                        </div>
+                        <div className='flex justify-end mt-3'>
+                            <Paginator
+                                style={{ backgroundColor: 'transparent', textAlign: 'right' }}
+                                first={first}
+                                rows={rows}
+                                totalRecords={rowVariants.length}
+                                rowsPerPageOptions={[10, 15, 20]}
+                                onPageChange={onPageChange}
+                            />
                         </div>
                     </div>
                 </div>

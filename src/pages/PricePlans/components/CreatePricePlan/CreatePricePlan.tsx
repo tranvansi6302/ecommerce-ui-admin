@@ -25,6 +25,7 @@ import FilterWarehouseMany from '../FilterWarehouseMany'
 import HistoryDialog from '../HistoryDialog'
 import QuickApplyDialog from '../QuickApplyDialog'
 import { queryClient } from '~/main'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 
 export default function CreatePricePlan() {
     useSetTitle('Lên bảng giá')
@@ -45,7 +46,8 @@ export default function CreatePricePlan() {
     const [quickApplyPercentagePromotion, setQuickApplyPercentagePromotion] = useState<number | ''>(0)
     const [openHistory, setOpenHistory] = useState<boolean>(false)
     const [warehouseId, setWarehouseId] = useState<number>(0)
-
+    const [first, setFirst] = useState<number>(0)
+    const [rows, setRows] = useState<number>(10)
     const createPricePlanMutation = useMutation({
         mutationFn: (body: CreatePricePlanRequest) => pricesApi.createPricePlan(body)
     })
@@ -133,6 +135,10 @@ export default function CreatePricePlan() {
         setStartDate(newStartDates)
         setEndDate(newEndDates)
         setQuickApplyVisible(false)
+    }
+    const variantNumberTemplate = (rowData: Variant) => {
+        const index = rowVariants.findIndex((row) => row.id === rowData.id)
+        return index + 1
     }
 
     const variantImageTemplate = useCallback(
@@ -271,6 +277,12 @@ export default function CreatePricePlan() {
         enabled: openHistory
     })
 
+    // Pagination
+    const onPageChange = (event: PaginatorPageChangeEvent) => {
+        setFirst(event.first)
+        setRows(event.rows)
+    }
+
     return (
         <div className=''>
             <form onSubmit={onSubmit}>
@@ -281,13 +293,14 @@ export default function CreatePricePlan() {
                             <h3 className='text-base font-medium text-gray-900 pt-3'>Thông tin sản phẩm</h3>
                             <div className='my-4'></div>
                             <DataTable
-                                value={(rowVariants as unknown as DataTableValueArray) ?? []}
+                                value={(rowVariants.slice(first, first + rows) as unknown as DataTableValueArray) ?? []}
                                 dataKey='id'
                                 header={header}
                                 tableStyle={{ minWidth: '60rem', fontSize: '14px' }}
                                 className='shadow'
                                 globalFilter={globalFilter}
                             >
+                                <Column body={variantNumberTemplate} header='STT' />
                                 <Column body={variantImageTemplate} header='Ảnh' />
                                 <Column className='w-[20%]' body={variantNameTemplate} header='Tên sản phẩm' />
                                 <Column body={variantPurchasePriceTemplate} header='Giá nhập' />
@@ -297,6 +310,16 @@ export default function CreatePricePlan() {
                                 <Column className='w-[12%]' body={variantEndDateTemplate} header='Ngày kết thúc' />
                                 <Column body={variantActionTemplate} className='w-[5%]' />
                             </DataTable>
+                        </div>
+                        <div className='flex justify-end mt-3'>
+                            <Paginator
+                                style={{ backgroundColor: 'transparent', textAlign: 'right' }}
+                                first={first}
+                                rows={rows}
+                                totalRecords={rowVariants.length}
+                                rowsPerPageOptions={[10, 15, 20]}
+                                onPageChange={onPageChange}
+                            />
                         </div>
                     </div>
                 </div>
