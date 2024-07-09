@@ -2,7 +2,7 @@ import { Calendar } from 'primereact/calendar'
 import { Dialog } from 'primereact/dialog'
 import { Nullable } from 'primereact/ts-helpers'
 import MyButton from '~/components/MyButton'
-import MyInput from '~/components/MyInput'
+import MyInputNumberV2Blur from '~/components/MyInputNumberV2Blur'
 
 interface QuickApplyDialogProps {
     visible: boolean
@@ -67,8 +67,8 @@ export default function QuickApplyDialog({
                 </div>
 
                 <div className='field mt-4'>
-                    <MyInput
-                        type='number'
+                    <MyInputNumberV2Blur
+                        keyfilter='pint'
                         name='quickApplyPercentage'
                         placeholder='Nhập số %'
                         label='Giá bán ra so với giá nhập (%)'
@@ -76,13 +76,13 @@ export default function QuickApplyDialog({
                         classNameLabel='text-[13.6px]'
                         style={{ fontSize: '13.6px' }}
                         value={quickApplyPercentage}
-                        onChange={(e) => setQuickApplyPercentage(e.target.value)}
+                        onBlur={(e) => setQuickApplyPercentage(e.target.value)}
                     />
                 </div>
 
                 <div className='field mt-4'>
-                    <MyInput
-                        type='number'
+                    <MyInputNumberV2Blur
+                        keyfilter='pint'
                         name='quickApplyPercentagePromotion'
                         placeholder='Nhập số %'
                         label='Giá khuyến mãi so với giá nhập (%)'
@@ -90,7 +90,7 @@ export default function QuickApplyDialog({
                         classNameLabel='text-[13.6px]'
                         style={{ fontSize: '13.6px' }}
                         value={quickApplyPercentagePromotion}
-                        onChange={(e) => setQuickApplyPercentagePromotion(e.target.value)}
+                        onBlur={(e) => setQuickApplyPercentagePromotion(e.target.value)}
                     />
                 </div>
 

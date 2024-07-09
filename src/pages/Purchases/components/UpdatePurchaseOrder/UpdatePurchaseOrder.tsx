@@ -240,10 +240,8 @@ export default function UpdatePurchaseOrder() {
         setOpenReason(false)
     }
 
-    console.log('render UpdatePurchaseOrder')
     return (
         <div>
-            {message && <ShowMessage severity='warn' detail={message} />}
             <Dialog
                 header={<p className='font-medium text-gray-900'>Ghi chú cho sản phẩm</p>}
                 visible={openNote}

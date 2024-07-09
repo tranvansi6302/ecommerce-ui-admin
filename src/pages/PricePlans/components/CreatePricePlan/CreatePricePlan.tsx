@@ -15,7 +15,7 @@ import pricesApi, { CreatePricePlanRequest } from '~/apis/prices.api'
 import warehousesApi from '~/apis/warehouses.api'
 import DefaultProductImage from '~/components/DefaultProductImage'
 import MyButton from '~/components/MyButton'
-import MyInput from '~/components/MyInput'
+import MyInputNumberV2Blur from '~/components/MyInputNumberV2Blur'
 import ShowMessage from '~/components/ShowMessage'
 import MESSAGE from '~/constants/message'
 import PATH from '~/constants/path'
@@ -24,6 +24,7 @@ import { convertToLocaleDateTime } from '~/utils/format'
 import FilterWarehouseMany from '../FilterWarehouseMany'
 import HistoryDialog from '../HistoryDialog'
 import QuickApplyDialog from '../QuickApplyDialog'
+import { queryClient } from '~/main'
 
 export default function CreatePricePlan() {
     useSetTitle('Lên bảng giá')
@@ -70,6 +71,9 @@ export default function CreatePricePlan() {
 
         createPricePlanMutation.mutate(body, {
             onSuccess: () => {
+                queryClient.invalidateQueries({
+                    queryKey: ['price-plans-current']
+                })
                 toast.success(MESSAGE.CREATE_PRICE_PLAN_SUCCESS)
                 navigate(PATH.PRICE_PLAN_LIST)
             },
@@ -166,13 +170,14 @@ export default function CreatePricePlan() {
     const variantSalePriceTemplate = useCallback(
         (rowData: Variant) => {
             return (
-                <MyInput
+                <MyInputNumberV2Blur
                     register={register}
                     className='w-28 h-[40px] rounded-none border-t-0 border-l-0 border-r-0'
                     name={`sale_price_${rowData.id}`}
                     style={{ fontSize: '13.6px' }}
                     value={salePrice[rowData.id] || 0}
-                    onChange={(e) => handleSalePriceChange(rowData.id, parseInt(e.target.value))}
+                    keyfilter='pint'
+                    onBlur={(e) => handleSalePriceChange(rowData.id, parseInt(e.target.value))}
                 />
             )
         },
@@ -181,13 +186,14 @@ export default function CreatePricePlan() {
     const variantPromtionPriceTemplate = useCallback(
         (rowData: Variant) => {
             return (
-                <MyInput
+                <MyInputNumberV2Blur
                     register={register}
+                    keyfilter='pint'
                     className='w-28 h-[40px] rounded-none border-t-0 border-l-0 border-r-0'
                     name={`promotion_price_${rowData.id}`}
                     style={{ fontSize: '13.6px' }}
                     value={promotionPrice[rowData.id] || 0}
-                    onChange={(e) => handlePromotionPriceChange(rowData.id, parseInt(e.target.value))}
+                    onBlur={(e) => handlePromotionPriceChange(rowData.id, parseInt(e.target.value))}
                 />
             )
         },

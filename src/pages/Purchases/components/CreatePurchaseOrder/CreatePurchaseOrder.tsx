@@ -35,6 +35,7 @@ import { formatCurrencyVND } from '~/utils/format'
 import FilterProductMany from '../FilterProductMany'
 import SupplierInfo from '../SupplierInfo'
 import MyInputNumberV2Blur from '~/components/MyInputNumberV2Blur'
+import { queryClient } from '~/main'
 
 type CreatePurchaseOrderForm = CreatePurchaseOrderRequest & { [key: string]: any }
 export default function CreatePurchaseOrder() {
@@ -87,6 +88,9 @@ export default function CreatePurchaseOrder() {
 
         createPurchaseOrderMutation.mutate(body, {
             onSuccess: () => {
+                queryClient.invalidateQueries({
+                    queryKey: ['purchaseOrders']
+                })
                 toast.success(MESSAGE.CREATE_PURCHASE_SUCCESS)
                 navigate(PATH.PURCHASE_LIST)
             },
