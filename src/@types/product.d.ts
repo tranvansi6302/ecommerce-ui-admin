@@ -16,6 +16,8 @@ interface Product {
     sold: number
     brand: Brand
     category: Category
+    status: string
+
     variants: Omit<Variant, 'current_price_plan'>[]
     product_images: ProductImage[]
     average_rating: number
@@ -29,6 +31,7 @@ interface ProductCreate {
     description: string
     sku: string
     brand: Brand
+    status: string
     category: Category
     variants: Variant[]
     created_at: string
@@ -54,6 +57,7 @@ export interface ProductFilter {
     category?: string
     brand?: string
     name?: string
+    status?: string
 }
 
 export type ListProductResponse = PaginatedApiResponse<Product>

@@ -24,6 +24,7 @@ import Upload from '~/components/Upload'
 import MESSAGE from '~/constants/message'
 import PATH from '~/constants/path'
 import useSetTitle from '~/hooks/useSetTitle'
+import { queryClient } from '~/main'
 import { productSchema } from '~/schemas/products.schema'
 
 type FormDataCreateProduct = Pick<CreateProductRequest, 'name' | 'sku' | 'brand_id' | 'category_id'>
@@ -84,6 +85,9 @@ export default function CreateProduct() {
         const product = await createProductMutation.mutateAsync(finalData, {
             onSuccess: () => {
                 if (files.length === 0) {
+                    queryClient.invalidateQueries({
+                        queryKey: ['products']
+                    })
                     toast.success(MESSAGE.CREATE_PRODUCT_SUCCESS)
                     navigate(PATH.PRODUCT_LIST)
                 }
@@ -108,6 +112,9 @@ export default function CreateProduct() {
             }
             await uploadImagesMutation.mutateAsync(payload, {
                 onSuccess: () => {
+                    queryClient.invalidateQueries({
+                        queryKey: ['products']
+                    })
                     toast.success(MESSAGE.CREATE_PRODUCT_SUCCESS)
                     navigate(PATH.PRODUCT_LIST)
                 },

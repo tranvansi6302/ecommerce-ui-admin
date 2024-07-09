@@ -1,4 +1,4 @@
-import { PURCHASE_ORDER_STATUS, SUPPLIER_STATUS } from '~/constants/status'
+import { PRODUCT_STATUS, PURCHASE_ORDER_STATUS, SUPPLIER_STATUS } from '~/constants/status'
 export const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     const day = String(date.getDate()).padStart(2, '0')
@@ -41,6 +41,21 @@ export const convertUserStatus = (status: string) => {
             return 'Hoạt động'
         case 'BLOCKED':
             return 'Vô hiệu hóa'
+        default:
+            return ''
+    }
+}
+
+export const convertProductStatus = (status: string) => {
+    switch (status) {
+        case PRODUCT_STATUS.ACTIVE:
+            return 'Đang kinh doanh'
+        case PRODUCT_STATUS.INACTIVE:
+            return 'Ngừng kinh doanh'
+        case PRODUCT_STATUS.INSTOCK:
+            return 'Đã nhập kho'
+        case PRODUCT_STATUS.OUTOFSTOCK:
+            return 'Chưa nhập kho'
         default:
             return ''
     }

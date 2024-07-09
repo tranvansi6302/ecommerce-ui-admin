@@ -1,23 +1,21 @@
-import { ProductFilter } from '../@types/product'
 import { isUndefined, omitBy } from 'lodash'
-import useQueryParams from './useQueryParams'
 import { useMemo } from 'react'
+import { CategoryFilter } from '~/@types/category'
+import useQueryParams from './useQueryParams'
 
 type QueryConfig = {
-    [key in keyof ProductFilter]: string
+    [key in keyof CategoryFilter]: string
 }
 
-export default function useQueryProducts() {
+export default function useQueryCategories() {
     const queryParams: QueryConfig = useQueryParams()
 
     const queryConfig: QueryConfig = useMemo(
         () =>
             omitBy(
                 {
-                    name: queryParams.name,
-                    brand: queryParams.brand,
+                    search: queryParams.search,
                     status: queryParams.status,
-                    category: queryParams.category,
                     page: queryParams.page || '1',
                     limit: queryParams.limit || '5'
                 },

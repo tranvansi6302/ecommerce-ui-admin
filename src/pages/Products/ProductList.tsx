@@ -20,7 +20,7 @@ import categoriesApi from '~/apis/categories.api'
 import productsApi from '~/apis/products.api'
 import PATH from '~/constants/path'
 import useQueryProducts from '~/hooks/useQueryProducts'
-import { formatDate } from '~/utils/format'
+import { convertProductStatus, formatDate } from '~/utils/format'
 
 import { Variant } from '~/@types/variant'
 import SetProductImage from '~/components/SetProductImage'
@@ -28,6 +28,8 @@ import useSetTitle from '~/hooks/useSetTitle'
 import FilterProduct from './components/FilterProduct'
 import RowVariant from './components/RowVariant'
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
+import { ProductStatus } from './components/FilterProduct/FilterProduct'
+import { PRODUCT_STATUS } from '~/constants/status'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
@@ -40,6 +42,7 @@ export default function ProductList() {
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([])
+    const [selectedProductStatus, setSelectedProductStatus] = useState<ProductStatus | null>(null)
     const [search, setSearch] = useState<string>('')
     const [globalFilter] = useState<string>('')
     const queryConfig = useQueryProducts()
@@ -102,9 +105,28 @@ export default function ProductList() {
     }, [])
 
     const productCreatedAtTemplate = useCallback((rowData: Product) => formatDate(rowData.created_at), [])
+    const productUpdatedAtTemplate = useCallback((rowData: Product) => formatDate(rowData.updated_at), [])
     const categoryNameTemplate = useCallback((rowData: Product) => rowData?.category?.name, [])
 
     const brandNameTemplate = useCallback((rowData: Product) => rowData?.brand?.name, [])
+    const productStatusTemplate = useCallback((rowData: Product) => {
+        return (
+            <MyButton
+                text
+                severity={
+                    rowData.status === PRODUCT_STATUS.ACTIVE
+                        ? 'success'
+                        : rowData.status === PRODUCT_STATUS.INACTIVE
+                          ? 'danger'
+                          : rowData.status === PRODUCT_STATUS.INSTOCK
+                            ? 'info'
+                            : 'warning'
+                }
+            >
+                <p className='text-[13.6px] font-medium'>{convertProductStatus(rowData.status).toUpperCase()}</p>
+            </MyButton>
+        )
+    }, [])
 
     const header = useMemo(
         () => (
@@ -115,11 +137,13 @@ export default function ProductList() {
                 setSelectedBrand={setSelectedBrand}
                 selectedCategory={selectedCategory as Category}
                 setSelectedCategory={setSelectedCategory}
+                selectedProductStatus={selectedProductStatus}
+                setSelectedProductStatus={setSelectedProductStatus}
                 brands={brands?.data.result as Brand}
                 categories={categories?.data.result as Category}
             />
         ),
-        [search, selectedBrand, selectedCategory, brands?.data.result, categories?.data.result]
+        [search, selectedBrand, selectedCategory, selectedProductStatus, brands?.data.result, categories?.data.result]
     )
 
     const selectedHeader = useMemo(
@@ -189,10 +213,12 @@ export default function ProductList() {
                 <Column className='pr-0 w-[35px]' expander={allowExpansion} />
                 <Column selectionMode='multiple' className='w-[40px]' />
                 <Column header='Ảnh' body={imageBodyTemplate} />
-                <Column className='w-1/3' field='name' header='Sản phẩm' body={productNameTemplate} />
+                <Column className='w-[35%]' field='name' header='Sản phẩm' body={productNameTemplate} />
                 <Column field='category' header='Loại' body={categoryNameTemplate} />
                 <Column field='brand' header='Thương hiệu' body={brandNameTemplate} />
-                <Column field='createdDate' header='Ngày khởi tạo' body={productCreatedAtTemplate} sortable />
+                <Column className='pl-0' field='status' header='Trạng thái' body={productStatusTemplate} />
+                <Column field='createdAt' header='Ngày khởi tạo' body={productCreatedAtTemplate} sortable />
+                <Column field='updatedAt' header='Cập nhật cuối' body={productUpdatedAtTemplate} sortable />
             </DataTable>
             <div className='flex justify-end mt-3'>
                 <Paginator

@@ -93,7 +93,12 @@ export default function FilterUser({ search, setSearch, selectedUserStatus, setS
                 {queryConfig.is_deleted === '1' ? 'Thùng rác' : 'Danh sách người dùng'}
             </p>
             {queryConfig.is_deleted === '1' && (
-                <ShowMessage severity='error' detail='Người dùng sẽ bị xóa khỏi hệ thống sau 30 ngày kể từ lúc có hiệu lực!' />
+                <div className='font-normal'>
+                    <ShowMessage
+                        severity='error'
+                        detail='Người dùng sẽ bị xóa khỏi hệ thống sau 30 ngày kể từ lúc có hiệu lực!'
+                    />
+                </div>
             )}
             <div className='flex justify-content-between gap-2'>
                 <form className='w-[40%]' onSubmit={handleSerach}>
