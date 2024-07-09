@@ -5,12 +5,12 @@ import {
     DataTableSelectionMultipleChangeEvent,
     DataTableValueArray
 } from 'primereact/datatable'
-import { Dropdown } from 'primereact/dropdown'
-import { useCallback, useMemo, useState } from 'react'
+import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown'
+import { Fragment, useCallback, useMemo, useState } from 'react'
 import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import MyButton from '~/components/MyButton'
 
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import { Brand } from '~/@types/brand'
 import { Category } from '~/@types/category'
 import { Product, ProductFilter } from '~/@types/product'
@@ -30,10 +30,22 @@ import RowVariant from './components/RowVariant'
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 import { ProductStatus } from './components/FilterProduct/FilterProduct'
 import { PRODUCT_STATUS } from '~/constants/status'
+import { FaCheckDouble } from 'react-icons/fa'
+import ShowMessage from '~/components/ShowMessage'
+import { toast } from 'react-toastify'
+import MESSAGE from '~/constants/message'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
 }
+
+const selectedOptions = [
+    { label: 'Chuyển đổi ngừng kinh doanh', value: 'TOGGLE' },
+    {
+        label: 'Xóa vĩnh viễn',
+        value: 'DELETE'
+    }
+]
 
 export default function ProductList() {
     useSetTitle('Danh sách sản phẩm')
@@ -49,7 +61,7 @@ export default function ProductList() {
     const [first, setFirst] = useState<number>(0)
     const [rows, setRows] = useState<number>(5)
 
-    const { data: products } = useQuery({
+    const { data: products, refetch } = useQuery({
         queryKey: ['products', queryConfig],
         queryFn: () => productsApi.getAllProducts(queryConfig as ProductFilter),
         staleTime: 3 * 60 * 1000,
@@ -146,14 +158,57 @@ export default function ProductList() {
         [search, selectedBrand, selectedCategory, selectedProductStatus, brands?.data.result, categories?.data.result]
     )
 
+    const deleteManyProductsMutation = useMutation({
+        mutationFn: (data: { product_ids: number[] }) => productsApi.deleteManyProducts(data),
+        onSuccess: (data) => {
+            toast.success(`${data.data.message} ${selectedProducts.length} dữ liệu`)
+            refetch()
+        },
+        onError: () => {
+            toast.error(MESSAGE.NOT_DELETE_CONSTRAINT)
+        }
+    })
+
+    const handleSelectedOptionChange = (e: DropdownChangeEvent) => {
+        switch (e.value) {
+            case 'TOGGLE': {
+                break
+            }
+            case 'DELETE': {
+                const productIds = selectedProducts.map((product) => product.id)
+                deleteManyProductsMutation.mutate({ product_ids: productIds })
+                break
+            }
+            default:
+                break
+        }
+    }
     const selectedHeader = useMemo(
         () => (
-            <div className='flex flex-wrap justify-content-between gap-2'>
-                <span>Đã chọn {selectedProducts.length} sản phẩm trên trang này</span>
-                <Dropdown options={['Xóa', 'Ngừng kinh doanh']} placeholder='Chọn thao tác' />
-            </div>
+            <Fragment>
+                <div className='flex flex-wrap justify-content-between gap-4 items-center'>
+                    <span className='text-blue-600 text-[15px] font-normal flex items-center gap-2'>
+                        <FaCheckDouble />
+                        Đã chọn {selectedProducts.length} dòng trên trang này
+                    </span>
+                    <Dropdown
+                        style={{ width: '300px' }}
+                        className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
+                        options={selectedOptions}
+                        onChange={handleSelectedOptionChange}
+                        placeholder='Chọn thao tác'
+                    />
+                </div>
+                <div className='text-[14px] font-normal'>
+                    <ShowMessage
+                        severity='warn'
+                        detail='Lưu ý với trường hợp xóa vĩnh viễn chỉ xóa được sản phẩm nào không có bắt kì ràng buộc dữ liệu nào, sau khi xóa dữ liệu sẽ không được khôi phục'
+                    />
+                </div>
+            </Fragment>
         ),
-        [selectedProducts]
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [selectedProducts.length]
     )
 
     const onSelectionChange = useCallback((e: DataTableSelectionMultipleChangeEvent<DataTableValueArray>) => {

@@ -14,7 +14,8 @@ const MESSAGE = {
     UPDATE_PURCHASE_ORDER_SUCCESS: 'Cập nhật đơn hàng mua thành công',
     CREATE_PRICE_PLAN_SUCCESS: 'Tạo bảng giá thành công',
     UPDATE_USER_SUCCESS: 'Cập nhật thông tin thành công',
-    LOGOUT_SUCCESS: 'Đăng xuất thành công'
+    LOGOUT_SUCCESS: 'Đăng xuất thành công',
+    NOT_DELETE_CONSTRAINT: 'Không thể xóa vì đang có ràng buộc'
 }
 
 export default MESSAGE

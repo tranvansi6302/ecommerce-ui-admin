@@ -16,7 +16,7 @@ export default function ShowMessage({ severity = 'success', detail }: ShowMessag
     }, [severity, detail])
 
     return (
-        <div className='card'>
+        <div className='card text-[14px]'>
             <Messages ref={msgs} />
         </div>
     )

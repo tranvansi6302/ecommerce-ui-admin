@@ -1,4 +1,5 @@
 import { CreateProductResponse, ListProductResponse, ProductFilter, UploadImagesResponse } from '~/@types/product'
+import { MessageResponse } from '~/@types/util'
 import API from '~/constants/api'
 import { ProductSchemaType } from '~/schemas/products.schema'
 import http from '~/utils/http'
@@ -23,6 +24,11 @@ const productsApi = {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
+        })
+    },
+    deleteManyProducts: (body: { product_ids: number[] }) => {
+        return http.delete<MessageResponse>(API.PRODUCT, {
+            data: body
         })
     }
 }
