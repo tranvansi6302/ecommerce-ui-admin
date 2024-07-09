@@ -63,7 +63,7 @@ export default function CreateSupplier() {
             <h2 className='text-[24px] font-semibold text-gray-900 mb-8'>Thêm mới nhà cung cấp</h2>
             <form onSubmit={onSubmit}>
                 <div className='bg-white p-5'>
-                    {message && <ShowMessage detail={message} />}
+                    {message && <ShowMessage severity='warn' detail={message} />}
                     <div className='grid grid-cols-2 gap-5'>
                         <div>
                             <MyInput

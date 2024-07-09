@@ -32,6 +32,11 @@ const suppliersApi = {
     },
     updateManyStatusSupplier: (data: { supplier_ids: number[] }) => {
         return http.patch<MessageResponse>(`${API.SUPPLIER}/status`, data)
+    },
+    deleteManySupplier: (body: { supplier_ids: number[] }) => {
+        return http.delete<MessageResponse>(API.SUPPLIER, {
+            data: body
+        })
     }
 }
 

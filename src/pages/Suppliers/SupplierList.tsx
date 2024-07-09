@@ -6,7 +6,7 @@ import {
     DataTableValueArray
 } from 'primereact/datatable'
 import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown'
-import { useCallback, useMemo, useState } from 'react'
+import { Fragment, useCallback, useMemo, useState } from 'react'
 import MyButton from '~/components/MyButton'
 
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
@@ -25,7 +25,15 @@ import { FaCheckDouble } from 'react-icons/fa'
 import { toast } from 'react-toastify'
 import { AxiosError } from 'axios'
 import { MessageResponse } from '~/@types/util'
-const selectedOptions = [{ label: 'Chuyển đổi giao dịch', value: 'TOGGLE' }]
+import MESSAGE from '~/constants/message'
+import ShowMessage from '~/components/ShowMessage'
+const selectedOptions = [
+    { label: 'Chuyển đổi giao dịch', value: 'TOGGLE' },
+    {
+        label: 'Xóa vĩnh viễn',
+        value: 'DELETE'
+    }
+]
 export default function SupplierList() {
     useSetTitle('Danh sách nhà cung cấp')
     const navigate = useNavigate()
@@ -91,10 +99,26 @@ export default function SupplierList() {
         }
     })
 
+    const deleteManySupplierMutation = useMutation({
+        mutationFn: (data: { supplier_ids: number[] }) => suppliersApi.deleteManySupplier(data),
+        onSuccess: (data) => {
+            toast.success(`${data.data.message} ${selectedSuppliers.length} dòng dữ liệu`)
+            refetch()
+            setSelectedSuppliers([])
+        },
+        onError: () => {
+            toast.error(MESSAGE.NOT_DELETE_CONSTRAINT)
+        }
+    })
+
     const handleSelectedOptionChange = (e: DropdownChangeEvent) => {
         switch (e.value) {
             case 'TOGGLE': {
-                updateManyStatusSupplierMutation.mutate({ supplier_ids: selectedSuppliers.map((brand) => brand.id) })
+                updateManyStatusSupplierMutation.mutate({ supplier_ids: selectedSuppliers.map((supplier) => supplier.id) })
+                break
+            }
+            case 'DELETE': {
+                deleteManySupplierMutation.mutate({ supplier_ids: selectedSuppliers.map((supplier) => supplier.id) })
                 break
             }
             default:
@@ -104,19 +128,27 @@ export default function SupplierList() {
 
     const selectedHeader = useMemo(
         () => (
-            <div className='flex flex-wrap justify-content-between gap-4 items-center'>
-                <span className='text-blue-600 text-[15px] font-normal flex items-center gap-2'>
-                    <FaCheckDouble />
-                    Đã chọn {selectedSuppliers.length} dòng trên trang này
-                </span>
-                <Dropdown
-                    style={{ width: '300px' }}
-                    className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
-                    options={selectedOptions}
-                    onChange={handleSelectedOptionChange}
-                    placeholder='Chọn thao tác'
-                />
-            </div>
+            <Fragment>
+                <div className='flex flex-wrap justify-content-between gap-4 items-center'>
+                    <span className='text-blue-600 text-[15px] font-normal flex items-center gap-2'>
+                        <FaCheckDouble />
+                        Đã chọn {selectedSuppliers.length} dòng trên trang này
+                    </span>
+                    <Dropdown
+                        style={{ width: '300px' }}
+                        className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
+                        options={selectedOptions}
+                        onChange={handleSelectedOptionChange}
+                        placeholder='Chọn thao tác'
+                    />
+                </div>
+                <div className='text-[14px] font-normal'>
+                    <ShowMessage
+                        severity='warn'
+                        detail='Lưu ý với trường hợp xóa vĩnh viễn chỉ xóa được nhà cung cấp nào không có bắt kì ràng buộc dữ liệu nào, sau khi xóa dữ liệu sẽ không được khôi phục'
+                    />
+                </div>
+            </Fragment>
         ),
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [selectedSuppliers.length]
