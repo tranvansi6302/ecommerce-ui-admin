@@ -27,7 +27,7 @@ export type QueryConfig = {
     [key in keyof ProductFilter]: string
 }
 
-const selectedOptions = [{ label: 'Chuyển đổi ngừng kinh doanh', value: 'TOGGLE' }]
+const selectedOptions = [{ label: 'Chuyển đổi trạng thái kinh doanh', value: 'TOGGLE' }]
 
 export default function CategoryList() {
     useSetTitle('Danh sách loại sản phẩm')

@@ -21,7 +21,7 @@ import PATH from '~/constants/path'
 import { BrandStatus } from './components/FilterBrand/FilterBrand'
 import { FaCheckDouble } from 'react-icons/fa'
 import { toast } from 'react-toastify'
-const selectedOptions = [{ label: 'Chuyển đổi ngừng kinh doanh', value: 'TOGGLE' }]
+const selectedOptions = [{ label: 'Chuyển đổi trạng thái kinh doanh', value: 'TOGGLE' }]
 export default function BrandList() {
     useSetTitle('Danh sách thương hiệu')
     const navigate = useNavigate()

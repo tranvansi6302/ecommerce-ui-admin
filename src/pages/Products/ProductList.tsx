@@ -42,7 +42,7 @@ export type QueryConfig = {
 }
 
 const selectedOptions = [
-    { label: 'Chuyển đổi ngừng kinh doanh', value: 'TOGGLE' },
+    { label: 'Chuyển đổi trạng thái kinh doanh', value: 'TOGGLE' },
     {
         label: 'Xóa vĩnh viễn',
         value: 'DELETE'

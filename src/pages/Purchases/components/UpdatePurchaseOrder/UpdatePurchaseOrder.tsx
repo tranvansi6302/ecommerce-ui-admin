@@ -21,7 +21,7 @@ import { toast } from 'react-toastify'
 import { PurchaseDetails } from '~/@types/purchase'
 import { MessageResponse } from '~/@types/util'
 import purchasesApi, { UpdatePurchaseOrderRequest } from '~/apis/purchases.api'
-import MyInput from '~/components/MyInput'
+import MyInputNumberV2Blur from '~/components/MyInputNumberV2Blur'
 import MyTextarea from '~/components/MyTextarea'
 import ShowMessage from '~/components/ShowMessage'
 import MESSAGE from '~/constants/message'
@@ -93,13 +93,14 @@ export default function UpdatePurchaseOrder() {
                 purchaseOrder?.data.result.status === PURCHASE_ORDER_STATUS.COMPLETED ? (
                 (rowData.quantity_received as number)
             ) : (
-                <MyInput
+                <MyInputNumberV2Blur
                     register={register}
                     className='w-28 h-[40px] rounded-none border-t-0 border-l-0 border-r-0'
                     name={`quantity_${rowData.variant.id}`}
                     type='number'
+                    keyfilter='pint'
                     value={quantityReceived[rowData.variant.id] || 0}
-                    onChange={(e) => handleQuantityChange(rowData.variant.id, parseInt(e.target.value))}
+                    onBlur={(e) => handleQuantityChange(rowData.variant.id, parseInt(e.target.value))}
                 />
             )
         },
@@ -142,11 +143,11 @@ export default function UpdatePurchaseOrder() {
     )
 
     // Total
-    const quantityTotal = useCallback(() => {
+    const quantityTotal = useMemo(() => {
         return purchaseOrder?.data.result.purchase_details.reduce((total, row) => total + row.quantity, 0)
     }, [purchaseOrder?.data.result.purchase_details])
 
-    const totalPrice = useCallback(() => {
+    const totalPrice = useMemo(() => {
         return (
             purchaseOrder?.data.result.purchase_details.reduce((total, row) => total + row.quantity * row.purchase_price, 0) || 0
         )
@@ -163,11 +164,10 @@ export default function UpdatePurchaseOrder() {
     }
 
     useEffect(() => {
-        setValue(
-            `note_${noteRowId}`,
-            purchaseOrder?.data.result.purchase_details.find((row) => row.variant.id === noteRowId)?.note
-        )
-    }, [noteRowId, noteVariant, purchaseOrder?.data.result.purchase_details, setValue])
+        const note = purchaseOrder?.data.result.purchase_details.find((row) => row.variant.id === noteRowId)?.note || ''
+        setValue(`note_${noteRowId}`, note)
+        setNoteVariant((prev) => ({ ...prev, [noteRowId]: note }))
+    }, [noteRowId, purchaseOrder?.data.result.purchase_details, setValue])
 
     const updatePurchaseOrderMutation = useMutation({
         mutationFn: (payload: { id: number; data: UpdatePurchaseOrderRequest }) =>
@@ -240,6 +240,7 @@ export default function UpdatePurchaseOrder() {
         setOpenReason(false)
     }
 
+    console.log('render UpdatePurchaseOrder')
     return (
         <div>
             {message && <ShowMessage severity='warn' detail={message} />}
@@ -353,8 +354,8 @@ export default function UpdatePurchaseOrder() {
                                         title='Trạng thái'
                                         value={convertPurchaseOrderStatus((purchaseOrder?.data.result.status as string) || '')}
                                     />
-                                    <PurchaseOrderInfo title='Số lượng' value={quantityTotal()?.toString() || ''} />
-                                    <PurchaseOrderInfo title='Tổng tiền' value={formatCurrencyVND(totalPrice()) || ''} />
+                                    <PurchaseOrderInfo title='Số lượng' value={quantityTotal?.toString() || ''} />
+                                    <PurchaseOrderInfo title='Tổng tiền' value={formatCurrencyVND(totalPrice) || ''} />
                                     <PurchaseOrderInfo title='Ghi chú' value={purchaseOrder?.data.result.note || ''} />
                                 </div>
                             </div>

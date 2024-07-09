@@ -53,7 +53,7 @@ export default function FilterPurchaseOrder({
 
     const { data: suppliers } = useQuery({
         queryKey: ['suppliers'],
-        queryFn: () => suppliersApi.getAllSuppliers(),
+        queryFn: () => suppliersApi.getAllSuppliers({ status: 'ACTIVE' }),
         placeholderData: keepPreviousData
     })
 

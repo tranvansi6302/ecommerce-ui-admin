@@ -34,6 +34,7 @@ import { PurchaseDetailSchemaType, createPurchaseSchema } from '~/schemas/purcha
 import { formatCurrencyVND } from '~/utils/format'
 import FilterProductMany from '../FilterProductMany'
 import SupplierInfo from '../SupplierInfo'
+import MyInputNumberV2Blur from '~/components/MyInputNumberV2Blur'
 
 type CreatePurchaseOrderForm = CreatePurchaseOrderRequest & { [key: string]: any }
 export default function CreatePurchaseOrder() {
@@ -58,7 +59,7 @@ export default function CreatePurchaseOrder() {
     })
     const { data: suppliers } = useQuery({
         queryKey: ['suppliers'],
-        queryFn: () => suppliersApi.getAllSuppliers(),
+        queryFn: () => suppliersApi.getAllSuppliers({ status: 'ACTIVE' }),
         placeholderData: keepPreviousData
     })
 
@@ -68,11 +69,12 @@ export default function CreatePurchaseOrder() {
 
     const onSubmit = handleSubmit((data) => {
         setMessage('')
+
         const rowVariant: PurchaseDetailSchemaType[] = rowVariants.map((row) => {
             return {
                 variant_id: row.id.toString(),
-                quantity: data['quantity' + '_' + row.id] as number,
-                purchase_price: data['purchase_price' + '_' + row.id] as number,
+                quantity: quantity[row.id] as number,
+                purchase_price: purchasePrice[row.id] as number,
                 note: noteVariant[row.id]
             }
         })
@@ -82,6 +84,7 @@ export default function CreatePurchaseOrder() {
             note: data.note,
             purchase_details: rowVariant
         }
+
         createPurchaseOrderMutation.mutate(body, {
             onSuccess: () => {
                 toast.success(MESSAGE.CREATE_PURCHASE_SUCCESS)
@@ -93,11 +96,10 @@ export default function CreatePurchaseOrder() {
                 toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
             }
         })
-        console.log(body)
     })
 
     // Render
-
+    console.log('ren-render')
     const handleQuantityChange = (id: number, value: number) => {
         setQuantity((prev) => ({ ...prev, [id]: value }))
     }
@@ -119,13 +121,14 @@ export default function CreatePurchaseOrder() {
     const variantQuantityTemplate = useCallback(
         (rowData: Variant) => {
             return (
-                <MyInput
+                <MyInputNumberV2Blur
+                    type='number'
                     register={register}
+                    keyfilter='pint'
                     className='w-28 h-[40px] rounded-none border-t-0 border-l-0 border-r-0'
                     name={`quantity_${rowData.id}`}
-                    type='number'
                     value={quantity[rowData.id] || 0}
-                    onChange={(e) => handleQuantityChange(rowData.id, parseInt(e.target.value))}
+                    onBlur={(e) => handleQuantityChange(rowData.id, parseInt(e.target.value))}
                 />
             )
         },
@@ -135,13 +138,14 @@ export default function CreatePurchaseOrder() {
     const variantPriceTemplate = useCallback(
         (rowData: Variant) => {
             return (
-                <MyInput
+                <MyInputNumberV2Blur
                     register={register}
+                    keyfilter='pint'
                     className='w-28 h-[40px] rounded-none border-t-0 border-l-0 border-r-0'
                     name={`purchase_price_${rowData.id}`}
                     style={{ fontSize: '13.6px' }}
                     value={purchasePrice[rowData.id] || 0}
-                    onChange={(e) => handlePriceChange(rowData.id, parseInt(e.target.value))}
+                    onBlur={(e) => handlePriceChange(rowData.id, parseInt(e.target.value))}
                 />
             )
         },
@@ -194,7 +198,6 @@ export default function CreatePurchaseOrder() {
     }
 
     const handleConfirmNote = () => {
-        console.log(noteVariant)
         setOpenNote(false)
     }
 
@@ -206,11 +209,11 @@ export default function CreatePurchaseOrder() {
     )
 
     // Total
-    const quantityTotal = useCallback(() => {
+    const quantityTotal = useMemo(() => {
         return rowVariants.reduce((total, row) => total + (quantity[row.id] || 0), 0)
     }, [quantity, rowVariants])
 
-    const totalPrice = useCallback(() => {
+    const totalPrice = useMemo(() => {
         return rowVariants.reduce((total, row) => total + (quantity[row.id] || 0) * (purchasePrice[row.id] || 0), 0)
     }, [purchasePrice, quantity, rowVariants])
 
@@ -364,11 +367,11 @@ export default function CreatePurchaseOrder() {
                 <div className='mt-10 px-16 flex flex-col items-end gap-2 justify-end'>
                     <div className='flex items-center justify-between w-[255px] text-[13.6px] text-gray-800'>
                         <span>Số lượng</span>
-                        <span>{quantityTotal() || 0}</span>
+                        <span>{quantityTotal || 0}</span>
                     </div>
                     <div className='flex items-center justify-between w-[255px] text-[13.6px] text-gray-800'>
                         <span>Tổng tiền</span>
-                        <span>{formatCurrencyVND(totalPrice()) || formatCurrencyVND(0)}</span>
+                        <span>{formatCurrencyVND(totalPrice) || formatCurrencyVND(0)}</span>
                     </div>
                     <div className='flex items-center justify-between w-[255px] text-[13.6px] text-blue-500'>
                         <span>Chiết khấu</span>
@@ -376,7 +379,7 @@ export default function CreatePurchaseOrder() {
                     </div>
                     <div className='flex items-center font-medium justify-between w-[255px] text-[13.6px] text-gray-800'>
                         <span>Tiền cần trả</span>
-                        <span>{formatCurrencyVND(totalPrice()) || formatCurrencyVND(0)}</span>
+                        <span>{formatCurrencyVND(totalPrice) || formatCurrencyVND(0)}</span>
                     </div>
                 </div>
                 <Divider />
