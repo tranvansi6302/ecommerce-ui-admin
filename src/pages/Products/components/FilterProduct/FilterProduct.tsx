@@ -146,7 +146,7 @@ export default function FilterProduct({
                     </div>
                 </form>
                 <div className='flex gap-2'>
-                    <div className='w-[250px]'>
+                    <div className='w-[200px]'>
                         <MyDropdown
                             value={selectedBrand}
                             onChange={(e: DropdownChangeEvent) => setSelectedBrand(e.value)}
@@ -156,7 +156,7 @@ export default function FilterProduct({
                             name='brand'
                         />
                     </div>
-                    <div className='w-[250px]'>
+                    <div className='w-[200px]'>
                         <MyDropdown
                             value={selectedCategory}
                             onChange={(e: DropdownChangeEvent) => setSelectedCategory(e.value)}
@@ -167,7 +167,7 @@ export default function FilterProduct({
                         />
                     </div>
 
-                    <div className='w-[250px]'>
+                    <div className='w-[200px]'>
                         <MyDropdown
                             value={selectedProductStatus}
                             onChange={(e: DropdownChangeEvent) => setSelectedProductStatus(e.value)}

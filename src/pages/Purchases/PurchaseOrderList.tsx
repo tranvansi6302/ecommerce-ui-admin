@@ -1,31 +1,26 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Column } from 'primereact/column'
-import {
-    DataTable,
-    DataTableExpandedRows,
-    DataTableSelectionMultipleChangeEvent,
-    DataTableValueArray
-} from 'primereact/datatable'
+import { DataTable, DataTableSelectionMultipleChangeEvent, DataTableValueArray } from 'primereact/datatable'
 import { Dropdown } from 'primereact/dropdown'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 import { useCallback, useMemo, useState } from 'react'
+import { FaCheckDouble } from 'react-icons/fa'
 import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import { PurchaseOrder, PurchaseOrderFilter, PurchaseOrderStatus } from '~/@types/purchase'
+import { Supplier } from '~/@types/supplier'
 import purchasesApi from '~/apis/purchases.api'
 import MyButton from '~/components/MyButton'
 import PATH from '~/constants/path'
 import { PURCHASE_ORDER_STATUS } from '~/constants/status'
-import { convertPurchaseOrderStatus, formatDate } from '~/utils/format'
-import FilterPurchaseOrder from './components/FilterPurchaseOrder'
-import { Supplier } from '~/@types/supplier'
 import useQueryPurchaseOrders from '~/hooks/useQueryPurchaseOrders'
 import useSetTitle from '~/hooks/useSetTitle'
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
+import { convertPurchaseOrderStatus, formatDate } from '~/utils/format'
+import FilterPurchaseOrder from './components/FilterPurchaseOrder'
 
 export default function PurchaseOrderList() {
     useSetTitle('Danh sách đơn hàng')
     const navigate = useNavigate()
     const queryConfig = useQueryPurchaseOrders()
-    const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
     const [globalFilter] = useState<string>('')
     const [selectedPurchaseOrders, setSelectedPurchaseOrders] = useState<PurchaseOrder[]>([])
     const [search, setSearch] = useState<string>('')
@@ -84,12 +79,20 @@ export default function PurchaseOrderList() {
 
     const selectedHeader = useMemo(
         () => (
-            <div className='flex flex-wrap justify-content-between gap-2'>
-                <span>Đã chọn {selectedPurchaseOrders.length} sản phẩm trên trang này</span>
-                <Dropdown options={['Xóa', 'Ngừng kinh doanh']} placeholder='Chọn thao tác' />
+            <div className='flex flex-wrap justify-content-between gap-4 items-center'>
+                <span className='text-blue-600 text-[15px] font-normal flex items-center gap-2'>
+                    <FaCheckDouble />
+                    Đã chọn {selectedPurchaseOrders.length} dòng trên trang này
+                </span>
+                <Dropdown
+                    style={{ width: '300px' }}
+                    className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
+                    placeholder='Chưa có hành động nào trên trang này'
+                />
             </div>
         ),
-        [selectedPurchaseOrders]
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [selectedPurchaseOrders.length]
     )
 
     const onSelectionChange = useCallback((e: DataTableSelectionMultipleChangeEvent<DataTableValueArray>) => {
@@ -125,8 +128,6 @@ export default function PurchaseOrderList() {
             </div>
             <DataTable
                 value={(purchaseOrders?.data.result as unknown as DataTableValueArray) ?? []}
-                expandedRows={expandedRows}
-                onRowToggle={(e) => setExpandedRows(e.data)}
                 dataKey='id'
                 header={selectedPurchaseOrders.length > 0 ? selectedHeader : header}
                 tableStyle={{ minWidth: '60rem', fontSize: '14px' }}
@@ -137,11 +138,10 @@ export default function PurchaseOrderList() {
                 globalFilter={globalFilter}
             >
                 <Column selectionMode='multiple' className='w-[100px]' />
-
                 <Column className='' header='Mã đơn' body={purchaseOrdersCodeTemplate} />
                 <Column className='' header='Ngày đặt hàng' body={purchaseOrdersDateTemplate} />
                 <Column className='' header='Nhà cung cấp' body={purchaseOrdersSupplierTemplate} />
-                <Column className='' header='Trạng thái' body={purchaseOrderStatusTemplate} />
+                <Column className='pl-0' header='Trạng thái' body={purchaseOrderStatusTemplate} />
             </DataTable>
             <div className='flex justify-end mt-3'>
                 <Paginator

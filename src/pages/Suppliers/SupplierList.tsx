@@ -1,32 +1,28 @@
 import { Column } from 'primereact/column'
-import {
-    DataTable,
-    DataTableExpandedRows,
-    DataTableSelectionMultipleChangeEvent,
-    DataTableValueArray
-} from 'primereact/datatable'
+import { DataTable, DataTableSelectionMultipleChangeEvent, DataTableValueArray } from 'primereact/datatable'
 import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown'
 import { Fragment, useCallback, useMemo, useState } from 'react'
 import MyButton from '~/components/MyButton'
 
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 
+import { AxiosError } from 'axios'
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
+import { FaCheckDouble } from 'react-icons/fa'
+import { RxOpenInNewWindow } from 'react-icons/rx'
 import { createSearchParams, Link, useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import { Supplier, SupplierFilter, SupplierStatus } from '~/@types/supplier'
+import { MessageResponse } from '~/@types/util'
 import suppliersApi from '~/apis/supplier.api'
+import ShowMessage from '~/components/ShowMessage'
+import MESSAGE from '~/constants/message'
 import PATH from '~/constants/path'
 import { SUPPLIER_STATUS } from '~/constants/status'
 import useQuerySuppliers from '~/hooks/useQuerySuppliers'
 import useSetTitle from '~/hooks/useSetTitle'
 import { convertSupplierStatus, formatDate } from '~/utils/format'
 import FilterSupplier from './components/FilterSupplier'
-import { FaCheckDouble } from 'react-icons/fa'
-import { toast } from 'react-toastify'
-import { AxiosError } from 'axios'
-import { MessageResponse } from '~/@types/util'
-import MESSAGE from '~/constants/message'
-import ShowMessage from '~/components/ShowMessage'
 const selectedOptions = [
     { label: 'Chuyển đổi giao dịch', value: 'TOGGLE' },
     {
@@ -38,7 +34,6 @@ export default function SupplierList() {
     useSetTitle('Danh sách nhà cung cấp')
     const navigate = useNavigate()
     const queryConfig = useQuerySuppliers()
-    const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
     const [globalFilter] = useState<string>('')
     const [selectedSuppliers, setSelectedSuppliers] = useState<Supplier[]>([])
     const [selectedSupplierStatus, setSelectedSupplierStatus] = useState<SupplierStatus | null>(null)
@@ -188,8 +183,6 @@ export default function SupplierList() {
             </div>
             <DataTable
                 value={(suppliers?.data.result as unknown as DataTableValueArray) ?? []}
-                expandedRows={expandedRows}
-                onRowToggle={(e) => setExpandedRows(e.data)}
                 dataKey='id'
                 header={selectedSuppliers.length > 0 ? selectedHeader : header}
                 tableStyle={{ minWidth: '60rem', fontSize: '14px' }}

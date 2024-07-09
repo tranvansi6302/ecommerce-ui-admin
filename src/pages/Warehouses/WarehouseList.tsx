@@ -19,6 +19,7 @@ import useQueryWarehouse from '~/hooks/useQueryWarehouse'
 import useSetTitle from '~/hooks/useSetTitle'
 import { formatCurrencyVND, formatDate } from '~/utils/format'
 import FilterWarehouse from './components/FilterWarehouse'
+import { FaCheckDouble } from 'react-icons/fa'
 
 export default function WarehouseList() {
     useSetTitle('Tồn kho')
@@ -91,12 +92,20 @@ export default function WarehouseList() {
 
     const selectedHeader = useMemo(
         () => (
-            <div className='flex flex-wrap justify-content-between gap-2'>
-                <span>Đã chọn {selectedWarehouses.length} sản phẩm trên trang này</span>
-                <Dropdown options={['Xóa', 'Ngừng kinh doanh']} placeholder='Chọn thao tác' />
+            <div className='flex flex-wrap justify-content-between gap-4 items-center'>
+                <span className='text-blue-600 text-[15px] font-normal flex items-center gap-2'>
+                    <FaCheckDouble />
+                    Đã chọn {selectedWarehouses.length} dòng trên trang này
+                </span>
+                <Dropdown
+                    style={{ width: '300px' }}
+                    className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
+                    placeholder='Chưa có hành động nào trên trang này'
+                />
             </div>
         ),
-        [selectedWarehouses]
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [selectedWarehouses.length]
     )
 
     const onSelectionChange = useCallback((e: DataTableSelectionMultipleChangeEvent<DataTableValueArray>) => {

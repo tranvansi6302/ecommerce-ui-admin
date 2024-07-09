@@ -1,4 +1,5 @@
 import { InputText } from 'primereact/inputtext'
+import { KeyFilterType } from 'primereact/keyfilter'
 import { UseFormRegister } from 'react-hook-form'
 import { Fragment } from 'react/jsx-runtime'
 
@@ -17,6 +18,7 @@ interface MyInputProps {
     onChange?: (e: any) => void
     defaultValue?: string | number
     styleMessage?: React.CSSProperties
+    keyFilter?: KeyFilterType
 }
 
 export default function MyInput({
@@ -32,7 +34,8 @@ export default function MyInput({
     defaultValue,
     styleMessage,
     onChange,
-    register
+    register,
+    keyFilter
 }: MyInputProps) {
     const registerResult = register && name ? register(name) : null
     const errorResult = errors && name ? Boolean(errors[name]) : false
@@ -44,6 +47,7 @@ export default function MyInput({
             <InputText
                 {...registerResult}
                 id={name}
+                keyfilter={keyFilter}
                 type={type}
                 value={value?.toString()}
                 placeholder={placeholder}
