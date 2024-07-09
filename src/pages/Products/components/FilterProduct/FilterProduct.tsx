@@ -20,9 +20,7 @@ export interface ProductStatus {
 
 const productStatus: ProductStatus[] = [
     { id: PRODUCT_STATUS.ACTIVE, status: 'Đang kinh doanh' },
-    { id: PRODUCT_STATUS.INACTIVE, status: 'Ngừng kinh doanh' },
-    { id: PRODUCT_STATUS.INSTOCK, status: 'Đã nhập kho' },
-    { id: PRODUCT_STATUS.OUTOFSTOCK, status: 'Chưa nhập kho' }
+    { id: PRODUCT_STATUS.INACTIVE, status: 'Ngừng kinh doanh' }
 ]
 
 interface FilterProductProps {

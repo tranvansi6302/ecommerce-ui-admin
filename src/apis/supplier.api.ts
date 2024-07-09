@@ -5,6 +5,7 @@ import {
     SupplierResponse,
     UpdateSupplierResponse
 } from '~/@types/supplier'
+import { MessageResponse } from '~/@types/util'
 import API from '~/constants/api'
 import { SupplierSchemaType } from '~/schemas/supplier.schema'
 import http from '~/utils/http'
@@ -28,6 +29,9 @@ const suppliersApi = {
     },
     updateSupplier: (id: number, data: UpdateSupplierRequest) => {
         return http.patch<UpdateSupplierResponse>(`${API.SUPPLIER}/${id}`, data)
+    },
+    updateManyStatusSupplier: (data: { supplier_ids: number[] }) => {
+        return http.patch<MessageResponse>(`${API.SUPPLIER}/status`, data)
     }
 }
 

@@ -5,11 +5,11 @@ import {
     DataTableSelectionMultipleChangeEvent,
     DataTableValueArray
 } from 'primereact/datatable'
-import { Dropdown } from 'primereact/dropdown'
+import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown'
 import { useCallback, useMemo, useState } from 'react'
 import MyButton from '~/components/MyButton'
 
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 import { createSearchParams, Link, useNavigate } from 'react-router-dom'
@@ -19,9 +19,13 @@ import PATH from '~/constants/path'
 import { SUPPLIER_STATUS } from '~/constants/status'
 import useQuerySuppliers from '~/hooks/useQuerySuppliers'
 import useSetTitle from '~/hooks/useSetTitle'
-import { convertSupplierStatus } from '~/utils/format'
+import { convertSupplierStatus, formatDate } from '~/utils/format'
 import FilterSupplier from './components/FilterSupplier'
-
+import { FaCheckDouble } from 'react-icons/fa'
+import { toast } from 'react-toastify'
+import { AxiosError } from 'axios'
+import { MessageResponse } from '~/@types/util'
+const selectedOptions = [{ label: 'Chuyển đổi giao dịch', value: 'TOGGLE' }]
 export default function SupplierList() {
     useSetTitle('Danh sách nhà cung cấp')
     const navigate = useNavigate()
@@ -34,7 +38,7 @@ export default function SupplierList() {
     const [first, setFirst] = useState<number>(0)
     const [rows, setRows] = useState<number>(5)
 
-    const { data: suppliers } = useQuery({
+    const { data: suppliers, refetch } = useQuery({
         queryKey: ['suppliers', queryConfig],
         queryFn: () => suppliersApi.getAllSuppliers(queryConfig as SupplierFilter),
         staleTime: 3 * 60 * 1000,
@@ -53,6 +57,7 @@ export default function SupplierList() {
     const supplierNameTemplate = useCallback((rowData: Supplier) => rowData.name, [])
     const supplierEmailTemplate = useCallback((rowData: Supplier) => rowData.email, [])
     const supplierPhoneTemplate = useCallback((rowData: Supplier) => rowData.phone_number, [])
+    const supplierUpdatedAtTemplate = useCallback((rowData: Supplier) => formatDate(rowData.updated_at), [])
     const supplierStatusTemplate = useCallback((rowData: Supplier) => {
         return (
             <MyButton text severity={rowData.status === SUPPLIER_STATUS.INACTIVE ? 'danger' : 'success'}>
@@ -73,14 +78,48 @@ export default function SupplierList() {
         [search, selectedSupplierStatus]
     )
 
+    const updateManyStatusSupplierMutation = useMutation({
+        mutationFn: (data: { supplier_ids: number[] }) => suppliersApi.updateManyStatusSupplier(data),
+        onSuccess: (data) => {
+            toast.success(`${data.data.message} ${selectedSuppliers.length} dòng dữ liệu`)
+            refetch()
+            setSelectedSuppliers([])
+        },
+        onError: (error) => {
+            const errorResponse = (error as AxiosError<MessageResponse>).response?.data
+            toast.error(errorResponse?.message ?? '')
+        }
+    })
+
+    const handleSelectedOptionChange = (e: DropdownChangeEvent) => {
+        switch (e.value) {
+            case 'TOGGLE': {
+                updateManyStatusSupplierMutation.mutate({ supplier_ids: selectedSuppliers.map((brand) => brand.id) })
+                break
+            }
+            default:
+                break
+        }
+    }
+
     const selectedHeader = useMemo(
         () => (
-            <div className='flex flex-wrap justify-content-between gap-2'>
-                <span>Đã chọn {selectedSuppliers.length} sản phẩm trên trang này</span>
-                <Dropdown options={['Xóa', 'Ngừng kinh doanh']} placeholder='Chọn thao tác' />
+            <div className='flex flex-wrap justify-content-between gap-4 items-center'>
+                <span className='text-blue-600 text-[15px] font-normal flex items-center gap-2'>
+                    <FaCheckDouble />
+                    Đã chọn {selectedSuppliers.length} dòng trên trang này
+                </span>
+                <Dropdown
+                    style={{ width: '300px' }}
+                    className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
+                    options={selectedOptions}
+                    onChange={handleSelectedOptionChange}
+                    placeholder='Chọn thao tác'
+                />
             </div>
         ),
-        [selectedSuppliers]
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [selectedSuppliers.length]
     )
 
     const onSelectionChange = useCallback((e: DataTableSelectionMultipleChangeEvent<DataTableValueArray>) => {
@@ -130,11 +169,12 @@ export default function SupplierList() {
             >
                 <Column selectionMode='multiple' className='w-[100px]' />
 
-                <Column className='' field='tax_code' header='Mã nhà cung cấp' body={supplierTaxCodeTemplate} />
-                <Column className='' field='name' header='Tên nhà cung cấp' body={supplierNameTemplate} />
-                <Column className='' field='email' header='Email' body={supplierEmailTemplate} />
-                <Column className='' field='phone_number' header='Số điện thoại' body={supplierPhoneTemplate} />
+                <Column field='tax_code' header='Mã nhà cung cấp' body={supplierTaxCodeTemplate} />
+                <Column field='name' header='Tên nhà cung cấp' body={supplierNameTemplate} />
+                <Column field='email' header='Email' body={supplierEmailTemplate} />
+                <Column field='phone_number' header='Số điện thoại' body={supplierPhoneTemplate} />
                 <Column className='pl-0' field='status' header='Trạng thái' body={supplierStatusTemplate} />
+                <Column field='updated_at' header='Cập nhật cuối' body={supplierUpdatedAtTemplate} />
             </DataTable>
             <div className='flex justify-end mt-3'>
                 <Paginator

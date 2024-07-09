@@ -16,7 +16,5 @@ export const USER_STATUS = {
 
 export const PRODUCT_STATUS = {
     INACTIVE: 'INACTIVE',
-    ACTIVE: 'ACTIVE',
-    INSTOCK: 'INSTOCK',
-    OUTOFSTOCK: 'OUTOFSTOCK'
+    ACTIVE: 'ACTIVE'
 } as const

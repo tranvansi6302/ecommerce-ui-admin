@@ -34,6 +34,8 @@ import { FaCheckDouble } from 'react-icons/fa'
 import ShowMessage from '~/components/ShowMessage'
 import { toast } from 'react-toastify'
 import MESSAGE from '~/constants/message'
+import { AxiosError } from 'axios'
+import { MessageResponse } from '~/@types/util'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
@@ -123,18 +125,7 @@ export default function ProductList() {
     const brandNameTemplate = useCallback((rowData: Product) => rowData?.brand?.name, [])
     const productStatusTemplate = useCallback((rowData: Product) => {
         return (
-            <MyButton
-                text
-                severity={
-                    rowData.status === PRODUCT_STATUS.ACTIVE
-                        ? 'success'
-                        : rowData.status === PRODUCT_STATUS.INACTIVE
-                          ? 'danger'
-                          : rowData.status === PRODUCT_STATUS.INSTOCK
-                            ? 'info'
-                            : 'warning'
-                }
-            >
+            <MyButton text severity={rowData.status === PRODUCT_STATUS.ACTIVE ? 'success' : 'danger'}>
                 <p className='text-[13.6px] font-medium'>{convertProductStatus(rowData.status).toUpperCase()}</p>
             </MyButton>
         )
@@ -161,17 +152,33 @@ export default function ProductList() {
     const deleteManyProductsMutation = useMutation({
         mutationFn: (data: { product_ids: number[] }) => productsApi.deleteManyProducts(data),
         onSuccess: (data) => {
-            toast.success(`${data.data.message} ${selectedProducts.length} dữ liệu`)
+            toast.success(`${data.data.message} ${selectedProducts.length} dòng dữ liệu`)
             refetch()
+            setSelectedProducts([])
         },
         onError: () => {
             toast.error(MESSAGE.NOT_DELETE_CONSTRAINT)
         }
     })
 
+    const updateManyStatusProductsMutation = useMutation({
+        mutationFn: (data: { product_ids: number[] }) => productsApi.updateManyStatusProducts(data),
+        onSuccess: (data) => {
+            toast.success(`${data.data.message} ${selectedProducts.length} dòng dữ liệu`)
+            refetch()
+            setSelectedProducts([])
+        },
+        onError: (error) => {
+            const errorResponse = (error as AxiosError<MessageResponse>).response?.data
+            toast.error(errorResponse?.message ?? '')
+        }
+    })
+
     const handleSelectedOptionChange = (e: DropdownChangeEvent) => {
         switch (e.value) {
             case 'TOGGLE': {
+                const productIds = selectedProducts.map((product) => product.id)
+                updateManyStatusProductsMutation.mutate({ product_ids: productIds })
                 break
             }
             case 'DELETE': {

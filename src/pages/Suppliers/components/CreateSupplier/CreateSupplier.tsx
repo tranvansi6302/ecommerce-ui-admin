@@ -15,6 +15,7 @@ import ShowMessage from '~/components/ShowMessage'
 import MESSAGE from '~/constants/message'
 import PATH from '~/constants/path'
 import useSetTitle from '~/hooks/useSetTitle'
+import { queryClient } from '~/main'
 import { supplierSchema } from '~/schemas/supplier.schema'
 
 type CreateSupplierForm = CreateSupplierRequest
@@ -34,12 +35,14 @@ export default function CreateSupplier() {
     const createSupplierMutation = useMutation({
         mutationFn: (data: CreateSupplierForm) => suppliersApi.createSupplier(data)
     })
-    console.log(errors)
+
     const onSubmit = handleSubmit((data) => {
-        console.log(data)
         setMessage('')
         createSupplierMutation.mutate(data, {
             onSuccess: () => {
+                queryClient.invalidateQueries({
+                    queryKey: ['suppliers']
+                })
                 toast.success(MESSAGE.CREATE_SUPPLIER_SUCCESS)
                 navigate(PATH.SUPPLIER_LIST)
             },

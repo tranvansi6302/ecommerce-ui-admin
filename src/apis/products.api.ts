@@ -30,6 +30,9 @@ const productsApi = {
         return http.delete<MessageResponse>(API.PRODUCT, {
             data: body
         })
+    },
+    updateManyStatusProducts: (data: { product_ids: number[] }) => {
+        return http.patch<MessageResponse>(`${API.PRODUCT}/status`, data)
     }
 }
 
