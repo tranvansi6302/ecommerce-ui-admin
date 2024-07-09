@@ -8,7 +8,6 @@ import {
 import { Dropdown } from 'primereact/dropdown'
 import { useCallback, useMemo, useState } from 'react'
 import MyButton from '~/components/MyButton'
-
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import { Dialog } from 'primereact/dialog'
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
@@ -37,6 +36,7 @@ import HistoryDialog from './components/HistoryDialog'
 import { AxiosError } from 'axios'
 import { MessageResponse } from '~/@types/util'
 import { toast } from 'react-toastify'
+
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
 }
@@ -108,6 +108,7 @@ export default function PricePlanList() {
                 <p className='text-[13.6px] font-normal'>Thay đổi giá</p>
             </MyButton>
         )
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const { data: brands } = useQuery({

@@ -30,4 +30,5 @@ export interface PricePlanFilter {
 }
 
 export type CreatePricePlanResponse = ApiResponse<PricePlan>
+export type UpdatePricePlanResponse = ApiResponse<PricePlan>
 export type ListPricePlanCurrentResponse = PaginatedApiResponse<PricePlan>
