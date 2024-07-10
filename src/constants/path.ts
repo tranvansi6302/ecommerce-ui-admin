@@ -19,6 +19,7 @@ const PATH = {
     PRICE_PLAN_LIST: '/admin/price-plans',
     PRICE_PLAN_LIST_CREATE: '/admin/price-plans/create',
     PRICE_PLAN_LIST_HISTORY: '/admin/price-plans/history',
-    PRODUCT_EDIT:'/admin/products/:id'
+    PRODUCT_EDIT: '/admin/products/:id',
+    PRODUCT_SALE: '/admin/products/sale'
 }
 export default PATH

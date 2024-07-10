@@ -89,7 +89,7 @@ const menuItems: MenuItem[] = [
         children: [
             {
                 label: 'Sản phẩm đang bán',
-                link: PATH.PRICE_PLAN_LIST
+                link: PATH.PRODUCT_SALE
             }
         ]
     }
