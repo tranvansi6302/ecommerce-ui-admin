@@ -1,4 +1,10 @@
-import { FileUpload, FileUploadHeaderTemplateOptions, FileUploadSelectEvent, ItemTemplateOptions } from 'primereact/fileupload'
+import {
+    FileUpload,
+    FileUploadHeaderTemplateOptions,
+    FileUploadProps,
+    FileUploadSelectEvent,
+    ItemTemplateOptions
+} from 'primereact/fileupload'
 import { Tooltip } from 'primereact/tooltip'
 import { useRef, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -75,7 +81,8 @@ export default function Upload({ id, onSelectedFiles }: UploadProps) {
         )
     }
 
-    const emptyTemplate = () => {
+    const emptyTemplate = (props: FileUploadProps) => {
+        console.log(props)
         return (
             <div style={{ display: 'flex' }} className='items-center justify-center w-full'>
                 <button className='w-[20%]'>
@@ -105,7 +112,7 @@ export default function Upload({ id, onSelectedFiles }: UploadProps) {
     }
 
     return (
-        <div className=''>
+        <div>
             <Tooltip target='.custom-choose-btn' position='bottom' />
             <Tooltip target='.custom-cancel-btn' position='bottom' />
             <FileUpload

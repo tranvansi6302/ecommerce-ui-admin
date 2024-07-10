@@ -19,6 +19,7 @@ import { Variant } from '~/@types/variant'
 import brandsApi from '~/apis/brands.api'
 import categoriesApi from '~/apis/categories.api'
 import productsApi, { CreateUpdateProductRequest } from '~/apis/products.api'
+import variantsApi from '~/apis/variants.api'
 import MyButton from '~/components/MyButton'
 import MyDropdown from '~/components/MyDrowdown/MyDropdown'
 import MyInput from '~/components/MyInput'
@@ -30,7 +31,6 @@ import useSetTitle from '~/hooks/useSetTitle'
 import { queryClient } from '~/main'
 import { productSchema } from '~/schemas/products.schema'
 import UpdateVariant from './components/UpdateVariant'
-import variantsApi from '~/apis/variants.api'
 
 type FormDataCreateUpdateProduct = Pick<CreateUpdateProductRequest, 'name' | 'sku' | 'brand_id' | 'category_id'>
 const createProductSchema = productSchema
@@ -99,7 +99,7 @@ export default function UpdateProduct() {
     })
 
     // Submit form
-    const onsubmit = handleSubmit(async (data) => {
+    const onsubmit = handleSubmit((data) => {
         setMessage('')
         const finalData = {
             ...data,
@@ -116,7 +116,9 @@ export default function UpdateProduct() {
                 queryClient.invalidateQueries({
                     queryKey: ['product']
                 })
-                toast.success(MESSAGE.UPDATE_PRODUCT_SUCCESS)
+                if (files.length === 0) {
+                    toast.success(MESSAGE.UPDATE_PRODUCT_SUCCESS)
+                }
             },
             onError: (error) => {
                 console.log(error)
@@ -125,6 +127,32 @@ export default function UpdateProduct() {
                 toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
             }
         })
+
+        if (files && files.length > 0) {
+            const formData = new FormData()
+            files.forEach((file) => {
+                formData.append('files', file)
+            })
+
+            const payload = {
+                id: Number(productId),
+                body: formData
+            }
+            uploadImagesMutation.mutate(payload, {
+                onSuccess: (data) => {
+                    queryClient.invalidateQueries({
+                        queryKey: ['product']
+                    })
+                    toast.success(data.data.message)
+                },
+                onError: (error) => {
+                    console.log(error)
+                    const errorResponse = (error as AxiosError<MessageResponse>).response?.data
+                    setMessage(errorResponse?.message ?? '')
+                    toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
+                }
+            })
+        }
     })
 
     const handleOnSelectedFiles = (files: File[]) => {
@@ -259,18 +287,38 @@ export default function UpdateProduct() {
                             </div>
                         </div>
                         <div className='bg-white px-5 py-5 mt-5'>
+                            <h3 className='text-[13.6px] text-blue-600 font-medium  flex items-center cursor-pointer'>
+                                Hình ảnh
+                            </h3>
+                            <ShowMessage
+                                severity='warn'
+                                detail='Lưu ý khi cập nhật hình ảnh toàn bộ ảnh cũ sẽ bị ghi đè bằng ảnh được cập nhật!'
+                            />
+                            <div className='flex gap-2'>
+                                {product?.product_images &&
+                                    product.product_images.length > 0 &&
+                                    product.product_images.map((image) => (
+                                        <div className='border flex items-center justify-center p-3 rounded-md w-[100px] h-[100px] border-gray-300 relative'>
+                                            <img
+                                                className='w-full h-full object-cover'
+                                                alt={image.url}
+                                                role='presentation'
+                                                src={image.url}
+                                            />
+                                        </div>
+                                    ))}
+                            </div>
                             <h3
                                 onClick={() => setOpenUpload(!openUpload)}
-                                className='text-[13.6px] text-blue-600 font-medium mb-2 flex items-center cursor-pointer'
+                                className='text-[13.6px] text-blue-600 font-medium py-5  flex items-center cursor-pointer'
                             >
-                                Hình ảnh
+                                Tải lên hình ảnh
                                 {openUpload ? (
                                     <FaAngleUp className='inline-block ml-1 text-[16px]' />
                                 ) : (
                                     <FaAngleDown className='inline-block ml-1 text-[16px]' />
                                 )}
                             </h3>
-                            <p className='text-sm my-2'>Thêm hình ảnh để nhận dạng sản phẩm của bạn một cách dễ dàng</p>
                             {openUpload && (
                                 <div className='mt-1'>
                                     <Upload onSelectedFiles={handleOnSelectedFiles} id='upload-product' />
