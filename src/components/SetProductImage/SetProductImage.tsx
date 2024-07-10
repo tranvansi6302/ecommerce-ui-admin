@@ -9,7 +9,7 @@ interface ProductImageProps {
 export default function SetProductImage({ productImages }: ProductImageProps) {
     return (
         <Fragment>
-            {productImages.length > 0 ? (
+            {productImages && productImages?.length > 0 ? (
                 <div className='w-[40px] h-[40px] bg-gray-50 rounded-md flex justify-center items-center'>
                     <img src={productImages[0].url} alt='product_image' />
                 </div>

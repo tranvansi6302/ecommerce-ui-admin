@@ -60,8 +60,35 @@ export interface ProductFilter {
     status?: string
 }
 
+export type ProductSaleType = {
+    id: number
+    brand: Brand
+    category: Category
+    description: string
+    images: ProductImage[]
+    sku: string
+    variants: Variant[]
+    product_id: number
+    product_name: string
+    total_sold: number
+    average_rating: number
+    total_reviews: number
+    min_price: number
+    created_at: string
+    updated_at: string
+}
+
+export type ProductSaleFilters = {
+    page?: number
+    limit?: number
+    category?: string
+    brand?: string
+    search?: string
+}
+
 export type ListProductResponse = PaginatedApiResponse<Product>
 export type ProductResponse = ApiResponse<Product>
 export type CreateProductResponse = ApiResponse<ProductCreateUpdate>
 export type UpdateProductResponse = ApiResponse<ProductCreateUpdate>
 export type UploadImagesResponse = ApiResponse<ProductUploadImages>
+export type ListProductSaleResponse = PaginatedApiResponse<ProductSale>

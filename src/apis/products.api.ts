@@ -1,8 +1,10 @@
 import {
     CreateProductResponse,
     ListProductResponse,
+    ListProductSaleResponse,
     ProductFilter,
     ProductResponse,
+    ProductSaleFilters,
     UpdateProductResponse,
     UploadImagesResponse
 } from '~/@types/product'
@@ -48,6 +50,11 @@ const productsApi = {
     },
     updateManyStatusProducts: (data: { product_ids: number[] }) => {
         return http.patch<MessageResponse>(`${API.PRODUCT}/status`, data)
+    },
+    getAllProductSale: (params: ProductSaleFilters) => {
+        return http.get<ListProductSaleResponse>(`${API.PRODUCT}/sales`, {
+            params
+        })
     }
 }
 

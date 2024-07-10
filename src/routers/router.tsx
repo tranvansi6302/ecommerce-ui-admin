@@ -22,6 +22,7 @@ import UpdateUser from '~/pages/Users/components/UpdateUser'
 import WarehouseList from '~/pages/Warehouses'
 import { ProtectedRoute, RejectedRoute } from './protected'
 import UpdateProduct from '~/pages/Products/components/UpdateProduct'
+import ProductSale from '~/pages/Sells/ProductSale'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -170,6 +171,14 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <UpdateUser />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.PRODUCT_SALE,
+                    element: (
+                        <MainLayout>
+                            <ProductSale />
                         </MainLayout>
                     )
                 }

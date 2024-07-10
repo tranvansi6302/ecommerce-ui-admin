@@ -20,22 +20,22 @@ import categoriesApi from '~/apis/categories.api'
 import productsApi from '~/apis/products.api'
 import PATH from '~/constants/path'
 import useQueryProducts from '~/hooks/useQueryProducts'
-import { convertProductStatus, formatDate } from '~/utils/format'
+import { convertProductStatus } from '~/utils/format'
 
+import { AxiosError } from 'axios'
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
+import { FaCheckDouble } from 'react-icons/fa'
+import { toast } from 'react-toastify'
+import { MessageResponse } from '~/@types/util'
 import { Variant } from '~/@types/variant'
 import SetProductImage from '~/components/SetProductImage'
+import ShowMessage from '~/components/ShowMessage'
+import MESSAGE from '~/constants/message'
+import { PRODUCT_STATUS } from '~/constants/status'
 import useSetTitle from '~/hooks/useSetTitle'
 import FilterProduct from './components/FilterProduct'
-import RowVariant from './components/RowVariant'
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 import { ProductStatus } from './components/FilterProduct/FilterProduct'
-import { PRODUCT_STATUS } from '~/constants/status'
-import { FaCheckDouble } from 'react-icons/fa'
-import ShowMessage from '~/components/ShowMessage'
-import { toast } from 'react-toastify'
-import MESSAGE from '~/constants/message'
-import { AxiosError } from 'axios'
-import { MessageResponse } from '~/@types/util'
+import RowVariant from './components/RowVariant'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
@@ -92,6 +92,13 @@ export default function ProductList() {
 
     // handle image (default)
     const imageBodyTemplate = useCallback((rowData: Product) => <SetProductImage productImages={rowData.product_images} />, [])
+    const skuBodyTemplate = useCallback((rowData: Product) => {
+        return (
+            <Link className='text-blue-600' to={`${PATH.PRODUCT_LIST}/${rowData.id}`}>
+                {rowData.sku}
+            </Link>
+        )
+    }, [])
 
     const allowExpansion = useCallback((rowData: Product) => rowData.variants!.length > 0, [])
 
@@ -110,16 +117,8 @@ export default function ProductList() {
         [variantNameTemplate, warehouseTemplate, purchasePriceTemplate, salePriceTemplate]
     )
 
-    const productNameTemplate = useCallback((rowData: Product) => {
-        return (
-            <Link className='text-blue-600' to={`${PATH.PRODUCT_LIST}/${rowData.id}`}>
-                {rowData.name}
-            </Link>
-        )
-    }, [])
+    const productNameTemplate = useCallback((rowData: Product) => rowData.name, [])
 
-    const ProductCreateUpdatedAtTemplate = useCallback((rowData: Product) => formatDate(rowData.created_at), [])
-    // const productUpdatedAtTemplate = useCallback((rowData: Product) => formatDate(rowData.updated_at), [])
     const categoryNameTemplate = useCallback((rowData: Product) => rowData?.category?.name, [])
 
     const brandNameTemplate = useCallback((rowData: Product) => rowData?.brand?.name, [])
@@ -274,13 +273,12 @@ export default function ProductList() {
             >
                 <Column className='pr-0 w-[35px]' expander={allowExpansion} />
                 <Column selectionMode='multiple' className='w-[40px]' />
+                <Column header='SKU' body={skuBodyTemplate} />
                 <Column header='Ảnh' body={imageBodyTemplate} />
                 <Column className='w-[35%]' field='name' header='Sản phẩm' body={productNameTemplate} />
                 <Column field='category' header='Loại' body={categoryNameTemplate} />
                 <Column field='brand' header='Thương hiệu' body={brandNameTemplate} />
                 <Column className='pl-0' field='status' header='Trạng thái' body={productStatusTemplate} />
-                <Column field='createdAt' header='Ngày khởi tạo' body={ProductCreateUpdatedAtTemplate} sortable />
-                {/* <Column field='updatedAt' header='Cập nhật cuối' body={productUpdatedAtTemplate} sortable /> */}
             </DataTable>
             <div className='flex justify-end mt-3'>
                 <Paginator
