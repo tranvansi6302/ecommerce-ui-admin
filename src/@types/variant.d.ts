@@ -1,5 +1,5 @@
 import { ProductImage } from './product'
-import { PaginatedApiResponse } from './util'
+import { ApiResponse, PaginatedApiResponse } from './util'
 
 interface BaseVariant {
     id: number
@@ -37,3 +37,4 @@ export interface VariantWarehouse extends BaseVariant {
 }
 
 export type ListVariantResponse = PaginatedApiResponse<Variant>
+export type UpdateVariantResponse = ApiResponse<Variant>

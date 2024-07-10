@@ -85,6 +85,10 @@
     padding: 0 !important;
     border-radius: 2px !important;
 }
+.p-fileupload-content > div {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+}
 
 .p-fileupload-content > [data-pc-name='messages'] {
     display: none;
@@ -92,7 +96,7 @@
 
 .p-fileupload-row {
     border: none !important;
-    margin: 0;
+    margin: 0 !important;
 }
 
 .p-dropdown-filter-container > input {

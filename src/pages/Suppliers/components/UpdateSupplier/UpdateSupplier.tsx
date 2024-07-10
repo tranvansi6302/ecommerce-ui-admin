@@ -50,8 +50,6 @@ export default function UpdateSupplier() {
         enabled: !!supplierId
     })
 
-    console.log(selectedStatus)
-
     useEffect(() => {
         if (supplier) {
             setValue('name', supplier.data.result.name)

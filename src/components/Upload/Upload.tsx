@@ -1,5 +1,10 @@
-import { Button } from 'primereact/button'
-import { FileUpload, FileUploadHeaderTemplateOptions, FileUploadSelectEvent, ItemTemplateOptions } from 'primereact/fileupload'
+import {
+    FileUpload,
+    FileUploadHeaderTemplateOptions,
+    FileUploadProps,
+    FileUploadSelectEvent,
+    ItemTemplateOptions
+} from 'primereact/fileupload'
 import { Tooltip } from 'primereact/tooltip'
 import { useRef, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -64,39 +69,35 @@ export default function Upload({ id, onSelectedFiles }: UploadProps) {
     const itemTemplate = (inFile: object, props: ItemTemplateOptions) => {
         const file = inFile as File
         return (
-            <div className='flex align-items-center flex-wrap py-0'>
-                <div className='flex align-items-center' style={{ width: '40%' }}>
-                    <img className='h-[50px]' alt={file.name} role='presentation' src={URL.createObjectURL(file)} width={50} />
-                    <span className='flex flex-column text-left ml-3'>{file.name}</span>
-                </div>
-
-                <Button
-                    type='button'
-                    icon='pi pi-trash'
-                    severity='danger'
-                    text
-                    className='ml-auto'
-                    style={{ borderRadius: '50%' }}
+            <div className='border flex items-center justify-center p-3 rounded-md w-[100px] h-[100px] border-gray-300 relative'>
+                <img className='w-full h-full object-cover' alt={file.name} role='presentation' src={URL.createObjectURL(file)} />
+                <button
                     onClick={() => onTemplateRemove(file, props.onRemove)}
-                />
+                    className='absolute top-1 right-1 text-gray-500 hover:opacity-80'
+                >
+                    <i className='pi pi-fw pi-times text-[14px]'></i>
+                </button>
             </div>
         )
     }
 
-    const emptyTemplate = () => {
+    const emptyTemplate = (props: FileUploadProps) => {
+        console.log(props)
         return (
-            <div className='flex items-center justify-center'>
-                <i
-                    className='pi pi-image p-5'
-                    style={{
-                        fontSize: '3em',
-                        color: '#d3d3d3',
-                        borderRadius: '50%'
-                    }}
-                ></i>
-                <span style={{ fontSize: '14px', color: 'var(--text-color-secondary)' }} className='my-5'>
+            <div style={{ display: 'flex' }} className='items-center justify-center w-full'>
+                <button className='w-[20%]'>
+                    <i
+                        className='pi pi-images p-5'
+                        style={{
+                            fontSize: '3em',
+                            color: '#d3d3d3',
+                            borderRadius: '50%'
+                        }}
+                    ></i>
+                </button>
+                <p style={{ fontSize: '14px', color: 'var(--text-color-secondary)' }} className='my-5 w-[80%]'>
                     Chấp nhận đuôi .jpg, .jpeg, .png, dung lượng tối đa 5MB, tối đa 5 hình ảnh
-                </span>
+                </p>
             </div>
         )
     }
@@ -111,7 +112,7 @@ export default function Upload({ id, onSelectedFiles }: UploadProps) {
     }
 
     return (
-        <div className=''>
+        <div>
             <Tooltip target='.custom-choose-btn' position='bottom' />
             <Tooltip target='.custom-cancel-btn' position='bottom' />
             <FileUpload
