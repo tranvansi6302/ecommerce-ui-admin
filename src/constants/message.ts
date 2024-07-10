@@ -17,7 +17,8 @@ const MESSAGE = {
     LOGOUT_SUCCESS: 'Đăng xuất thành công',
     NOT_DELETE_CONSTRAINT: 'Không thể xóa vì đang có ràng buộc',
     INVALID_PRICE: 'Phải nhập ít nhất một giá',
-    INVALID_PROMOTION_PRICE_GREATER_THAN_SALE_PRICE: 'Giá khuyến mãi phải nhỏ hơn giá bán'
+    INVALID_PROMOTION_PRICE_GREATER_THAN_SALE_PRICE: 'Giá khuyến mãi phải nhỏ hơn giá bán',
+    UPDATE_PRODUCT_SUCCESS: 'Cập nhật sản phẩm thành công'
 }
 
 export default MESSAGE

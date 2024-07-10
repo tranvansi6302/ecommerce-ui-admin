@@ -25,7 +25,7 @@ interface Product {
     updated_at: string
 }
 
-interface ProductCreate {
+interface ProductCreateUpdate {
     id: number
     name: string
     description: string
@@ -61,5 +61,7 @@ export interface ProductFilter {
 }
 
 export type ListProductResponse = PaginatedApiResponse<Product>
-export type CreateProductResponse = ApiResponse<ProductCreate>
+export type ProductResponse = ApiResponse<Product>
+export type CreateProductResponse = ApiResponse<ProductCreateUpdate>
+export type UpdateProductResponse = ApiResponse<ProductCreateUpdate>
 export type UploadImagesResponse = ApiResponse<ProductUploadImages>

@@ -64,10 +64,10 @@ export default function Upload({ id, onSelectedFiles }: UploadProps) {
     const itemTemplate = (inFile: object, props: ItemTemplateOptions) => {
         const file = inFile as File
         return (
-            <div className='flex align-items-center flex-wrap py-0'>
-                <div className='flex align-items-center' style={{ width: '40%' }}>
+            <div className='flex align-items-center justify-between flex-wrap py-0'>
+                <div className='flex align-items-center' style={{ width: '80%' }}>
                     <img className='h-[50px]' alt={file.name} role='presentation' src={URL.createObjectURL(file)} width={50} />
-                    <span className='flex flex-column text-left ml-3'>{file.name}</span>
+                    <span className='flex text-left ml-3 truncate'>{file.name}</span>
                 </div>
 
                 <Button
@@ -75,7 +75,7 @@ export default function Upload({ id, onSelectedFiles }: UploadProps) {
                     icon='pi pi-trash'
                     severity='danger'
                     text
-                    className='ml-auto'
+                    className=''
                     style={{ borderRadius: '50%' }}
                     onClick={() => onTemplateRemove(file, props.onRemove)}
                 />

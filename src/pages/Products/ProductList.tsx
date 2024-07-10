@@ -112,13 +112,13 @@ export default function ProductList() {
 
     const productNameTemplate = useCallback((rowData: Product) => {
         return (
-            <Link className='text-blue-600' to={`/products/${rowData.id}`}>
+            <Link className='text-blue-600' to={`${PATH.PRODUCT_LIST}/${rowData.id}`}>
                 {rowData.name}
             </Link>
         )
     }, [])
 
-    const productCreatedAtTemplate = useCallback((rowData: Product) => formatDate(rowData.created_at), [])
+    const ProductCreateUpdatedAtTemplate = useCallback((rowData: Product) => formatDate(rowData.created_at), [])
     // const productUpdatedAtTemplate = useCallback((rowData: Product) => formatDate(rowData.updated_at), [])
     const categoryNameTemplate = useCallback((rowData: Product) => rowData?.category?.name, [])
 
@@ -279,7 +279,7 @@ export default function ProductList() {
                 <Column field='category' header='Loại' body={categoryNameTemplate} />
                 <Column field='brand' header='Thương hiệu' body={brandNameTemplate} />
                 <Column className='pl-0' field='status' header='Trạng thái' body={productStatusTemplate} />
-                <Column field='createdAt' header='Ngày khởi tạo' body={productCreatedAtTemplate} sortable />
+                <Column field='createdAt' header='Ngày khởi tạo' body={ProductCreateUpdatedAtTemplate} sortable />
                 {/* <Column field='updatedAt' header='Cập nhật cuối' body={productUpdatedAtTemplate} sortable /> */}
             </DataTable>
             <div className='flex justify-end mt-3'>

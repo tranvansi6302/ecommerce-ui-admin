@@ -5,6 +5,7 @@ import { LuLayoutDashboard } from 'react-icons/lu'
 import { RiTShirt2Line } from 'react-icons/ri'
 import { GrMoney } from 'react-icons/gr'
 import { MdOutlineClear } from 'react-icons/md'
+import { IoStorefront } from 'react-icons/io5'
 import PATH from '~/constants/path'
 import MenuItem from './components/MenuItem'
 import { Link } from 'react-router-dom'
@@ -79,6 +80,16 @@ const menuItems: MenuItem[] = [
             {
                 label: 'Lịch sử thay đổi',
                 link: PATH.PRICE_PLAN_LIST_HISTORY
+            }
+        ]
+    },
+    {
+        label: 'Quản lý bán hàng',
+        icon: <IoStorefront fontSize='18px' />,
+        children: [
+            {
+                label: 'Sản phẩm đang bán',
+                link: PATH.PRICE_PLAN_LIST
             }
         ]
     }

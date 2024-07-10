@@ -21,6 +21,7 @@ import UserList from '~/pages/Users'
 import UpdateUser from '~/pages/Users/components/UpdateUser'
 import WarehouseList from '~/pages/Warehouses'
 import { ProtectedRoute, RejectedRoute } from './protected'
+import UpdateProduct from '~/pages/Products/components/UpdateProduct'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -49,6 +50,14 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <CreateProduct />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.PRODUCT_EDIT,
+                    element: (
+                        <MainLayout>
+                            <UpdateProduct />
                         </MainLayout>
                     )
                 },

@@ -1,10 +1,17 @@
-import { CreateProductResponse, ListProductResponse, ProductFilter, UploadImagesResponse } from '~/@types/product'
+import {
+    CreateProductResponse,
+    ListProductResponse,
+    ProductFilter,
+    ProductResponse,
+    UpdateProductResponse,
+    UploadImagesResponse
+} from '~/@types/product'
 import { MessageResponse } from '~/@types/util'
 import API from '~/constants/api'
 import { ProductSchemaType } from '~/schemas/products.schema'
 import http from '~/utils/http'
 
-export type CreateProductRequest = ProductSchemaType & {
+export type CreateUpdateProductRequest = ProductSchemaType & {
     description: string
     colors: string[]
     sizes: string[]
@@ -16,9 +23,17 @@ const productsApi = {
             params
         })
     },
-    createProduct: (body: CreateProductRequest) => {
+    getProductById: (id: number) => {
+        return http.get<ProductResponse>(`${API.PRODUCT}/${id}`)
+    },
+    createProduct: (body: CreateUpdateProductRequest) => {
         return http.post<CreateProductResponse>(API.PRODUCT, body)
     },
+
+    updateProduct: (id: number, body: CreateUpdateProductRequest) => {
+        return http.patch<UpdateProductResponse>(`${API.PRODUCT}/${id}`, body)
+    },
+
     uploadImages: (id: number, body: FormData) => {
         return http.patch<UploadImagesResponse>(`${API.PRODUCT}/${id}/upload-images`, body, {
             headers: {

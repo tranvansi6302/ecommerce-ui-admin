@@ -14,7 +14,7 @@ import { Category } from '~/@types/category'
 import { MessageResponse } from '~/@types/util'
 import brandsApi from '~/apis/brands.api'
 import categoriesApi from '~/apis/categories.api'
-import productsApi, { CreateProductRequest } from '~/apis/products.api'
+import productsApi, { CreateUpdateProductRequest } from '~/apis/products.api'
 import MyButton from '~/components/MyButton'
 import MyChip from '~/components/MyChip'
 import MyDropdown from '~/components/MyDrowdown/MyDropdown'
@@ -27,7 +27,7 @@ import useSetTitle from '~/hooks/useSetTitle'
 import { queryClient } from '~/main'
 import { productSchema } from '~/schemas/products.schema'
 
-type FormDataCreateProduct = Pick<CreateProductRequest, 'name' | 'sku' | 'brand_id' | 'category_id'>
+type FormDataCreateUpdateProduct = Pick<CreateUpdateProductRequest, 'name' | 'sku' | 'brand_id' | 'category_id'>
 const createProductSchema = productSchema
 
 export default function CreateProduct() {
@@ -48,12 +48,12 @@ export default function CreateProduct() {
         register,
         handleSubmit,
         formState: { errors }
-    } = useForm<FormDataCreateProduct>({
+    } = useForm<FormDataCreateUpdateProduct>({
         resolver: yupResolver(createProductSchema)
     })
 
     const createProductMutation = useMutation({
-        mutationFn: (data: CreateProductRequest) => productsApi.createProduct(data)
+        mutationFn: (data: CreateUpdateProductRequest) => productsApi.createProduct(data)
     })
 
     const uploadImagesMutation = useMutation({
@@ -73,7 +73,7 @@ export default function CreateProduct() {
     // Submit form
     const onsubmit = handleSubmit(async (data) => {
         setMessage('')
-        const finalData: CreateProductRequest = {
+        const finalData: CreateUpdateProductRequest = {
             ...data,
             description,
             colors,
@@ -263,7 +263,10 @@ export default function CreateProduct() {
                             <p className='font-semibold text-[14px]'>Thoát</p>
                         </MyButton>
                     </Link>
-                    <MyButton loading={uploadImagesMutation.isPending} className='rounded-[3px] h-9 w-36'>
+                    <MyButton
+                        loading={createProductMutation.isPending || uploadImagesMutation.isPending}
+                        className='rounded-[3px] h-9 w-36'
+                    >
                         <p className='font-semibold text-[14px]'>Lưu sản phẩm</p>
                     </MyButton>
                 </div>
