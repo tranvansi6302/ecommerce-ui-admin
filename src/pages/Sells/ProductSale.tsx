@@ -16,8 +16,8 @@ import PATH from '~/constants/path'
 import useQueryProductsSales from '~/hooks/useQueryProductsSales'
 import useSetTitle from '~/hooks/useSetTitle'
 import { formatCurrencyVND, formatDate } from '~/utils/format'
-import RowVariant from './components/RowVariant'
 import FilterProductSale from './components/FilterProductSale'
+import RowVariant from './components/RowVariant'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
@@ -35,8 +35,8 @@ export default function ProductSale() {
     const [first, setFirst] = useState<number>(0)
     const [rows, setRows] = useState<number>(5)
 
-    const { data: products } = useQuery({
-        queryKey: ['products', queryConfig],
+    const { data: productsSales } = useQuery({
+        queryKey: ['productsSales', queryConfig],
         queryFn: () => productsApi.getAllProductSale(queryConfig as ProductSaleFilters),
         staleTime: 3 * 60 * 1000,
         placeholderData: keepPreviousData
@@ -70,11 +70,18 @@ export default function ProductSale() {
         return `${formatDate(rowData.current_price_plan.start_date)} - Không có`
     }, [])
 
-    // handle image (default)
     const imageBodyTemplate = useCallback(
         (rowData: ProductSaleType) => <SetProductImage productImages={rowData?.images as ProductImage[]} />,
         []
     )
+
+    const skuBodyTemplate = useCallback((rowData: ProductSaleType) => {
+        return (
+            <Link className='text-blue-600' to={`${PATH.PRODUCT_LIST}/${rowData.product_id}`}>
+                {rowData.sku}
+            </Link>
+        )
+    }, [])
 
     const allowExpansion = useCallback((rowData: ProductSaleType) => rowData.variants!.length > 0, [])
 
@@ -93,13 +100,7 @@ export default function ProductSale() {
         [applyDateTemplate, currentPriceTemplate, variantNameTemplate, warehouseTemplate]
     )
 
-    const productNameTemplate = useCallback((rowData: ProductSaleType) => {
-        return (
-            <Link className='text-blue-600' to={`${PATH.PRODUCT_LIST}/${rowData.id}`}>
-                {rowData.product_name}
-            </Link>
-        )
-    }, [])
+    const productNameTemplate = useCallback((rowData: ProductSaleType) => rowData.product_name, [])
 
     const categoryNameTemplate = useCallback((rowData: ProductSaleType) => rowData?.category?.name, [])
 
@@ -137,13 +138,13 @@ export default function ProductSale() {
     }
 
     const totalRecords = useMemo(() => {
-        return (products?.data?.pagination?.limit as number) * (products?.data?.pagination?.total_page as number)
-    }, [products?.data?.pagination?.limit, products?.data?.pagination?.total_page])
+        return (productsSales?.data?.pagination?.limit as number) * (productsSales?.data?.pagination?.total_page as number)
+    }, [productsSales?.data?.pagination?.limit, productsSales?.data?.pagination?.total_page])
 
     return (
         <div className='w-full'>
             <DataTable
-                value={(products?.data.result as unknown as DataTableValueArray) ?? []}
+                value={(productsSales?.data.result as unknown as DataTableValueArray) ?? []}
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
                 rowExpansionTemplate={rowVariantTemplate}
@@ -155,6 +156,7 @@ export default function ProductSale() {
             >
                 <Column className='pr-0 w-[35px]' expander={allowExpansion} />
 
+                <Column header='SKU' body={skuBodyTemplate} />
                 <Column header='Ảnh' body={imageBodyTemplate} />
                 <Column className='w-[50%]' field='name' header='Sản phẩm' body={productNameTemplate} />
                 <Column field='category' header='Loại sản phẩm' body={categoryNameTemplate} />
