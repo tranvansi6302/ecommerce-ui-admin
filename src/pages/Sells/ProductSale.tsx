@@ -16,8 +16,8 @@ import PATH from '~/constants/path'
 import useQueryProductsSales from '~/hooks/useQueryProductsSales'
 import useSetTitle from '~/hooks/useSetTitle'
 import { formatCurrencyVND, formatDate } from '~/utils/format'
-import FilterProduct from './components/FilterProduct'
 import RowVariant from './components/RowVariant'
+import FilterProductSale from './components/FilterProductSale'
 
 export type QueryConfig = {
     [key in keyof ProductFilter]: string
@@ -59,9 +59,9 @@ export default function ProductSale() {
     const warehouseTemplate = useCallback((rowData: Variant) => rowData?.warehouse?.available_quantity ?? 0, [])
 
     const currentPriceTemplate = useCallback((rowData: Variant) => {
-        return rowData?.current_price_plan.promotion_price
-            ? formatCurrencyVND(rowData?.current_price_plan.promotion_price)
-            : formatCurrencyVND(rowData?.current_price_plan.sale_price)
+        return rowData?.current_price_plan?.promotion_price
+            ? formatCurrencyVND(rowData?.current_price_plan?.promotion_price)
+            : formatCurrencyVND(rowData?.current_price_plan?.sale_price)
     }, [])
     const applyDateTemplate = useCallback((rowData: Variant) => {
         if (rowData.current_price_plan.start_date && rowData.current_price_plan.end_date) {
@@ -107,7 +107,7 @@ export default function ProductSale() {
 
     const header = useMemo(
         () => (
-            <FilterProduct
+            <FilterProductSale
                 search={search}
                 setSearch={setSearch}
                 selectedBrand={selectedBrand as Brand}
