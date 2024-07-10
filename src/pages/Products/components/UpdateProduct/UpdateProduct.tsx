@@ -1,24 +1,25 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
-import { ChipsChangeEvent } from 'primereact/chips'
+import { Column } from 'primereact/column'
+import { DataTable, DataTableSelectionMultipleChangeEvent, DataTableValueArray } from 'primereact/datatable'
 import { Divider } from 'primereact/divider'
-import { DropdownChangeEvent } from 'primereact/dropdown'
+import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown'
 import { Editor, EditorTextChangeEvent } from 'primereact/editor'
-import { useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link, useNavigate } from 'react-router-dom'
+import { FaAngleDown, FaAngleUp, FaCheckDouble } from 'react-icons/fa'
+import { Link, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Brand } from '~/@types/brand'
 import { Category } from '~/@types/category'
-import { FaAngleDown } from 'react-icons/fa6'
-import { FaAngleUp } from 'react-icons/fa6'
+import { Product } from '~/@types/product'
 import { MessageResponse } from '~/@types/util'
+import { Variant } from '~/@types/variant'
 import brandsApi from '~/apis/brands.api'
 import categoriesApi from '~/apis/categories.api'
 import productsApi, { CreateUpdateProductRequest } from '~/apis/products.api'
 import MyButton from '~/components/MyButton'
-import MyChip from '~/components/MyChip'
 import MyDropdown from '~/components/MyDrowdown/MyDropdown'
 import MyInput from '~/components/MyInput'
 import ShowMessage from '~/components/ShowMessage'
@@ -28,35 +29,59 @@ import PATH from '~/constants/path'
 import useSetTitle from '~/hooks/useSetTitle'
 import { queryClient } from '~/main'
 import { productSchema } from '~/schemas/products.schema'
+import UpdateVariant from './components/UpdateVariant'
+import variantsApi from '~/apis/variants.api'
 
 type FormDataCreateUpdateProduct = Pick<CreateUpdateProductRequest, 'name' | 'sku' | 'brand_id' | 'category_id'>
 const createProductSchema = productSchema
+const selectedOptions = [{ label: 'Xóa vĩnh viễn', value: 'DELETE' }]
 
-export default function CreateProduct() {
-    useSetTitle('Tạo sản phẩm')
-    const navigate = useNavigate()
+export default function UpdateProduct() {
+    useSetTitle('Cập nhật sản phẩm')
+    const { id: productId } = useParams<{ id: string }>()
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
     const [description, setDescription] = useState<string>('')
     const [openEditor, setOpenEditor] = useState<boolean>(false)
+    const [message, setMessage] = useState<string>('')
+    const [variant, setVariant] = useState<Variant | null>(null)
+    const [selectedVariant, setSelectedVariant] = useState<Variant[]>([])
     const [openVariant, setOpenVariant] = useState<boolean>(false)
     const [openUpload, setOpenUpload] = useState<boolean>(false)
-    const [sizes, setSizes] = useState<string[]>([])
-    const [colors, setColors] = useState<string[]>([])
-    const [message, setMessage] = useState<string>('')
+    const [globalFilter] = useState<string>('')
+
     const [files, setFiles] = useState<File[]>([])
+
+    const { data } = useQuery({
+        queryKey: ['product', productId],
+        queryFn: () => productsApi.getProductById(Number(productId)),
+        enabled: !!productId
+    })
+    const product = data?.data.result as Product
 
     // Handle form
     const {
         register,
         handleSubmit,
+        setValue,
         formState: { errors }
     } = useForm<FormDataCreateUpdateProduct>({
         resolver: yupResolver(createProductSchema)
     })
 
-    const createProductMutation = useMutation({
-        mutationFn: (data: CreateUpdateProductRequest) => productsApi.createProduct(data)
+    useEffect(() => {
+        setValue('name', product?.name)
+        setValue('sku', product?.sku)
+        setSelectedBrand(product?.brand)
+        setValue('brand_id', product?.brand.id.toString())
+        setSelectedCategory(product?.category)
+        setValue('category_id', product?.category.id.toString())
+        setDescription(product?.description)
+    }, [product?.brand, product?.category, product?.description, product?.name, product?.sku, setValue])
+
+    const updateProductMutation = useMutation({
+        mutationFn: (payload: { id: number; body: FormDataCreateUpdateProduct }) =>
+            productsApi.updateProduct(payload.id, payload.body as CreateUpdateProductRequest)
     })
 
     const uploadImagesMutation = useMutation({
@@ -76,24 +101,22 @@ export default function CreateProduct() {
     // Submit form
     const onsubmit = handleSubmit(async (data) => {
         setMessage('')
-        const finalData: CreateUpdateProductRequest = {
+        const finalData = {
             ...data,
-            description,
-            colors,
-            sizes,
             brand_id: selectedBrand?.id.toString() ?? '',
-            category_id: selectedCategory?.id.toString() ?? ''
+            category_id: selectedCategory?.id.toString() ?? '',
+            description
         }
-
-        const product = await createProductMutation.mutateAsync(finalData, {
+        const payload = {
+            id: Number(productId),
+            body: finalData
+        }
+        updateProductMutation.mutate(payload, {
             onSuccess: () => {
-                if (files.length === 0) {
-                    queryClient.invalidateQueries({
-                        queryKey: ['products']
-                    })
-                    toast.success(MESSAGE.CREATE_PRODUCT_SUCCESS)
-                    navigate(PATH.PRODUCT_LIST)
-                }
+                queryClient.invalidateQueries({
+                    queryKey: ['product']
+                })
+                toast.success(MESSAGE.UPDATE_PRODUCT_SUCCESS)
             },
             onError: (error) => {
                 console.log(error)
@@ -102,41 +125,83 @@ export default function CreateProduct() {
                 toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
             }
         })
-
-        if (files && files.length > 0) {
-            const formData = new FormData()
-            files.forEach((file) => {
-                formData.append('files', file)
-            })
-
-            const payload = {
-                id: product.data.result.id,
-                body: formData
-            }
-            await uploadImagesMutation.mutateAsync(payload, {
-                onSuccess: () => {
-                    queryClient.invalidateQueries({
-                        queryKey: ['products']
-                    })
-                    toast.success(MESSAGE.CREATE_PRODUCT_SUCCESS)
-                    navigate(PATH.PRODUCT_LIST)
-                },
-                onError: (error) => {
-                    console.log(error)
-                    const errorResponse = (error as AxiosError<MessageResponse>).response?.data
-                    setMessage(errorResponse?.message ?? '')
-                    toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
-                }
-            })
-        }
     })
 
     const handleOnSelectedFiles = (files: File[]) => {
         setFiles(files)
     }
 
+    const variantNameTemplate = useCallback((rowData: Variant) => {
+        return (
+            <p
+                onClick={() => {
+                    setVariant(rowData)
+                    setOpenVariant(true)
+                }}
+                className='text-blue-600 cursor-pointer'
+            >
+                {rowData.variant_name}
+            </p>
+        )
+    }, [])
+
+    const variantSkuTemplate = useCallback((rowData: Variant) => rowData.sku.toUpperCase(), [])
+    const variantColorTemplate = useCallback((rowData: Variant) => rowData.color.toUpperCase(), [])
+    const variantSizeTemplate = useCallback((rowData: Variant) => rowData.size.toUpperCase(), [])
+
+    const deleteManyVariantsMutation = useMutation({
+        mutationFn: (data: { variant_ids: number[] }) => variantsApi.deleteManyVariants(data),
+        onSuccess: (data) => {
+            setSelectedVariant([])
+            toast.success(data.data.message)
+            queryClient.invalidateQueries({
+                queryKey: ['product']
+            })
+        },
+        onError: () => {
+            toast.error(MESSAGE.NOT_DELETE_CONSTRAINT)
+        }
+    })
+
+    const handleSelectedOptionChange = (e: DropdownChangeEvent) => {
+        switch (e.value) {
+            case 'DELETE': {
+                const variantIds = selectedVariant.map((variant) => variant.id)
+                deleteManyVariantsMutation.mutate({ variant_ids: variantIds })
+                break
+            }
+            default:
+                break
+        }
+    }
+
+    const selectedHeader = useMemo(
+        () => (
+            <div className='flex flex-wrap justify-content-between gap-4 items-center'>
+                <span className='text-blue-600 text-[15px] font-normal flex items-center gap-2'>
+                    <FaCheckDouble />
+                    Đã chọn {selectedVariant.length} dòng trên trang này
+                </span>
+                <Dropdown
+                    style={{ width: '300px' }}
+                    options={selectedOptions}
+                    onChange={handleSelectedOptionChange}
+                    className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
+                    placeholder='Chọn thao tác'
+                />
+            </div>
+        ),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [selectedVariant.length]
+    )
+
+    const onSelectionChange = useCallback((e: DataTableSelectionMultipleChangeEvent<DataTableValueArray>) => {
+        setSelectedVariant(e.value as Variant[])
+    }, [])
+
     return (
         <div className='card w-full'>
+            <UpdateVariant openVariant={openVariant} setOpenVariant={setOpenVariant} variant={variant as Variant} />
             {message && <ShowMessage severity='warn' detail={message} />}
             <form onSubmit={onsubmit} className=''>
                 <div className='flex items-start gap-6'>
@@ -144,6 +209,7 @@ export default function CreateProduct() {
                         <div className='bg-white px-5 py-5'>
                             <h3 className='text-base font-medium text-gray-900 pt-3'>Thông tin chung</h3>
                             <Divider />
+
                             <MyInput
                                 register={register}
                                 errors={errors}
@@ -155,6 +221,7 @@ export default function CreateProduct() {
                                 placeholder='Nhập tên sản phẩm'
                                 styleMessage={{ fontSize: '13.6px' }}
                             />
+
                             <MyInput
                                 register={register}
                                 errors={errors}
@@ -191,7 +258,6 @@ export default function CreateProduct() {
                                 )}
                             </div>
                         </div>
-
                         <div className='bg-white px-5 py-5 mt-5'>
                             <h3
                                 onClick={() => setOpenUpload(!openUpload)}
@@ -247,44 +313,6 @@ export default function CreateProduct() {
                                 className='mt-1'
                             />
                         </div>
-                        <Divider className='mt-8' />
-                        <div className='mt-3 pb-8'>
-                            <div className='cursor-pointer' onClick={() => setOpenVariant(!openVariant)}>
-                                <h3 className='text-[13.6px] font-medium text-blue-600 pt-3 flex items-center'>
-                                    Thuộc tính
-                                    {openVariant ? (
-                                        <FaAngleUp className='inline-block ml-1 text-[16px]' />
-                                    ) : (
-                                        <FaAngleDown className='inline-block ml-1 text-[16px]' />
-                                    )}
-                                </h3>
-                                <p className='text-sm mt-2'>
-                                    Thêm mới các thuộc tính giúp sản phẩm có nhiều sự lựa chọn hơn như kích thước, màu sắc
-                                </p>
-                            </div>
-
-                            {openVariant && (
-                                <div className=''>
-                                    <Divider />
-                                    <div className=''>
-                                        <MyChip
-                                            label='Kích thước'
-                                            value={sizes}
-                                            onChange={(e: ChipsChangeEvent) => setSizes(e.value ?? [])}
-                                            id='sizes'
-                                        />
-                                    </div>
-                                    <div className='mt-3'>
-                                        <MyChip
-                                            label='Màu sắc'
-                                            value={colors}
-                                            onChange={(e: ChipsChangeEvent) => setColors(e.value ?? [])}
-                                            id='colors'
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
                     </div>
                 </div>
                 <div className='flex justify-end gap-4 py-14'>
@@ -294,13 +322,41 @@ export default function CreateProduct() {
                         </MyButton>
                     </Link>
                     <MyButton
-                        loading={createProductMutation.isPending || uploadImagesMutation.isPending}
+                        loading={uploadImagesMutation.isPending || updateProductMutation.isPending}
                         className='rounded-[3px] h-9 w-36'
                     >
                         <p className='font-semibold text-[14px]'>Lưu sản phẩm</p>
                     </MyButton>
                 </div>
             </form>
+            <div className='bg-white pb-20'>
+                <h3 className='text-base font-medium text-gray-900 pt-4 px-4'>Thông tin phiên bản</h3>
+                <div className='px-4'>
+                    <ShowMessage
+                        severity='warn'
+                        detail='Chỉnh sửa trực tiếp thông tin của phiên bản nhưng có thể sẽ không tạo ra sự đồng nhất với sản phẩm. Hãy chỉnh sửa nếu điều đó là cần thiết. Đối với xóa thì chỉ xóa được phiên bản nào không có sự ràng buộc dữ liệu'
+                    />
+                </div>
+                <Divider />
+                <DataTable
+                    value={(product?.variants as unknown as DataTableValueArray) ?? []}
+                    dataKey='id'
+                    header={selectedVariant.length > 0 && selectedHeader}
+                    tableStyle={{ minWidth: '60rem', fontSize: '14px' }}
+                    selectionMode='checkbox'
+                    selection={selectedVariant}
+                    className='shadow'
+                    onSelectionChange={onSelectionChange}
+                    globalFilter={globalFilter}
+                >
+                    <Column selectionMode='multiple' className='w-[100px]' />
+
+                    <Column className='w-2/5' field='name' header='Tên phiên bản' body={variantNameTemplate} />
+                    <Column field='sku' header='Mã sku' body={variantSkuTemplate} />
+                    <Column field='color' header='Màu sắc' body={variantColorTemplate} />
+                    <Column field='size' header='Kích thước' body={variantSizeTemplate} />
+                </DataTable>
+            </div>
         </div>
     )
 }

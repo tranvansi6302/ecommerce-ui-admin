@@ -1,3 +1,4 @@
+import { MessageResponse } from '~/@types/util'
 import { ListVariantResponse, UpdateVariantResponse } from '~/@types/variant'
 import API from '~/constants/api'
 import { VariantSchemaType } from '~/schemas/variant.schema'
@@ -13,6 +14,11 @@ const variantsApi = {
     },
     updateVariant: (id: number, body: UpdateVariantRequest) => {
         return http.patch<UpdateVariantResponse>(`${API.VARIANT}/${id}`, body)
+    },
+    deleteManyVariants: (body: { variant_ids: number[] }) => {
+        return http.delete<MessageResponse>(API.VARIANT, {
+            data: body
+        })
     }
 }
 
