@@ -55,6 +55,12 @@ const productsApi = {
         return http.get<ListProductSaleResponse>(`${API.PRODUCT}/sales`, {
             params
         })
+    },
+
+    deleteProductImages: (body: { product_id: number }) => {
+        return http.delete<MessageResponse>(`${API.PRODUCT}/images`, {
+            data: body
+        })
     }
 }
 

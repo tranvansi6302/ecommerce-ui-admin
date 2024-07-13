@@ -98,8 +98,12 @@ export default function UpdateProduct() {
         queryFn: () => categoriesApi.getAllCategories({ status: 'ACTIVE' })
     })
 
+    const deleteProductImagesMutation = useMutation({
+        mutationFn: (body: { product_id: number }) => productsApi.deleteProductImages(body)
+    })
+
     // Submit form
-    const onsubmit = handleSubmit((data) => {
+    const onsubmit = handleSubmit(async (data) => {
         setMessage('')
         const finalData = {
             ...data,
@@ -129,6 +133,7 @@ export default function UpdateProduct() {
         })
 
         if (files && files.length > 0) {
+            await deleteProductImagesMutation.mutateAsync({ product_id: Number(productId) })
             const formData = new FormData()
             files.forEach((file) => {
                 formData.append('files', file)
@@ -138,7 +143,7 @@ export default function UpdateProduct() {
                 id: Number(productId),
                 body: formData
             }
-            uploadImagesMutation.mutate(payload, {
+            await uploadImagesMutation.mutateAsync(payload, {
                 onSuccess: (data) => {
                     queryClient.invalidateQueries({
                         queryKey: ['product']

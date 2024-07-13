@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import { IoChevronBackOutline } from 'react-icons/io5'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { SupplierStatus } from '~/@types/supplier'
+import { Supplier, SupplierStatus } from '~/@types/supplier'
 import { MessageResponse } from '~/@types/util'
 import suppliersApi, { UpdateSupplierRequest } from '~/apis/supplier.api'
 import MyButton from '~/components/MyButton'
@@ -52,12 +52,12 @@ export default function UpdateSupplier() {
 
     useEffect(() => {
         if (supplier) {
-            setValue('name', supplier.data.result.name)
-            setValue('email', supplier.data.result.email)
-            setValue('tax_code', supplier.data.result.tax_code)
-            setValue('phone_number', supplier.data.result.phone_number)
-            setValue('address', supplier.data.result.address)
-            const status = supplierStatus.find((status) => status.id === supplier?.data.result.status)
+            setValue('name', (supplier.data.result as Supplier).name)
+            setValue('email', (supplier.data.result as Supplier).email)
+            setValue('tax_code', (supplier.data.result as Supplier).tax_code)
+            setValue('phone_number', (supplier.data.result as Supplier).phone_number)
+            setValue('address', (supplier.data.result as Supplier).address)
+            const status = supplierStatus.find((status) => status.id === (supplier?.data.result as Supplier).status)
             setSelectedStatus(status)
             setValue('status', status?.id.toString() || '')
         }

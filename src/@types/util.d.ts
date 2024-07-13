@@ -1,7 +1,7 @@
 export interface ApiResponse<T> {
     code: number
     message?: string
-    result: T
+    result?: T
 }
 
 export interface PaginatedApiResponse<T> extends ApiResponse<T> {

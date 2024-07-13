@@ -119,6 +119,7 @@ export default function CreateSupplier() {
                         </div>
                         <div className='col-span-2 w-full'>
                             <MyTextarea
+                                {...register('address')}
                                 errors={errors}
                                 register={register}
                                 name='address'
