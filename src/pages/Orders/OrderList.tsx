@@ -12,21 +12,22 @@ import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 import PATH from '~/constants/path'
-import { formatDate } from '~/utils/format'
+import { convertOrderStatus, formatDate } from '~/utils/format'
 
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 import { FaCheckDouble } from 'react-icons/fa'
 import { Order, OrderDetail, OrderFilters } from '~/@types/order'
 import ordersApi from '~/apis/orders.api'
 import SetProductImage from '~/components/SetProductImage'
-import ShowMessage from '~/components/ShowMessage'
 import useSetTitle from '~/hooks/useSetTitle'
 import FilterOrder from './components/FilterOrder'
 
 import { SplitButton } from 'primereact/splitbutton'
+import MyButton from '~/components/MyButton'
 import useQueryOrders from '~/hooks/useQueryOrders'
 import { OrderStatus } from './components/FilterOrder/FilterOrder'
 import RowVariant from './components/RowVariant'
+import { ORDER_STATUS } from '~/constants/status'
 
 export default function OrderList() {
     useSetTitle('Danh sách đơn hàng')
@@ -69,7 +70,39 @@ export default function OrderList() {
 
     const phoneNumberTemplate = useCallback((rowData: Order) => rowData?.phone_number ?? '', [])
 
-    const orderStatusTemplate = useCallback((rowData: Order) => rowData?.status ?? '', [])
+    const orderStatusTemplate = useCallback((rowData: Order) => {
+        let statusColorClass = ''
+        switch (rowData.status) {
+            case ORDER_STATUS.PENDING:
+                statusColorClass = 'text-yellow-600'
+                break
+            case ORDER_STATUS.CONFIRMED:
+                statusColorClass = 'text-blue-600'
+                break
+            case ORDER_STATUS.DELIVERING:
+                statusColorClass = 'text-green-600'
+                break
+            case ORDER_STATUS.DELIVERED:
+                statusColorClass = 'text-gray-600'
+                break
+            case ORDER_STATUS.CANCELLED:
+                statusColorClass = 'text-red-600'
+                break
+            case ORDER_STATUS.PAID:
+                statusColorClass = 'text-green-600'
+                break
+            case ORDER_STATUS.UNPAID:
+                statusColorClass = 'text-orange-800'
+                break
+            default:
+                statusColorClass = 'text-gray-500'
+        }
+        return (
+            <MyButton text className={statusColorClass}>
+                <p className='text-[13.6px] font-medium'>{convertOrderStatus(rowData.status).toUpperCase()}</p>
+            </MyButton>
+        )
+    }, [])
     const totalTemplate = useCallback((rowData: Order) => rowData?.shipping_fee ?? 0, [])
 
     const createMenuItems = (orderId: number) => [
@@ -161,12 +194,6 @@ export default function OrderList() {
                         style={{ width: '300px' }}
                         className='rounded-sm border-gray-200 font-normal text-[14px] h-[44px] flex items-center'
                         placeholder='Chưa có thao tác trên trang này'
-                    />
-                </div>
-                <div className='text-[14px] font-normal'>
-                    <ShowMessage
-                        severity='warn'
-                        detail='Lưu ý với trường hợp xóa vĩnh viễn chỉ xóa được sản phẩm nào không có bắt kì ràng buộc dữ liệu nào, sau khi xóa dữ liệu sẽ không được khôi phục'
                     />
                 </div>
             </Fragment>

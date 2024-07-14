@@ -17,7 +17,7 @@ export interface OrderStatus {
 const orderStatus: OrderStatus[] = [
     { id: ORDER_STATUS.PENDING, status: 'Chờ xác nhận' },
     { id: ORDER_STATUS.CONFIRMED, status: 'Đã xác nhận' },
-    { id: ORDER_STATUS.DELIVERING, status: 'Đang giao hàng' },
+    { id: ORDER_STATUS.DELIVERING, status: 'Vận chuyển' },
     { id: ORDER_STATUS.DELIVERED, status: 'Đã giao hàng' },
     { id: ORDER_STATUS.CANCELLED, status: 'Đã hủy' }
 ]

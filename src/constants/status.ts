@@ -20,7 +20,9 @@ export const PRODUCT_STATUS = {
 } as const
 
 export const ORDER_STATUS = {
+    PAID: 'PAID',
     PENDING: 'PENDING',
+    UNPAID: 'UNPAID',
     CONFIRMED: 'CONFIRMED',
     DELIVERING: 'DELIVERING',
     DELIVERED: 'DELIVERED',
