@@ -28,3 +28,9 @@ export const ORDER_STATUS = {
     DELIVERED: 'DELIVERED',
     CANCELLED: 'CANCELLED'
 } as const
+
+export const PAYMENT_METHOD = {
+    CASH_ON_DELIVERY: 'CASH_ON_DELIVERY',
+    MOMO: 'MOMO',
+    VNPAY: 'VNPAY'
+} as const

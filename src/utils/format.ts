@@ -1,4 +1,4 @@
-import { ORDER_STATUS, PRODUCT_STATUS, PURCHASE_ORDER_STATUS, SUPPLIER_STATUS } from '~/constants/status'
+import { ORDER_STATUS, PAYMENT_METHOD, PRODUCT_STATUS, PURCHASE_ORDER_STATUS, SUPPLIER_STATUS } from '~/constants/status'
 export const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     const day = String(date.getDate()).padStart(2, '0')
@@ -69,6 +69,17 @@ export const convertToLocaleDateTime = (dateString: string) => {
     return `${year}-${month}-${day} ${hour}:${minute}:${second}`
 }
 
+export const formatDateFull = (dateString: string) => {
+    const date = new Date(dateString)
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = date.getFullYear()
+    return `${hours}:${minutes} ${day}/${month}/${year}`
+}
+
 export const convertOrderStatus = (status: string) => {
     switch (status) {
         case ORDER_STATUS.PENDING:
@@ -85,6 +96,18 @@ export const convertOrderStatus = (status: string) => {
             return 'Đã thanh toán'
         case ORDER_STATUS.UNPAID:
             return 'Chưa thanh toán'
+        default:
+            return 'Không xác định'
+    }
+}
+export const convertPaymentMethod = (method: string) => {
+    switch (method) {
+        case PAYMENT_METHOD.CASH_ON_DELIVERY:
+            return 'Thanh toán khi nhận hàng'
+        case PAYMENT_METHOD.MOMO:
+            return 'Thanh toán qua MoMo'
+        case PAYMENT_METHOD.VNPAY:
+            return 'Thanh toán qua VNPay'
         default:
             return 'Không xác định'
     }

@@ -1,5 +1,5 @@
 import { Profile } from './user'
-import { PaginatedApiResponse } from './util'
+import { ApiResponse, PaginatedApiResponse } from './util'
 import { Variant } from './variant'
 
 export interface Order {
@@ -43,3 +43,5 @@ export type OrderFilters = {
 }
 
 export type ListOrderResponse = PaginatedApiResponse<Order>
+export type OrderResponse = ApiResponse<Order>
+export type UpdateOrderResponse = ApiResponse<Order>

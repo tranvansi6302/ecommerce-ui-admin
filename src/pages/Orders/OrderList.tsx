@@ -9,7 +9,7 @@ import { Dropdown } from 'primereact/dropdown'
 import { Fragment, useCallback, useMemo, useState } from 'react'
 import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 
 import PATH from '~/constants/path'
 import { convertOrderStatus, formatDate } from '~/utils/format'
@@ -28,21 +28,26 @@ import useQueryOrders from '~/hooks/useQueryOrders'
 import { OrderStatus } from './components/FilterOrder/FilterOrder'
 import RowVariant from './components/RowVariant'
 import { ORDER_STATUS } from '~/constants/status'
+import { toast } from 'react-toastify'
+import { AxiosError } from 'axios'
+import { MessageResponse } from '~/@types/util'
+import MESSAGE from '~/constants/message'
+import ShowMessage from '~/components/ShowMessage'
 
 export default function OrderList() {
     useSetTitle('Danh sách đơn hàng')
     const navigate = useNavigate()
     const queryConfig = useQueryOrders()
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
-
     const [selectedOrders, setSelectedOrders] = useState<Order[]>([])
     const [selectedOrderStatus, setSelectedOrderStatus] = useState<OrderStatus | null>(null)
     const [search, setSearch] = useState<string>('')
     const [globalFilter] = useState<string>('')
+    const [message, setMessage] = useState<string>('')
     const [first, setFirst] = useState<number>(0)
     const [rows, setRows] = useState<number>(5)
 
-    const { data: orders } = useQuery({
+    const { data: orders, refetch } = useQuery({
         queryKey: ['orders', queryConfig],
         queryFn: () => ordersApi.getAllOrders(queryConfig as OrderFilters),
         staleTime: 3 * 60 * 1000,
@@ -105,37 +110,48 @@ export default function OrderList() {
     }, [])
     const totalTemplate = useCallback((rowData: Order) => rowData?.shipping_fee ?? 0, [])
 
+    const updateStatusOrderMutation = useMutation({
+        mutationFn: (body: { id: number; status: string; canceled_reason?: string }) =>
+            ordersApi.updateStatusOrder(body.id, body),
+        onSuccess: (data) => {
+            toast.success(data?.data?.message)
+            refetch()
+        },
+        onError: (error) => {
+            console.log(error)
+            const errorResponse = (error as AxiosError<MessageResponse>).response?.data
+            setMessage(errorResponse?.message ?? '')
+            toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
+        }
+    })
+
     const createMenuItems = (orderId: number) => [
         {
             label: 'Xác nhận đơn hàng',
             icon: 'pi pi-check',
             command: () => {
-                console.log('Xác nhận', orderId)
-                // Thực hiện hành động xác nhận tại đây
+                updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.CONFIRMED })
             }
         },
         {
             label: 'Giao cho vận chuyển',
             icon: 'pi pi-truck',
             command: () => {
-                console.log('Hủy bỏ', orderId)
-                // Thực hiện hành động hủy bỏ tại đây
+                updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.DELIVERING })
             }
         },
         {
             label: 'Đã giao hàng (Fake)',
             icon: 'pi pi-gift',
             command: () => {
-                console.log('Hủy bỏ', orderId)
-                // Thực hiện hành động hủy bỏ tại đây
+                updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.DELIVERED })
             }
         },
         {
             label: 'Hủy đơn hàng',
             icon: 'pi pi-times',
             command: () => {
-                console.log('Hủy bỏ', orderId)
-                // Thực hiện hành động hủy bỏ tại đây
+                updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.CANCELLED })
             }
         }
     ]
@@ -227,6 +243,7 @@ export default function OrderList() {
 
     return (
         <div className='w-full'>
+            {message && <ShowMessage severity='warn' detail={message} />}
             <DataTable
                 value={(orders?.data.result as unknown as DataTableValueArray) ?? []}
                 expandedRows={expandedRows}
@@ -248,7 +265,7 @@ export default function OrderList() {
                 <Column header='Số điện thoại' body={phoneNumberTemplate} />
                 <Column header='Tổng thanh toán' body={totalTemplate} />
                 <Column className='pl-0' field='status' header='Trạng thái' body={orderStatusTemplate} />
-                <Column className='w-[25%]' header='Hành động' body={actionTemplate} />
+                <Column className='pl-0 w-[25%]' header='Hành động' body={actionTemplate} />
             </DataTable>
             <div className='flex justify-end mt-3'>
                 <Paginator

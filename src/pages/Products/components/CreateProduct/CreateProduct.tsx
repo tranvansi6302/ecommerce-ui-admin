@@ -28,6 +28,7 @@ import PATH from '~/constants/path'
 import useSetTitle from '~/hooks/useSetTitle'
 import { queryClient } from '~/main'
 import { productSchema } from '~/schemas/products.schema'
+import { Product } from '~/@types/product'
 
 type FormDataCreateUpdateProduct = Pick<CreateUpdateProductRequest, 'name' | 'sku' | 'brand_id' | 'category_id'>
 const createProductSchema = productSchema
@@ -110,7 +111,7 @@ export default function CreateProduct() {
             })
 
             const payload = {
-                id: product.data.result.id,
+                id: (product?.data?.result as unknown as Product).id,
                 body: formData
             }
             await uploadImagesMutation.mutateAsync(payload, {
