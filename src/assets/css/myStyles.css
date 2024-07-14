@@ -123,6 +123,7 @@
 }
 [data-pc-name='splitbutton'] {
     height: 36px !important;
+    border-radius: 2px !important;
 }
 
 [data-pc-name='calendar'] > input {
@@ -143,4 +144,7 @@
 
 .p-datepicker {
     width: 500px !important;
+}
+[data-pc-name='tieredmenu'] {
+    width: 230px !important;
 }

@@ -18,3 +18,11 @@ export const PRODUCT_STATUS = {
     INACTIVE: 'INACTIVE',
     ACTIVE: 'ACTIVE'
 } as const
+
+export const ORDER_STATUS = {
+    PENDING: 'PENDING',
+    CONFIRMED: 'CONFIRMED',
+    DELIVERING: 'DELIVERING',
+    DELIVERED: 'DELIVERED',
+    CANCELLED: 'CANCELLED'
+} as const

@@ -11,7 +11,8 @@ const API = {
     PRICE_PLAN: '/price-plans',
     PRICE_PLAN_HISTORY: '/price-plans/history',
     USER: '/users',
-    LOGOUT: '/auth/logout'
+    LOGOUT: '/auth/logout',
+    ORDER: '/orders'
 }
 
 export default API
