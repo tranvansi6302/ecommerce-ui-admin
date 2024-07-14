@@ -1,6 +1,6 @@
 import { InputTextarea } from 'primereact/inputtextarea'
 import { UseFormRegister } from 'react-hook-form'
-import { Fragment, useEffect, useState } from 'react'
+import { ChangeEvent, FocusEvent, Fragment, useEffect, useState } from 'react'
 
 interface MyTextareaProps {
     register?: UseFormRegister<any>
@@ -40,11 +40,18 @@ export default function MyTextarea({
         setTempValue(value || defaultValue || '')
     }, [value, defaultValue])
 
-    const handleBlur = (e: any) => {
+    const handleBlur = (e: FocusEvent<HTMLTextAreaElement, Element>) => {
         if (onChange) {
             onChange(e)
         }
     }
+    const inputProps = register
+        ? { ...registerResult }
+        : {
+              value: tempValue,
+              onChange: (e: ChangeEvent<HTMLTextAreaElement>) => setTempValue(e.target.value),
+              onBlur: handleBlur
+          }
 
     return (
         <Fragment>
@@ -53,12 +60,10 @@ export default function MyTextarea({
             </label>
             <InputTextarea
                 {...registerResult}
+                {...inputProps}
                 placeholder={placeholder}
                 className={`${errorResult ? 'border-red-500' : ''} ${className}`}
                 id={name}
-                value={tempValue}
-                onChange={(e) => setTempValue(e.target.value)}
-                onBlur={handleBlur}
                 name={name}
                 rows={5}
                 style={style}

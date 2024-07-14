@@ -22,17 +22,22 @@ import SetProductImage from '~/components/SetProductImage'
 import useSetTitle from '~/hooks/useSetTitle'
 import FilterOrder from './components/FilterOrder'
 
+import { yupResolver } from '@hookform/resolvers/yup'
+import { AxiosError } from 'axios'
+import { Dialog } from 'primereact/dialog'
 import { SplitButton } from 'primereact/splitbutton'
+import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
+import { MessageResponse } from '~/@types/util'
 import MyButton from '~/components/MyButton'
+import MyTextarea from '~/components/MyTextarea'
+import ShowMessage from '~/components/ShowMessage'
+import MESSAGE from '~/constants/message'
+import { ORDER_STATUS } from '~/constants/status'
 import useQueryOrders from '~/hooks/useQueryOrders'
+import { orderSchema } from '~/schemas/orders.schema'
 import { OrderStatus } from './components/FilterOrder/FilterOrder'
 import RowVariant from './components/RowVariant'
-import { ORDER_STATUS } from '~/constants/status'
-import { toast } from 'react-toastify'
-import { AxiosError } from 'axios'
-import { MessageResponse } from '~/@types/util'
-import MESSAGE from '~/constants/message'
-import ShowMessage from '~/components/ShowMessage'
 
 export default function OrderList() {
     useSetTitle('Danh sách đơn hàng')
@@ -46,6 +51,16 @@ export default function OrderList() {
     const [message, setMessage] = useState<string>('')
     const [first, setFirst] = useState<number>(0)
     const [rows, setRows] = useState<number>(5)
+    const [openCancel, setOpenCancel] = useState<boolean>(false)
+    const [cancelOrderId, setCancelOrderId] = useState<number>(0)
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors }
+    } = useForm<{ canceled_reason: string }>({
+        resolver: yupResolver(orderSchema)
+    })
 
     const { data: orders, refetch } = useQuery({
         queryKey: ['orders', queryConfig],
@@ -110,52 +125,6 @@ export default function OrderList() {
     }, [])
     const totalTemplate = useCallback((rowData: Order) => rowData?.shipping_fee ?? 0, [])
 
-    const updateStatusOrderMutation = useMutation({
-        mutationFn: (body: { id: number; status: string; canceled_reason?: string }) =>
-            ordersApi.updateStatusOrder(body.id, body),
-        onSuccess: (data) => {
-            toast.success(data?.data?.message)
-            refetch()
-        },
-        onError: (error) => {
-            console.log(error)
-            const errorResponse = (error as AxiosError<MessageResponse>).response?.data
-            setMessage(errorResponse?.message ?? '')
-            toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
-        }
-    })
-
-    const createMenuItems = (orderId: number) => [
-        {
-            label: 'Xác nhận đơn hàng',
-            icon: 'pi pi-check',
-            command: () => {
-                updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.CONFIRMED })
-            }
-        },
-        {
-            label: 'Giao cho vận chuyển',
-            icon: 'pi pi-truck',
-            command: () => {
-                updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.DELIVERING })
-            }
-        },
-        {
-            label: 'Đã giao hàng (Fake)',
-            icon: 'pi pi-gift',
-            command: () => {
-                updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.DELIVERED })
-            }
-        },
-        {
-            label: 'Hủy đơn hàng',
-            icon: 'pi pi-times',
-            command: () => {
-                updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.CANCELLED })
-            }
-        }
-    ]
-
     const actionTemplate = useCallback((order: Order) => {
         return (
             <SplitButton
@@ -167,6 +136,7 @@ export default function OrderList() {
                 model={createMenuItems(order.id)}
             />
         )
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const allowExpansion = useCallback((rowData: Order) => rowData.order_details!.length > 0, [])
@@ -241,8 +211,110 @@ export default function OrderList() {
         return (orders?.data?.pagination?.limit as number) * (orders?.data?.pagination?.total_page as number)
     }, [orders?.data?.pagination?.limit, orders?.data?.pagination?.total_page])
 
+    // Update
+    const updateStatusOrderMutation = useMutation({
+        mutationFn: (body: { id: number; status: string; canceled_reason?: string }) =>
+            ordersApi.updateStatusOrder(body.id, body),
+        onSuccess: (data) => {
+            toast.success(data?.data?.message)
+            refetch()
+        },
+        onError: (error) => {
+            console.log(error)
+            const errorResponse = (error as AxiosError<MessageResponse>).response?.data
+            setMessage(errorResponse?.message ?? '')
+            toast.warn(MESSAGE.PLEASE_CHECK_DATA_INPUT)
+            setOpenCancel(false)
+        }
+    })
+
+    const createMenuItems = (orderId: number) => [
+        {
+            label: 'Xác nhận đơn hàng',
+            icon: 'pi pi-check',
+            command: () => {
+                updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.CONFIRMED })
+            }
+        },
+        {
+            label: 'Giao cho vận chuyển',
+            icon: 'pi pi-truck',
+            command: () => {
+                updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.DELIVERING })
+            }
+        },
+        {
+            label: 'Đã giao hàng (Fake)',
+            icon: 'pi pi-gift',
+            command: () => {
+                updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.DELIVERED })
+            }
+        },
+        {
+            label: 'Hủy đơn hàng',
+            icon: 'pi pi-times',
+            command: () => {
+                setOpenCancel(true)
+                setCancelOrderId(orderId)
+            }
+        }
+    ]
+
+    // Cancel order
+    const onSubmit = handleSubmit((data) => {
+        updateStatusOrderMutation.mutate({
+            id: cancelOrderId,
+            status: ORDER_STATUS.CANCELLED,
+            canceled_reason: data.canceled_reason
+        })
+        setOpenCancel(false)
+    })
     return (
         <div className='w-full'>
+            <Dialog
+                header={<p className='font-medium text-gray-900'>Hủy đơn hàng</p>}
+                visible={openCancel}
+                style={{ width: '50vw' }}
+                onHide={() => {
+                    if (!openCancel) return
+                    setOpenCancel(false)
+                    reset()
+                }}
+            >
+                <div className='m-0'>
+                    <form onSubmit={onSubmit}>
+                        <MyTextarea
+                            register={register}
+                            errors={errors}
+                            placeholder='Nhập ghi chú'
+                            className='w-full py-0 pt-3 font-normal flex items-center'
+                            classNameLabel='font-normal text-gray-800 text-[13.6px] mb-1'
+                            styleMessage={{ fontSize: '13.6px' }}
+                            name='canceled_reason'
+                        />
+                        <div className='flex justify-end gap-4  pt-6'>
+                            <MyButton
+                                onClick={() => {
+                                    setOpenCancel(false)
+                                    reset()
+                                }}
+                                className='rounded-[3px] h-9'
+                                outlined
+                            >
+                                <p className='font-semibold text-[14px]'>Thoát</p>
+                            </MyButton>
+
+                            <MyButton
+                                loading={updateStatusOrderMutation.isPending}
+                                type='submit'
+                                className='rounded-[3px] h-9 w-36'
+                            >
+                                <p className='font-semibold text-[14px]'>Xác nhận</p>
+                            </MyButton>
+                        </div>
+                    </form>
+                </div>
+            </Dialog>
             {message && <ShowMessage severity='warn' detail={message} />}
             <DataTable
                 value={(orders?.data.result as unknown as DataTableValueArray) ?? []}
