@@ -59,7 +59,7 @@ export default function MyInput({
                 autoComplete='on'
             />
             {errors && (
-                <p style={styleMessage} className='mb-4 mt-1 text-red-500 text-[15px] px-2'>
+                <p style={styleMessage} className='mb-4 mt-1 text-red-500 text-[14px] px-2'>
                     {errors[name]?.message}
                 </p>
             )}

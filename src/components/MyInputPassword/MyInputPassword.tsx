@@ -26,7 +26,7 @@ export default function MyInputPassword({ placeholder, className, name, style, l
 
     return (
         <Fragment>
-            <label htmlFor={name} className='block text-gray-900 text-[16px] font-medium mb-2'>
+            <label htmlFor={name} className='block text-gray-900 text-[15px] font-medium mb-2'>
                 {label}
             </label>
             <div className='relative w-full md:w-30rem'>
@@ -43,7 +43,7 @@ export default function MyInputPassword({ placeholder, className, name, style, l
 
                 <i className={`pi ${showPassword ? 'pi-eye-slash' : 'pi-eye'} eye-icon`} onClick={toggleShowPassword} />
             </div>
-            {errors.password && <p className='mt-1 text-red-500 text-[15px] px-2'>{errors[name]?.message}</p>}
+            {errors.password && <p className='mt-1 text-red-500 text-[14px] px-2'>{errors[name]?.message}</p>}
         </Fragment>
     )
 }

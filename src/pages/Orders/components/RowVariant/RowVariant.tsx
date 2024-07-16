@@ -1,13 +1,13 @@
 import { Column } from 'primereact/column'
 import { DataTable } from 'primereact/datatable'
-import { Order } from '~/@types/order'
+import { Order, OrderDetail } from '~/@types/order'
 
 interface RowVariantProps {
     data: Order
-    variantNameTemplate: any
-    imageTemplate: any
-    quantityTemplate: any
-    priceTemplate: any
+    variantNameTemplate: (rowData: OrderDetail) => string
+    imageTemplate: (rowData: OrderDetail) => JSX.Element
+    quantityTemplate: (rowData: OrderDetail) => number
+    priceTemplate: (rowData: OrderDetail) => number | 0
 }
 export default function RowVariant({
     data,

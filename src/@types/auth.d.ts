@@ -1,7 +1,9 @@
 import { User } from './user'
 import { ApiResponse } from './util'
 
-export type LoginResponse = ApiResponse<{
+export interface AuthType {
     token: string
     user: User
-}>
+}
+
+export type LoginResponse = ApiResponse<AuthType>
