@@ -16,6 +16,7 @@ export interface Order {
     delivering_date: string
     pending_date: string
     order_code: string
+    tracking_code: string
     order_date: string
     payment_method: string
     discount_order: number

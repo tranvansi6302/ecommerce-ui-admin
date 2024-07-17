@@ -11,7 +11,7 @@ const ordersApi = {
     getOrderById: (id: number) => {
         return http.get<OrderResponse>(API.ORDER + `/${id}`)
     },
-    updateStatusOrder: (id: number, body: { status: string; canceled_reason?: string }) => {
+    updateStatusOrder: (id: number, body: { status: string; canceled_reason?: string; tracking_code?: string }) => {
         return http.patch<OrderResponse>(API.ORDER + `/${id}`, body)
     }
 }

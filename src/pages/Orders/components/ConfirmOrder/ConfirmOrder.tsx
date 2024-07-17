@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import { Dialog } from 'primereact/dialog'
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { ConfirmOrderRequest, ItemType } from '~/@types/ghn'
@@ -33,16 +33,26 @@ export default function ConfirmOrder({
 }: ConfirmOrderProps) {
     const { register, handleSubmit, reset } = useForm<{ note: string }>()
     const refMessage = useRef<string>('')
+
+    const totalProduct = useMemo(() => {
+        return orderPayload?.order_details.reduce((acc, cur) => acc + cur.price * cur.quantity, 0)
+    }, [orderPayload?.order_details])
+
+    const totalCheckout = useMemo(() => {
+        return totalProduct + orderPayload?.shipping_fee - orderPayload?.discount_order - orderPayload?.discount_shipping
+    }, [orderPayload?.discount_order, orderPayload?.discount_shipping, orderPayload?.shipping_fee, totalProduct])
+
     const createOrderGHNMutation = useMutation({
         mutationFn: (data: ConfirmOrderRequest) => ghnApi.createOrder(data),
         onSuccess: (data) => {
             const orderCode = data?.data?.data?.order_code as string
+
             refMessage.current = `Đơn hàng đã tạo thành công với mã vận đơn ${orderCode}`
         }
     })
 
     const updateStatusOrderMutation = useMutation({
-        mutationFn: (body: { id: number; status: string; canceled_reason?: string }) =>
+        mutationFn: (body: { id: number; status: string; canceled_reason?: string; tracking_code: string }) =>
             ordersApi.updateStatusOrder(body.id, body),
         onSuccess: (data) => {
             toast.success(data?.data?.message)
@@ -63,9 +73,9 @@ export default function ConfirmOrder({
     const onSubmit = handleSubmit(async (data) => {
         const addresses = orderPayload?.address.split(',')
         console.log(addresses)
-        const province = addresses[3].trim()
-        const district = addresses[2].trim()
-        const ward = addresses[1].trim()
+        const province = addresses[3]?.trim()
+        const district = addresses[2]?.trim()
+        const ward = addresses[1]?.trim()
 
         const items = orderPayload?.order_details.map((item) => {
             return {
@@ -88,7 +98,7 @@ export default function ConfirmOrder({
             to_ward_name: ward,
             to_district_name: district,
             to_province_name: province,
-            cod_amount: orderPayload?.payment_method === PAYMENT_METHOD.CASH_ON_DELIVERY ? orderPayload?.shipping_fee : 0,
+            cod_amount: orderPayload?.payment_method === PAYMENT_METHOD.CASH_ON_DELIVERY ? totalCheckout : 0,
             weight: GHN_CONFIG.WEIGHT,
             length: GHN_CONFIG.LENGTH,
             width: GHN_CONFIG.WIDTH,
@@ -98,10 +108,11 @@ export default function ConfirmOrder({
             service_type_id: GHN_CONFIG.SERVICE_TYPE_ID,
             items: items as ItemType[]
         }
-        await createOrderGHNMutation.mutateAsync(finalData)
+        const resOrder = await createOrderGHNMutation.mutateAsync(finalData)
         await updateStatusOrderMutation.mutateAsync({
             id: orderPayload?.id,
-            status: ORDER_STATUS.CONFIRMED
+            status: ORDER_STATUS.CONFIRMED,
+            tracking_code: resOrder?.data?.data?.order_code
         })
     })
 

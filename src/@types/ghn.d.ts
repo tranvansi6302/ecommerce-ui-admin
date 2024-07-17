@@ -69,3 +69,11 @@ export interface CreateOrderGHNResponse {
     message: string
     message_display: string
 }
+
+export interface GenTokenResponse {
+    code: number
+    message: string
+    data: {
+        token: string
+    }
+}

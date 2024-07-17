@@ -12,7 +12,7 @@ import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 
 import PATH from '~/constants/path'
-import { convertOrderStatus, formatCurrencyVND, formatDate } from '~/utils/format'
+import { convertOrderStatus, formatDate } from '~/utils/format'
 
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 import { FaCheckDouble } from 'react-icons/fa'
@@ -30,9 +30,11 @@ import { useForm } from 'react-hook-form'
 import { GrPrint } from 'react-icons/gr'
 import { toast } from 'react-toastify'
 import { MessageResponse } from '~/@types/util'
+import ghnApi from '~/apis/ghn.api'
 import MyButton from '~/components/MyButton'
 import MyTextarea from '~/components/MyTextarea'
 import ShowMessage from '~/components/ShowMessage'
+import API from '~/constants/api'
 import MESSAGE from '~/constants/message'
 import { ORDER_STATUS } from '~/constants/status'
 import useQueryOrders from '~/hooks/useQueryOrders'
@@ -95,21 +97,24 @@ export default function OrderList() {
 
     const phoneNumberTemplate = useCallback((rowData: Order) => rowData?.phone_number ?? '', [])
 
-    const printOrderTemplate = useCallback(() => {
-        return (
-            <MyButton text severity='secondary'>
+    const printOrderTemplate = useCallback((rowData: Order) => {
+        return rowData?.status === ORDER_STATUS.CONFIRMED ? (
+            <MyButton onClick={() => handlePrintOrder(rowData)} text severity='secondary'>
                 <p className='text-[13.6px] font-medium flex items-center gap-2 uppercase'>
                     <GrPrint />
                     In hóa đơn
                 </p>
             </MyButton>
+        ) : (
+            <Fragment></Fragment>
         )
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
-    const totalCheckoutTemplate = useCallback((rowData: Order) => {
-        const totalProduct = rowData?.order_details.reduce((acc, cur) => acc + cur.price * cur.quantity, 0)
-        const totalCheckout = totalProduct + rowData?.shipping_fee - rowData?.discount_order - rowData?.discount_shipping
-        return formatCurrencyVND(totalCheckout)
-    }, [])
+
+    const trackingCodeTemplate = useCallback(
+        (rowData: Order) => (rowData?.tracking_code ? rowData?.tracking_code : 'Chưa tạo đơn'),
+        []
+    )
 
     const actionTemplate = useCallback((rowData: Order) => {
         let severity: 'warning' | 'info' | 'contrast' | 'success' | 'danger' | 'secondary' | undefined = undefined
@@ -283,6 +288,20 @@ export default function OrderList() {
         })
         setOpenCancel(false)
     })
+
+    // Print order
+    const genTokenMutation = useMutation({
+        mutationFn: (data: { order_codes: string[] }) => ghnApi.genToken(data),
+        onSuccess: (data) => {
+            window.open(`${API.PRINT_ORDER}?token=${data?.data?.data?.token}`, '_blank')
+        },
+        onError: () => {
+            toast.error('Đã có lỗi xảy ra vui lòng kiểm tra lại')
+        }
+    })
+    const handlePrintOrder = (order: Order) => {
+        genTokenMutation.mutate({ order_codes: [order?.tracking_code] })
+    }
     return (
         <div className='w-full'>
             <ConfirmOrder
@@ -355,9 +374,9 @@ export default function OrderList() {
                 <Column className='pr-0 w-[35px]' expander={allowExpansion} />
                 <Column selectionMode='multiple' className='w-[40px]' />
                 <Column header='Mã đơn hàng' body={orderCodeTemplate} />
+                <Column header='Mã vận đơn' body={trackingCodeTemplate} />
                 <Column header='Ngày đặt hàng' body={orderDateTemplate} />
                 <Column header='Số điện thoại' body={phoneNumberTemplate} />
-                <Column header='Tổng thanh toán' body={totalCheckoutTemplate} />
                 <Column className='pl-0 w-[20%]' header='Trạng thái' body={actionTemplate} />
                 <Column className='pl-0' field='status' header='Thao tác' body={printOrderTemplate} />
             </DataTable>

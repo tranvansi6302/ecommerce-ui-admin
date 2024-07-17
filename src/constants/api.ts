@@ -16,7 +16,9 @@ const API = {
     ORDER: '/orders',
 
     // GHN
-    CREATE_ORDER: '/v2/shipping-order/create'
+    CREATE_ORDER: '/v2/shipping-order/create',
+    GEN_TOKEN: '/v2/a5/gen-token',
+    PRINT_ORDER: 'https://dev-online-gateway.ghn.vn/a5/public-api/printA5'
 }
 
 export default API
