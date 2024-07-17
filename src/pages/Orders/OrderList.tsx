@@ -12,7 +12,7 @@ import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 
 import PATH from '~/constants/path'
-import { convertOrderStatus, formatDate } from '~/utils/format'
+import { convertOrderStatus, formatCurrencyVND, formatDate } from '~/utils/format'
 
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 import { FaCheckDouble } from 'react-icons/fa'
@@ -27,6 +27,7 @@ import { AxiosError } from 'axios'
 import { Dialog } from 'primereact/dialog'
 import { SplitButton } from 'primereact/splitbutton'
 import { useForm } from 'react-hook-form'
+import { GrPrint } from 'react-icons/gr'
 import { toast } from 'react-toastify'
 import { MessageResponse } from '~/@types/util'
 import MyButton from '~/components/MyButton'
@@ -36,9 +37,9 @@ import MESSAGE from '~/constants/message'
 import { ORDER_STATUS } from '~/constants/status'
 import useQueryOrders from '~/hooks/useQueryOrders'
 import { orderSchema } from '~/schemas/orders.schema'
+import ConfirmOrder from './components/ConfirmOrder'
 import { OrderStatus } from './components/FilterOrder/FilterOrder'
 import RowVariant from './components/RowVariant'
-
 export default function OrderList() {
     useSetTitle('Danh sách đơn hàng')
     const navigate = useNavigate()
@@ -53,6 +54,10 @@ export default function OrderList() {
     const [rows, setRows] = useState<number>(5)
     const [openCancel, setOpenCancel] = useState<boolean>(false)
     const [cancelOrderId, setCancelOrderId] = useState<number>(0)
+    const [openConFirmOrder, setOpenConFirmOrder] = useState<boolean>(false)
+    const [orderPayload, setOrderPayload] = useState<Order | null>(null)
+    const [confirmMessageOrder, setConfirmMessageOrder] = useState<string>('')
+
     const {
         register,
         handleSubmit,
@@ -90,50 +95,57 @@ export default function OrderList() {
 
     const phoneNumberTemplate = useCallback((rowData: Order) => rowData?.phone_number ?? '', [])
 
-    const orderStatusTemplate = useCallback((rowData: Order) => {
-        let statusColorClass = ''
-        switch (rowData.status) {
-            case ORDER_STATUS.PENDING:
-                statusColorClass = 'text-yellow-600'
-                break
-            case ORDER_STATUS.CONFIRMED:
-                statusColorClass = 'text-blue-600'
-                break
-            case ORDER_STATUS.DELIVERING:
-                statusColorClass = 'text-green-600'
-                break
-            case ORDER_STATUS.DELIVERED:
-                statusColorClass = 'text-gray-600'
-                break
-            case ORDER_STATUS.CANCELLED:
-                statusColorClass = 'text-red-600'
-                break
-            case ORDER_STATUS.PAID:
-                statusColorClass = 'text-green-600'
-                break
-            case ORDER_STATUS.UNPAID:
-                statusColorClass = 'text-orange-800'
-                break
-            default:
-                statusColorClass = 'text-gray-500'
-        }
+    const printOrderTemplate = useCallback(() => {
         return (
-            <MyButton text className={statusColorClass}>
-                <p className='text-[13.6px] font-medium'>{convertOrderStatus(rowData.status).toUpperCase()}</p>
+            <MyButton text severity='secondary'>
+                <p className='text-[13.6px] font-medium flex items-center gap-2 uppercase'>
+                    <GrPrint />
+                    In hóa đơn
+                </p>
             </MyButton>
         )
     }, [])
-    const totalTemplate = useCallback((rowData: Order) => rowData?.shipping_fee ?? 0, [])
+    const totalCheckoutTemplate = useCallback((rowData: Order) => {
+        const totalProduct = rowData?.order_details.reduce((acc, cur) => acc + cur.price * cur.quantity, 0)
+        const totalCheckout = totalProduct + rowData?.shipping_fee - rowData?.discount_order - rowData?.discount_shipping
+        return formatCurrencyVND(totalCheckout)
+    }, [])
 
-    const actionTemplate = useCallback((order: Order) => {
+    const actionTemplate = useCallback((rowData: Order) => {
+        let severity: 'warning' | 'info' | 'contrast' | 'success' | 'danger' | 'secondary' | undefined = undefined
+
+        switch (rowData.status) {
+            case ORDER_STATUS.PENDING:
+                severity = 'warning'
+                break
+            case ORDER_STATUS.CONFIRMED:
+                severity = 'info'
+                break
+            case ORDER_STATUS.DELIVERING:
+                severity = 'contrast'
+                break
+            case ORDER_STATUS.DELIVERED:
+                severity = 'success'
+                break
+            case ORDER_STATUS.CANCELLED:
+                severity = 'danger'
+                break
+            case ORDER_STATUS.PAID:
+                severity = 'info'
+                break
+            case ORDER_STATUS.UNPAID:
+                severity = 'warning'
+                break
+            default:
+                severity = 'contrast'
+        }
         return (
             <SplitButton
-                label='Cập nhật trạng thái'
-                icon='pi pi-plus'
+                buttonClassName='text-[13px]'
+                label={convertOrderStatus(rowData.status).toUpperCase()}
                 text
-                severity='warning'
-                onClick={() => console.log('Update purchase order...', order)}
-                model={createMenuItems(order.id)}
+                severity={severity}
+                model={createMenuItems(rowData)}
             />
         )
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -228,26 +240,28 @@ export default function OrderList() {
         }
     })
 
-    const createMenuItems = (orderId: number) => [
+    const createMenuItems = (order: Order) => [
         {
             label: 'Xác nhận đơn hàng',
             icon: 'pi pi-check',
             command: () => {
-                updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.CONFIRMED })
+                // updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.CONFIRMED })
+                setOpenConFirmOrder(true)
+                setOrderPayload(order)
             }
         },
         {
             label: 'Giao cho vận chuyển',
             icon: 'pi pi-truck',
             command: () => {
-                updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.DELIVERING })
+                updateStatusOrderMutation.mutate({ id: order?.id, status: ORDER_STATUS.DELIVERING })
             }
         },
         {
             label: 'Đã giao hàng (Fake)',
             icon: 'pi pi-gift',
             command: () => {
-                updateStatusOrderMutation.mutate({ id: orderId, status: ORDER_STATUS.DELIVERED })
+                updateStatusOrderMutation.mutate({ id: order?.id, status: ORDER_STATUS.DELIVERED })
             }
         },
         {
@@ -255,7 +269,7 @@ export default function OrderList() {
             icon: 'pi pi-times',
             command: () => {
                 setOpenCancel(true)
-                setCancelOrderId(orderId)
+                setCancelOrderId(order?.id)
             }
         }
     ]
@@ -271,6 +285,13 @@ export default function OrderList() {
     })
     return (
         <div className='w-full'>
+            <ConfirmOrder
+                setMessage={setMessage}
+                setMessageConfirmOrder={setConfirmMessageOrder}
+                orderPayload={orderPayload as Order}
+                openConfirmOrder={openConFirmOrder}
+                setOpenConfirmOrder={setOpenConFirmOrder}
+            />
             <Dialog
                 header={<p className='font-medium text-gray-900'>Hủy đơn hàng</p>}
                 visible={openCancel}
@@ -316,6 +337,7 @@ export default function OrderList() {
                 </div>
             </Dialog>
             {message && <ShowMessage severity='warn' detail={message} />}
+            {confirmMessageOrder && <ShowMessage severity='success' detail={confirmMessageOrder} />}
             <DataTable
                 value={(orders?.data.result as unknown as DataTableValueArray) ?? []}
                 expandedRows={expandedRows}
@@ -335,9 +357,9 @@ export default function OrderList() {
                 <Column header='Mã đơn hàng' body={orderCodeTemplate} />
                 <Column header='Ngày đặt hàng' body={orderDateTemplate} />
                 <Column header='Số điện thoại' body={phoneNumberTemplate} />
-                <Column header='Tổng thanh toán' body={totalTemplate} />
-                <Column className='pl-0' field='status' header='Trạng thái' body={orderStatusTemplate} />
-                <Column className='pl-0 w-[25%]' header='Hành động' body={actionTemplate} />
+                <Column header='Tổng thanh toán' body={totalCheckoutTemplate} />
+                <Column className='pl-0 w-[20%]' header='Trạng thái' body={actionTemplate} />
+                <Column className='pl-0' field='status' header='Thao tác' body={printOrderTemplate} />
             </DataTable>
             <div className='flex justify-end mt-3'>
                 <Paginator

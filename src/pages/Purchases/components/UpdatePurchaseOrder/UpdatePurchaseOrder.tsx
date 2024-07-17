@@ -247,7 +247,7 @@ export default function UpdatePurchaseOrder() {
     return (
         <div>
             <Dialog
-                header={<p className='font-medium text-gray-900'>Ghi chú cho sản phẩm</p>}
+                header={<p className='font-medium text-gray-900 capitalize'>Ghi chú cho sản phẩm</p>}
                 visible={openNote}
                 style={{ width: '50vw' }}
                 onHide={() => {
@@ -278,7 +278,7 @@ export default function UpdatePurchaseOrder() {
                 </div>
             </Dialog>
             <Dialog
-                header={<p className='font-medium text-gray-900'>Lý do hủy đơn</p>}
+                header={<p className='font-medium text-gray-900 capitalize'>Lý do hủy đơn</p>}
                 visible={openReason}
                 style={{ width: '50vw' }}
                 onHide={() => {

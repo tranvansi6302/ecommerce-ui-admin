@@ -239,7 +239,7 @@ export default function CreatePurchaseOrder() {
         <div className=''>
             {/* Note */}
             <Dialog
-                header={<p className='font-medium text-gray-900'>Ghi chú cho sản phẩm</p>}
+                header={<p className='font-medium text-gray-900 capitalize'>Ghi chú cho sản phẩm</p>}
                 visible={openNote}
                 style={{ width: '50vw' }}
                 onHide={() => {

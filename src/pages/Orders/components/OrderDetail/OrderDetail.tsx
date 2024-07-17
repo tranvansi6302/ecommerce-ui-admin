@@ -23,6 +23,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { orderSchema } from '~/schemas/orders.schema'
 import MyTextarea from '~/components/MyTextarea'
 import MyButton from '~/components/MyButton'
+
 export default function OrderDetail() {
     const navigate = useNavigate()
     useSetTitle('Chi tiết đơn hàng')
@@ -171,9 +172,9 @@ export default function OrderDetail() {
                         <div className='w-[1px] h-[15px] bg-gray-400 mx-4'></div>
                         <div>
                             <SplitButton
-                                label={convertOrderStatus(order?.status as keyof typeof ORDER_STATUS)}
-                                icon='pi pi-plus'
+                                label={convertOrderStatus(order?.status as keyof typeof ORDER_STATUS).toUpperCase()}
                                 text
+                                buttonClassName='text-[13px]'
                                 severity='info'
                                 style={{ textTransform: 'capitalize' }}
                                 onClick={() => console.log('Update purchase order...', order)}
