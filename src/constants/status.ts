@@ -18,3 +18,19 @@ export const PRODUCT_STATUS = {
     INACTIVE: 'INACTIVE',
     ACTIVE: 'ACTIVE'
 } as const
+
+export const ORDER_STATUS = {
+    PAID: 'PAID',
+    PENDING: 'PENDING',
+    UNPAID: 'UNPAID',
+    CONFIRMED: 'CONFIRMED',
+    DELIVERING: 'DELIVERING',
+    DELIVERED: 'DELIVERED',
+    CANCELLED: 'CANCELLED'
+} as const
+
+export const PAYMENT_METHOD = {
+    CASH_ON_DELIVERY: 'CASH_ON_DELIVERY',
+    MOMO: 'MOMO',
+    VNPAY: 'VNPAY'
+} as const

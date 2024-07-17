@@ -30,6 +30,24 @@ export interface UserFilter {
     is_deleted?: number
 }
 
+interface Address {
+    id: number
+    province: string
+    district: string
+    ward: string
+    description: string
+    full_name: string
+    phone_number: string
+    is_default: number
+    province_id: number
+    district_id: number
+    ward_id: string
+}
+
+export interface Profile extends User {
+    address: Address[]
+}
+
 export type ListUserResponse = PaginatedApiResponse<User>
 export type UserResponse = ApiResponse<User>
 export type UpdateUserResponse = ApiResponse<User>

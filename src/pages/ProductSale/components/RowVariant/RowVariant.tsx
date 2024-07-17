@@ -1,12 +1,14 @@
 import { Column } from 'primereact/column'
 import { DataTable } from 'primereact/datatable'
+import { ProductSaleType } from '~/@types/product'
+import { Variant } from '~/@types/variant'
 
 interface RowVariantProps {
-    data: any
-    variantNameTemplate: any
-    warehouseTemplate: any
-    currentPriceTemplate: any
-    applyDateTemplate: any
+    data: ProductSaleType
+    variantNameTemplate: (rowData: Variant) => string
+    warehouseTemplate: (rowData: Variant) => number
+    currentPriceTemplate: (rowData: Variant) => string | 0
+    applyDateTemplate: (rowData: Variant) => string
 }
 export default function RowVariant({
     data,

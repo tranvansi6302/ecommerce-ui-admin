@@ -18,7 +18,7 @@ import { SplitButton } from 'primereact/splitbutton'
 import { FaRegEdit } from 'react-icons/fa'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { PurchaseDetails } from '~/@types/purchase'
+import { PurchaseDetails, PurchaseOrder } from '~/@types/purchase'
 import { MessageResponse } from '~/@types/util'
 import purchasesApi, { UpdatePurchaseOrderRequest } from '~/apis/purchases.api'
 import MyInputNumberV2Blur from '~/components/MyInputNumberV2Blur'
@@ -52,7 +52,7 @@ export default function UpdatePurchaseOrder() {
     })
 
     const handleAutoReceivedQuantity = useCallback(() => {
-        const updatedQuantities = purchaseOrder?.data.result.purchase_details.reduce(
+        const updatedQuantities = (purchaseOrder?.data.result as PurchaseOrder).purchase_details.reduce(
             (acc, row) => {
                 acc[row.variant.id] = row.quantity
                 return acc
@@ -62,7 +62,7 @@ export default function UpdatePurchaseOrder() {
 
         setQuantityReceived(updatedQuantities || {})
         toast.success(MESSAGE.AUTO_RECEIVED_QUANTITY_SUCCESS)
-    }, [purchaseOrder?.data.result.purchase_details])
+    }, [purchaseOrder?.data.result])
 
     // Render
     const handleQuantityChange = (id: number, value: number) => {
@@ -89,8 +89,8 @@ export default function UpdatePurchaseOrder() {
 
     const variantReceivedTemplate = useCallback(
         (rowData: PurchaseDetails) => {
-            return purchaseOrder?.data.result.status === PURCHASE_ORDER_STATUS.CANCELLED ||
-                purchaseOrder?.data.result.status === PURCHASE_ORDER_STATUS.COMPLETED ? (
+            return (purchaseOrder?.data.result as PurchaseOrder).status === PURCHASE_ORDER_STATUS.CANCELLED ||
+                (purchaseOrder?.data.result as PurchaseOrder).status === PURCHASE_ORDER_STATUS.COMPLETED ? (
                 (rowData.quantity_received as number)
             ) : (
                 <MyInputNumberV2Blur
@@ -104,7 +104,7 @@ export default function UpdatePurchaseOrder() {
                 />
             )
         },
-        [purchaseOrder?.data.result.status, quantityReceived, register]
+        [purchaseOrder?.data.result, quantityReceived, register]
     )
 
     const variantActionTemplate = useCallback(
@@ -144,14 +144,17 @@ export default function UpdatePurchaseOrder() {
 
     // Total
     const quantityTotal = useMemo(() => {
-        return purchaseOrder?.data.result.purchase_details.reduce((total, row) => total + row.quantity, 0)
-    }, [purchaseOrder?.data.result.purchase_details])
+        return (purchaseOrder?.data.result as PurchaseOrder)?.purchase_details.reduce((total, row) => total + row.quantity, 0)
+    }, [purchaseOrder?.data.result])
 
     const totalPrice = useMemo(() => {
         return (
-            purchaseOrder?.data.result.purchase_details.reduce((total, row) => total + row.quantity * row.purchase_price, 0) || 0
+            (purchaseOrder?.data.result as PurchaseOrder)?.purchase_details.reduce(
+                (total, row) => total + row.quantity * row.purchase_price,
+                0
+            ) || 0
         )
-    }, [purchaseOrder?.data.result.purchase_details])
+    }, [purchaseOrder?.data.result])
 
     // Note
     const handleOpenNote = (id: number) => {
@@ -164,10 +167,11 @@ export default function UpdatePurchaseOrder() {
     }
 
     useEffect(() => {
-        const note = purchaseOrder?.data.result.purchase_details.find((row) => row.variant.id === noteRowId)?.note || ''
+        const note =
+            (purchaseOrder?.data.result as PurchaseOrder).purchase_details.find((row) => row.variant.id === noteRowId)?.note || ''
         setValue(`note_${noteRowId}`, note)
         setNoteVariant((prev) => ({ ...prev, [noteRowId]: note }))
-    }, [noteRowId, purchaseOrder?.data.result.purchase_details, setValue])
+    }, [noteRowId, purchaseOrder?.data.result, setValue])
 
     const updatePurchaseOrderMutation = useMutation({
         mutationFn: (payload: { id: number; data: UpdatePurchaseOrderRequest }) =>
@@ -182,7 +186,7 @@ export default function UpdatePurchaseOrder() {
                 setMessage('')
                 const data: UpdatePurchaseOrderRequest = {
                     status: PURCHASE_ORDER_STATUS.COMPLETED,
-                    purchase_details: purchaseOrder?.data.result.purchase_details.map((row) => ({
+                    purchase_details: (purchaseOrder?.data.result as PurchaseOrder).purchase_details.map((row) => ({
                         variant_id: row.variant.id,
                         quantity_received: quantityReceived[row.variant.id] || 0,
                         note: noteVariant[row.variant.id] || row.note
@@ -243,7 +247,7 @@ export default function UpdatePurchaseOrder() {
     return (
         <div>
             <Dialog
-                header={<p className='font-medium text-gray-900'>Ghi chú cho sản phẩm</p>}
+                header={<p className='font-medium text-gray-900 capitalize'>Ghi chú cho sản phẩm</p>}
                 visible={openNote}
                 style={{ width: '50vw' }}
                 onHide={() => {
@@ -274,7 +278,7 @@ export default function UpdatePurchaseOrder() {
                 </div>
             </Dialog>
             <Dialog
-                header={<p className='font-medium text-gray-900'>Lý do hủy đơn</p>}
+                header={<p className='font-medium text-gray-900 capitalize'>Lý do hủy đơn</p>}
                 visible={openReason}
                 style={{ width: '50vw' }}
                 onHide={() => {
@@ -307,27 +311,27 @@ export default function UpdatePurchaseOrder() {
                                     <SupplierInfo
                                         title='Tên nhà cung cấp'
                                         icon={<FaRegCircleUser />}
-                                        value={purchaseOrder?.data.result.supplier.name ?? ''}
+                                        value={(purchaseOrder?.data.result as PurchaseOrder)?.supplier?.name ?? ''}
                                     />
                                     <SupplierInfo
                                         title='Mã nhà cung cấp'
                                         icon={<GoCodeSquare />}
-                                        value={purchaseOrder?.data.result.supplier.tax_code ?? ''}
+                                        value={(purchaseOrder?.data.result as PurchaseOrder)?.supplier?.tax_code ?? ''}
                                     />
                                     <SupplierInfo
                                         title='Email'
                                         icon={<MdOutlineMailOutline />}
-                                        value={purchaseOrder?.data.result.supplier.email ?? ''}
+                                        value={(purchaseOrder?.data.result as PurchaseOrder)?.supplier?.email ?? ''}
                                     />
                                     <SupplierInfo
                                         title='Số điện thoại'
                                         icon={<MdOutlinePhoneForwarded />}
-                                        value={purchaseOrder?.data.result.supplier.phone_number ?? ''}
+                                        value={(purchaseOrder?.data.result as PurchaseOrder)?.supplier?.phone_number ?? ''}
                                     />
                                     <SupplierInfo
                                         title='Địa chỉ'
                                         icon={<MdMyLocation />}
-                                        value={purchaseOrder?.data.result.supplier.address ?? ''}
+                                        value={(purchaseOrder?.data.result as PurchaseOrder)?.supplier?.address ?? ''}
                                     />
                                 </div>
                             </div>
@@ -341,20 +345,27 @@ export default function UpdatePurchaseOrder() {
                                 <div className='card-body text-gray-700  flex flex-col gap-2 '>
                                     <PurchaseOrderInfo
                                         title='Mã đơn hàng'
-                                        value={purchaseOrder?.data.result.purchase_order_code ?? ''}
+                                        value={(purchaseOrder?.data.result as PurchaseOrder)?.purchase_order_code ?? ''}
                                     />
                                     <PurchaseOrderInfo
                                         title='Ngày đặt hàng'
-                                        value={formatDate(purchaseOrder?.data.result.purchase_order_date ?? '')}
+                                        value={formatDate(
+                                            (purchaseOrder?.data.result as PurchaseOrder)?.purchase_order_date ?? ''
+                                        )}
                                     />
                                     <PurchaseOrderInfo title='Người đặt hàng' value='Admin' />
                                     <PurchaseOrderInfo
                                         title='Trạng thái'
-                                        value={convertPurchaseOrderStatus((purchaseOrder?.data.result.status as string) || '')}
+                                        value={convertPurchaseOrderStatus(
+                                            ((purchaseOrder?.data.result as PurchaseOrder)?.status as string) || ''
+                                        )}
                                     />
                                     <PurchaseOrderInfo title='Số lượng' value={quantityTotal?.toString() || ''} />
                                     <PurchaseOrderInfo title='Tổng tiền' value={formatCurrencyVND(totalPrice) || ''} />
-                                    <PurchaseOrderInfo title='Ghi chú' value={purchaseOrder?.data.result.note || ''} />
+                                    <PurchaseOrderInfo
+                                        title='Ghi chú'
+                                        value={(purchaseOrder?.data.result as PurchaseOrder)?.note || ''}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -367,11 +378,14 @@ export default function UpdatePurchaseOrder() {
                         {message && <ShowMessage severity='warn' detail={message} />}
                         <div className='my-4'></div>
                         <DataTable
-                            value={(purchaseOrder?.data.result.purchase_details as unknown as DataTableValueArray) ?? []}
+                            value={
+                                ((purchaseOrder?.data.result as PurchaseOrder)
+                                    ?.purchase_details as unknown as DataTableValueArray) ?? []
+                            }
                             dataKey='variant.id'
                             header={
-                                purchaseOrder?.data.result.status === PURCHASE_ORDER_STATUS.COMPLETED ||
-                                purchaseOrder?.data.result.status === PURCHASE_ORDER_STATUS.CANCELLED
+                                (purchaseOrder?.data.result as PurchaseOrder)?.status === PURCHASE_ORDER_STATUS.COMPLETED ||
+                                (purchaseOrder?.data.result as PurchaseOrder)?.status === PURCHASE_ORDER_STATUS.CANCELLED
                                     ? null
                                     : header
                             }

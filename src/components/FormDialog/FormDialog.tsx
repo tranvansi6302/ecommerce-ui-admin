@@ -29,7 +29,7 @@ export default function FormDialog({ header, content, visible, btnSaveName, onCo
 
     return (
         <Dialog
-            header={<p className='font-medium text-gray-900'>{header}</p>}
+            header={<p className='text-gray-900'>{header}</p>}
             visible={visible}
             style={{ width: '45vw' }}
             onHide={onClose}

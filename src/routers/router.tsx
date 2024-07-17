@@ -22,7 +22,9 @@ import UpdateUser from '~/pages/Users/components/UpdateUser'
 import WarehouseList from '~/pages/Warehouses'
 import { ProtectedRoute, RejectedRoute } from './protected'
 import UpdateProduct from '~/pages/Products/components/UpdateProduct'
-import ProductSale from '~/pages/Sells/ProductSale'
+import ProductSale from '~/pages/ProductSale'
+import OrderList from '~/pages/Orders/OrderList'
+import OrderDetail from '~/pages/Orders/components/OrderDetail'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -179,6 +181,22 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <ProductSale />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.ORDER_LIST,
+                    element: (
+                        <MainLayout>
+                            <OrderList />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.ORDER_DETAIL,
+                    element: (
+                        <MainLayout>
+                            <OrderDetail />
                         </MainLayout>
                     )
                 }

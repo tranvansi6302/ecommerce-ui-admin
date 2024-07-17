@@ -90,6 +90,10 @@ const menuItems: MenuItem[] = [
             {
                 label: 'Sản phẩm đang bán',
                 link: PATH.PRODUCT_SALE
+            },
+            {
+                label: 'Đơn hàng',
+                link: PATH.ORDER_LIST
             }
         ]
     }

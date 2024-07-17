@@ -65,7 +65,9 @@ export default function FilterPurchaseOrder({
         }
         if (queryConfig.supplier && suppliers) {
             setSelectedSupplier(
-                suppliers.data.result.find((supplier: { id: number }) => supplier.id === parseInt(queryConfig.supplier || '0'))
+                (suppliers?.data.result as Supplier).find(
+                    (supplier: { id: number }) => supplier.id === parseInt(queryConfig.supplier || '0')
+                )
             )
         }
         if (queryConfig.search) {

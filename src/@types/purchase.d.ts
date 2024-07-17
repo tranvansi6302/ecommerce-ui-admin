@@ -2,7 +2,7 @@ import { Supplier } from './supplier'
 import { ApiResponse, PaginatedApiResponse } from './util'
 import { Variant } from './variant'
 
-interface PurchaseOrder {
+export interface PurchaseOrder {
     id: number
     note: string
     purchase_order_date: string
