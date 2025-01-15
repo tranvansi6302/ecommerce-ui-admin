@@ -5,7 +5,7 @@ class HttpGhn {
     instance: AxiosInstance
     private token: string
     constructor() {
-        this.token = import.meta.env.VITE_API_GHN_TOKEN as string
+        this.token = 'a1a3a65f-39cc-11ef-8e53-0a00184fe694'
         this.instance = axios.create({
             baseURL: API.BASE_API_GHN_URL,
             timeout: 10000,

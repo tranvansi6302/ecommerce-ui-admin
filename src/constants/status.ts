@@ -29,6 +29,12 @@ export const ORDER_STATUS = {
     CANCELLED: 'CANCELLED'
 } as const
 
+export const RETURN_ORDER_STATUS = {
+    REQUESTED: 'REQUESTED',
+    ACCEPTED: 'ACCEPTED',
+    REJECTED: 'REJECTED'
+} as const
+
 export const PAYMENT_METHOD = {
     CASH_ON_DELIVERY: 'CASH_ON_DELIVERY',
     MOMO: 'MOMO',

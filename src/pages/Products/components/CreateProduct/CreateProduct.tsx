@@ -85,7 +85,7 @@ export default function CreateProduct() {
             brand_id: selectedBrand?.id.toString() ?? '',
             category_id: selectedCategory?.id.toString() ?? ''
         }
-
+        console.log(finalData)
         const product = await createProductMutation.mutateAsync(finalData, {
             onSuccess: () => {
                 if (files.length === 0) {

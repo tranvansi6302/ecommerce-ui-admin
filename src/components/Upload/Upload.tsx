@@ -96,7 +96,7 @@ export default function Upload({ id, onSelectedFiles }: UploadProps) {
                     ></i>
                 </button>
                 <p style={{ fontSize: '14px', color: 'var(--text-color-secondary)' }} className='my-5 w-[80%]'>
-                    Chấp nhận đuôi .jpg, .jpeg, .png, dung lượng tối đa 5MB, tối đa 5 hình ảnh
+                    Chấp nhận đuôi .jpg, .jpeg, .png, .webp dung lượng tối đa 5MB, tối đa 5 hình ảnh
                 </p>
             </div>
         )

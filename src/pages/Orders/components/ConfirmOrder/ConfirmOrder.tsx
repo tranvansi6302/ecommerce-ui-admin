@@ -46,7 +46,6 @@ export default function ConfirmOrder({
         mutationFn: (data: ConfirmOrderRequest) => ghnApi.createOrder(data),
         onSuccess: (data) => {
             const orderCode = data?.data?.data?.order_code as string
-
             refMessage.current = `Đơn hàng đã tạo thành công với mã vận đơn ${orderCode}`
         }
     })
@@ -111,7 +110,7 @@ export default function ConfirmOrder({
         const resOrder = await createOrderGHNMutation.mutateAsync(finalData)
         await updateStatusOrderMutation.mutateAsync({
             id: orderPayload?.id,
-            status: ORDER_STATUS.CONFIRMED,
+            status: ORDER_STATUS.DELIVERING,
             tracking_code: resOrder?.data?.data?.order_code
         })
     })

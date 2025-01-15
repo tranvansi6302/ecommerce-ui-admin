@@ -81,7 +81,7 @@ export default function FilterOrder({ search, setSearch, selectedOrderStatus, se
     return (
         <div>
             <p className='font-medium text-[14px] text-blue-600 pb-2 border-b-2 border-blue-500 inline-block mb-3'>
-                Danh sách sản phẩm
+                Danh sách đơn hàng
             </p>
 
             <div className='flex justify-content-between gap-2'>

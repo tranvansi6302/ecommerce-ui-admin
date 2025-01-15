@@ -27,7 +27,7 @@ export default function OrderStep({ order }: OrderStepProps) {
                         }
                       : {
                             status: ORDER_STATUS.PAID,
-                            label: 'Đã thanh toán1',
+                            label: 'Đã thanh toán',
                             icon: MdOutlinePayments,
                             date: order?.paid_date
                         }

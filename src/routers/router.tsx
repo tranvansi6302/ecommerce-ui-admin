@@ -25,6 +25,7 @@ import UpdateProduct from '~/pages/Products/components/UpdateProduct'
 import ProductSale from '~/pages/ProductSale'
 import OrderList from '~/pages/Orders/OrderList'
 import OrderDetail from '~/pages/Orders/components/OrderDetail'
+import ReturnOrders from '~/pages/Orders/ReturnOrders'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -197,6 +198,14 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <OrderDetail />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.RETURN_ORDERS,
+                    element: (
+                        <MainLayout>
+                            <ReturnOrders />
                         </MainLayout>
                     )
                 }

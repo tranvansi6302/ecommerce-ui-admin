@@ -1,4 +1,11 @@
-import { ORDER_STATUS, PAYMENT_METHOD, PRODUCT_STATUS, PURCHASE_ORDER_STATUS, SUPPLIER_STATUS } from '~/constants/status'
+import {
+    ORDER_STATUS,
+    PAYMENT_METHOD,
+    PRODUCT_STATUS,
+    PURCHASE_ORDER_STATUS,
+    RETURN_ORDER_STATUS,
+    SUPPLIER_STATUS
+} from '~/constants/status'
 export const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     const day = String(date.getDate()).padStart(2, '0')
@@ -100,6 +107,20 @@ export const convertOrderStatus = (status: string) => {
             return 'Không xác định'
     }
 }
+
+export const convertReturnOrderStatus = (status: string) => {
+    switch (status) {
+        case RETURN_ORDER_STATUS.REQUESTED:
+            return 'Chờ xác nhận'
+        case RETURN_ORDER_STATUS.ACCEPTED:
+            return 'Đã xác nhận'
+        case RETURN_ORDER_STATUS.REJECTED:
+            return 'Đã từ chối'
+        default:
+            return ''
+    }
+}
+
 export const convertPaymentMethod = (method: string) => {
     switch (method) {
         case PAYMENT_METHOD.CASH_ON_DELIVERY:

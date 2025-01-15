@@ -94,6 +94,10 @@ const menuItems: MenuItem[] = [
             {
                 label: 'Đơn hàng',
                 link: PATH.ORDER_LIST
+            },
+            {
+                label: 'Đổi trả',
+                link: PATH.RETURN_ORDERS
             }
         ]
     }
