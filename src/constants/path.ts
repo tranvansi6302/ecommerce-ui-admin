@@ -23,6 +23,8 @@ const PATH = {
     PRODUCT_SALE: '/admin/products/sale',
     ORDER_LIST: '/admin/orders',
     ORDER_DETAIL: '/admin/orders/:id',
-    RETURN_ORDERS: '/admin/return-orders'
+    RETURN_ORDERS: '/admin/return-orders',
+    REVENUE_SALE: '/admin/revenue-sale',
+    REVENUE_WAREHOUSE: '/admin/revenue-warehouse'
 }
 export default PATH

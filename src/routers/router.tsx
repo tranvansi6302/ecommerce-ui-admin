@@ -4,13 +4,20 @@ import AuthLayout from '~/layouts/AuthLayout'
 import MainLayout from '~/layouts/MainLayout'
 import BrandList from '~/pages/Brands'
 import CategoryList from '~/pages/Categories'
-import Dashboard from '~/pages/Dashboard'
+import RevenueSale from '~/pages/Dashboard/pages/RevenueSale'
+import RevenueWarehouse from '~/pages/Dashboard/pages/RevenueWarehouse'
 import Login from '~/pages/Login'
+import OrderDetail from '~/pages/Orders/components/OrderDetail'
+import OrderList from '~/pages/Orders/OrderList'
+import ReturnOrderDetail from '~/pages/Orders/ReturnOrderDetail'
+import ReturnOrders from '~/pages/Orders/ReturnOrders'
 import PricePlanList from '~/pages/PricePlans'
 import CreatePricePlan from '~/pages/PricePlans/components/CreatePricePlan'
 import PricePlanHistory from '~/pages/PricePlans/components/PricePlanHistory'
 import ProductList from '~/pages/Products'
 import CreateProduct from '~/pages/Products/components/CreateProduct'
+import UpdateProduct from '~/pages/Products/components/UpdateProduct'
+import ProductSale from '~/pages/ProductSale'
 import PurchaseOrderList from '~/pages/Purchases'
 import CreatePurchaseOrder from '~/pages/Purchases/components/CreatePurchaseOrder'
 import UpdatePurchaseOrder from '~/pages/Purchases/components/UpdatePurchaseOrder'
@@ -21,11 +28,6 @@ import UserList from '~/pages/Users'
 import UpdateUser from '~/pages/Users/components/UpdateUser'
 import WarehouseList from '~/pages/Warehouses'
 import { ProtectedRoute, RejectedRoute } from './protected'
-import UpdateProduct from '~/pages/Products/components/UpdateProduct'
-import ProductSale from '~/pages/ProductSale'
-import OrderList from '~/pages/Orders/OrderList'
-import OrderDetail from '~/pages/Orders/components/OrderDetail'
-import ReturnOrders from '~/pages/Orders/ReturnOrders'
 
 export default function useRoutesElement() {
     return useRoutes([
@@ -34,10 +36,18 @@ export default function useRoutesElement() {
             element: <ProtectedRoute />,
             children: [
                 {
-                    path: PATH.DASHBOARD,
+                    path: PATH.REVENUE_SALE,
                     element: (
                         <MainLayout>
-                            <Dashboard />
+                            <RevenueSale />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.REVENUE_WAREHOUSE,
+                    element: (
+                        <MainLayout>
+                            <RevenueWarehouse />
                         </MainLayout>
                     )
                 },
@@ -206,6 +216,14 @@ export default function useRoutesElement() {
                     element: (
                         <MainLayout>
                             <ReturnOrders />
+                        </MainLayout>
+                    )
+                },
+                {
+                    path: PATH.RETURN_ORDERS + '/:id',
+                    element: (
+                        <MainLayout>
+                            <ReturnOrderDetail />
                         </MainLayout>
                     )
                 }

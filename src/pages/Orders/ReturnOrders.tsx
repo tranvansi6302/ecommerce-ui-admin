@@ -18,7 +18,6 @@ import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator'
 import { FaCheckDouble } from 'react-icons/fa'
 import { Order } from '~/@types/order'
 import useSetTitle from '~/hooks/useSetTitle'
-import FilterOrder from './components/FilterOrder'
 
 import { yupResolver } from '@hookform/resolvers/yup'
 import { AxiosError } from 'axios'
@@ -36,7 +35,7 @@ import MESSAGE from '~/constants/message'
 import { RETURN_ORDER_STATUS } from '~/constants/status'
 import useQueryOrders from '~/hooks/useQueryOrders'
 import { rejectOrderSchema, RejectOrderSchemaType } from '~/schemas/orders.schema'
-import { OrderStatus } from './components/FilterOrder/FilterOrder'
+import FilterReturnOrder, { ReturnOrderStatusType } from './components/FilterOrder/FilterReturnOrder'
 import RowVariantReturnOrder from './components/RowVariantReturnOrder'
 export default function ReturnOrders() {
     useSetTitle('Đơn hàng đổi trả')
@@ -44,7 +43,7 @@ export default function ReturnOrders() {
     const queryConfig = useQueryOrders()
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined)
     const [selectedOrders, setSelectedOrders] = useState<Order[]>([])
-    const [selectedOrderStatus, setSelectedOrderStatus] = useState<OrderStatus | null>(null)
+    const [selectedOrderStatus, setSelectedOrderStatus] = useState<ReturnOrderStatusType | null>(null)
     const [search, setSearch] = useState<string>('')
     const [globalFilter] = useState<string>('')
     const [message, setMessage] = useState<string>('')
@@ -98,7 +97,7 @@ export default function ReturnOrders() {
 
     const returnOrderDateTemplate = useCallback((rowData: ReturnOrderResponse) => formatDate(rowData?.created_at), [])
 
-    const actionTemplate = useCallback((rowData: ReturnOrderResponse) => {
+    const statusTemplate = useCallback((rowData: ReturnOrderResponse) => {
         let severity: 'warning' | 'info' | 'contrast' | 'success' | 'danger' | 'secondary' | undefined = undefined
 
         switch (rowData.return_status) {
@@ -127,6 +126,14 @@ export default function ReturnOrders() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    const actionTemplate = useCallback((rowData: ReturnOrderResponse) => {
+        return (
+            <Link to={`${PATH.RETURN_ORDERS}/${rowData.id}`}>
+                <p className='text-blue-600 text-[14px] font-semibold hover:underline'>CHI TIẾT</p>
+            </Link>
+        )
+    }, [])
+
     const rowVariantTemplate = useCallback(
         (data: ReturnOrderResponse) => {
             console.log(data)
@@ -145,7 +152,7 @@ export default function ReturnOrders() {
 
     const header = useMemo(
         () => (
-            <FilterOrder
+            <FilterReturnOrder
                 search={search}
                 setSearch={setSearch}
                 selectedOrderStatus={selectedOrderStatus}
@@ -321,7 +328,8 @@ export default function ReturnOrders() {
                 <Column className='pl-0 w-[40%]' header='Sản phẩm' body={returnOrderProductTemplate} />
                 <Column header='Ngày yêu cầu' body={returnOrderDateTemplate} />
 
-                <Column className='pl-0 w-[20%]' header='Trạng thái' body={actionTemplate} />
+                <Column className='pl-0 w-[20%]' header='Trạng thái' body={statusTemplate} />
+                <Column className='w-[10%]' header='Hành động' body={actionTemplate} />
             </DataTable>
             <div className='flex justify-end mt-3'>
                 <Paginator

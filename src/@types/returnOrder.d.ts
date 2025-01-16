@@ -2,11 +2,17 @@ import { Variant } from './variant'
 
 export type ReturnOrderResponse = {
     id: number
+    order_id: number
+    product_image: string
     price: number
     order_detail: null
     old_variant_id: number
     product_name: string
     order_code: string
+    rejected_reason: string
+    date_requested: string
+    date_accepted: string
+    date_rejected: string
     created_at: string
     variant_id: number
     return_reason: string
@@ -22,5 +28,5 @@ export type ReturnOrderFilter = {
     status?: string
     search?: string
 }
-export type ReturnOrderResponse = ApiResponse<ReturnOrderResponse>
+export type ReturnOrderResponseDetail = ApiResponse<ReturnOrderResponse>
 export type ReturnOrderListResponse = PaginatedApiResponse<ReturnOrderResponse>

@@ -9,6 +9,7 @@ import { IoStorefront } from 'react-icons/io5'
 import PATH from '~/constants/path'
 import MenuItem from './components/MenuItem'
 import { Link } from 'react-router-dom'
+import { FaRegChartBar } from 'react-icons/fa'
 
 interface MenuItem {
     label: string
@@ -19,9 +20,18 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
     {
-        label: 'Tổng quan',
-        icon: <LuLayoutDashboard fontSize='18px' />,
-        link: PATH.DASHBOARD
+        label: 'Thống kê',
+        icon: <FaRegChartBar fontSize='18px' />,
+        children: [
+            {
+                label: 'Thống kê bán hàng',
+                link: PATH.REVENUE_SALE
+            },
+            {
+                label: 'Thống kê kho',
+                link: PATH.REVENUE_WAREHOUSE
+            }
+        ]
     },
     {
         label: 'Quản lý người dùng',

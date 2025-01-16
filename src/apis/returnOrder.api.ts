@@ -1,4 +1,4 @@
-import { ReturnOrderFilter, ReturnOrderListResponse } from '~/@types/returnOrder'
+import { ReturnOrderFilter, ReturnOrderListResponse, ReturnOrderResponseDetail } from '~/@types/returnOrder'
 import http from '~/utils/http'
 
 interface ReturnOrderUpdateRequest {
@@ -14,5 +14,9 @@ export const returnOrderApi = {
 
     updateStatus: (data: ReturnOrderUpdateRequest) => {
         return http.patch(`/return-orders`, data)
+    },
+
+    getDetail: (id: number) => {
+        return http.get<ReturnOrderResponseDetail>(`/return-orders/${id}`)
     }
 }

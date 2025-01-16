@@ -40,3 +40,9 @@ export const PAYMENT_METHOD = {
     MOMO: 'MOMO',
     VNPAY: 'VNPAY'
 } as const
+
+export enum ReturnOrderStatus {
+    REQUESTED = 'REQUESTED',
+    ACCEPTED = 'ACCEPTED',
+    REJECTED = 'REJECTED'
+}
