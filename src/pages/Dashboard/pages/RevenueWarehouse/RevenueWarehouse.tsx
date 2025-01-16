@@ -1,521 +1,1093 @@
-import {
-    ArcElement,
-    BarElement,
-    CategoryScale,
-    Chart as ChartJS,
-    Legend,
-    LinearScale,
-    LineElement,
-    PointElement,
-    Title,
-    Tooltip
-} from 'chart.js'
-import { useEffect, useState } from 'react'
-import { Bar, Pie } from 'react-chartjs-2'
+import { useQuery } from '@tanstack/react-query'
+import { useMemo, useState } from 'react'
+import { Bar, Line, Pie } from 'react-chartjs-2'
 import useSetTitle from '~/hooks/useSetTitle'
+import { formatCurrency } from '../RevenueSale/utils/chart'
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Title, Tooltip, Legend)
+const mockData = {
+    stock: [
+        {
+            id: 'P1',
+            name: 'iPhone 15 Pro Max',
+            category: 'Điện thoại',
+            brand: 'Apple',
+            quantity: 50,
+            minQuantity: 10,
+            value: 1500000000,
+            location: 'Kho A'
+        },
+        {
+            id: 'P2',
+            name: 'Samsung S24 Ultra',
+            category: 'Điện thoại',
+            brand: 'Samsung',
+            quantity: 8,
+            minQuantity: 10,
+            value: 800000000,
+            location: 'Kho A'
+        },
+        {
+            id: 'P3',
+            name: 'Xiaomi 14 Pro',
+            category: 'Điện thoại',
+            brand: 'Xiaomi',
+            quantity: 15,
+            minQuantity: 8,
+            value: 450000000,
+            location: 'Kho A'
+        },
+        {
+            id: 'P4',
+            name: 'MacBook Pro M3',
+            category: 'Laptop',
+            brand: 'Apple',
+            quantity: 25,
+            minQuantity: 5,
+            value: 1200000000,
+            location: 'Kho B'
+        },
+        {
+            id: 'P5',
+            name: 'Dell XPS 13',
+            category: 'Laptop',
+            brand: 'Dell',
+            quantity: 4,
+            minQuantity: 5,
+            value: 400000000,
+            location: 'Kho B'
+        },
+        {
+            id: 'P6',
+            name: 'iPad Pro',
+            category: 'Máy tính bảng',
+            brand: 'Apple',
+            quantity: 30,
+            minQuantity: 8,
+            value: 900000000,
+            location: 'Kho C'
+        }
+    ],
+    history: [
+        {
+            date: '2024-03-01',
+            stockIn: 100,
+            stockOut: 80,
+            stockInValue: 3000000000,
+            stockOutValue: 2400000000
+        },
+        {
+            date: '2024-03-02',
+            stockIn: 150,
+            stockOut: 120,
+            stockInValue: 4500000000,
+            stockOutValue: 3600000000
+        },
+        {
+            date: '2024-03-03',
+            stockIn: 80,
+            stockOut: 95,
+            stockInValue: 2400000000,
+            stockOutValue: 2850000000
+        },
+        {
+            date: '2024-03-04',
+            stockIn: 120,
+            stockOut: 100,
+            stockInValue: 3600000000,
+            stockOutValue: 3000000000
+        },
+        {
+            date: '2024-03-05',
+            stockIn: 90,
+            stockOut: 85,
+            stockInValue: 2700000000,
+            stockOutValue: 2550000000
+        }
+    ],
+    cost: [
+        {
+            period: 'T1/2024',
+            storageCost: 150000000,
+            operatingCost: 100000000,
+            maintenanceCost: 50000000,
+            utilitiesCost: 30000000,
+            total: 330000000
+        },
+        {
+            period: 'T2/2024',
+            storageCost: 160000000,
+            operatingCost: 110000000,
+            maintenanceCost: 45000000,
+            utilitiesCost: 35000000,
+            total: 350000000
+        },
+        {
+            period: 'T3/2024',
+            storageCost: 155000000,
+            operatingCost: 105000000,
+            maintenanceCost: 48000000,
+            utilitiesCost: 32000000,
+            total: 340000000
+        }
+    ],
+    summary: {
+        byCategory: [
+            {
+                name: 'Điện thoại',
+                totalQuantity: 73,
+                totalValue: 2750000000,
+                stockInRate: 0.45,
+                stockOutRate: 0.42
+            },
+            {
+                name: 'Laptop',
+                totalQuantity: 29,
+                totalValue: 1600000000,
+                stockInRate: 0.35,
+                stockOutRate: 0.38
+            },
+            {
+                name: 'Máy tính bảng',
+                totalQuantity: 30,
+                totalValue: 900000000,
+                stockInRate: 0.2,
+                stockOutRate: 0.2
+            }
+        ],
+        byBrand: [
+            {
+                name: 'Apple',
+                totalQuantity: 105,
+                totalValue: 3600000000,
+                stockInRate: 0.4,
+                stockOutRate: 0.38
+            },
+            {
+                name: 'Samsung',
+                totalQuantity: 8,
+                totalValue: 800000000,
+                stockInRate: 0.25,
+                stockOutRate: 0.27
+            },
+            {
+                name: 'Xiaomi',
+                totalQuantity: 15,
+                totalValue: 450000000,
+                stockInRate: 0.2,
+                stockOutRate: 0.22
+            },
+            {
+                name: 'Dell',
+                totalQuantity: 4,
+                totalValue: 400000000,
+                stockInRate: 0.15,
+                stockOutRate: 0.13
+            }
+        ]
+    }
+}
 
 export default function RevenueWarehouse() {
-    useSetTitle('Thống kê kho bán hàng')
-    const [selectedTab, setSelectedTab] = useState<string>('stockInOut')
-    const [timeFrame, setTimeFrame] = useState<'week' | 'month' | 'quarter' | 'year'>('week')
+    useSetTitle('Thống kê kho hàng')
+    const [timeRangeType, setTimeRangeType] = useState<'week' | 'month' | 'quarter' | 'year'>('week')
+    const [activeTab, setActiveTab] = useState<'overview' | 'stock' | 'cost'>('overview')
 
-    // Thêm state cho các thống kê tổng quan
-    const [summaryStats, setSummaryStats] = useState({
-        totalStockValue: 0,
-        outOfStockItems: 0,
-        lowStockItems: 0,
-        topSellingItems: [],
-        stockTurnoverRate: 0
+    // Thay thế các useQuery bằng dữ liệu mock
+    const { data: warehouseStock } = useQuery({
+        queryKey: ['warehouse-stock'],
+        queryFn: () => Promise.resolve({ data: mockData.stock })
     })
 
-    // Hàm format ngày tháng
-    const formatDate = (dateStr: string, type: 'week' | 'month' | 'quarter' | 'year') => {
-        const date = new Date(dateStr)
-        switch (type) {
-            case 'week':
-                const weekNumber = Math.ceil((date.getDate() + 6 - date.getDay()) / 7)
-                return `Tuần ${weekNumber}, Tháng ${date.getMonth() + 1}/${date.getFullYear()}`
-            case 'month':
-                return `Tháng ${date.getMonth() + 1}/${date.getFullYear()}`
-            case 'quarter':
-                const quarter = Math.floor(date.getMonth() / 3) + 1
-                return `Quý ${quarter}/${date.getFullYear()}`
-            case 'year':
-                return date.getFullYear().toString()
-            default:
-                return dateStr
-        }
-    }
+    const { data: warehouseCost } = useQuery({
+        queryKey: ['warehouse-cost'],
+        queryFn: () => Promise.resolve({ data: mockData.cost })
+    })
 
-    // Dữ liệu mẫu đầy đủ cho cả năm
-    const fullMockData = {
-        stockInOut: [
-            // Tuần 1
-            {
-                date: '2025-01-01',
-                stockIn: 250,
-                stockOut: 180,
-                stockInValue: 25000000,
-                stockOutValue: 18000000,
-                topCategories: ['Điện tử', 'Thời trang']
-            },
-            {
-                date: '2025-01-02',
-                stockIn: 180,
-                stockOut: 150,
-                stockInValue: 20000000,
-                stockOutValue: 15000000,
-                topCategories: ['Mỹ phẩm', 'Điện tử']
-            },
-            {
-                date: '2025-01-03',
-                stockIn: 300,
-                stockOut: 280,
-                stockInValue: 35000000,
-                stockOutValue: 32000000,
-                topCategories: ['Thực phẩm', 'Đồ gia dụng']
-            },
-            {
-                date: '2025-01-04',
-                stockIn: 220,
-                stockOut: 200,
-                stockInValue: 28000000,
-                stockOutValue: 25000000,
-                topCategories: ['Thời trang', 'Mỹ phẩm']
-            },
-            {
-                date: '2025-01-05',
-                stockIn: 280,
-                stockOut: 250,
-                stockInValue: 32000000,
-                stockOutValue: 28000000,
-                topCategories: ['Điện tử', 'Thực phẩm']
-            },
-            {
-                date: '2025-01-06',
-                stockIn: 350,
-                stockOut: 320,
-                stockInValue: 40000000,
-                stockOutValue: 36000000,
-                topCategories: ['Đồ gia dụng', 'Điện tử']
-            },
-            {
-                date: '2025-01-07',
-                stockIn: 200,
-                stockOut: 180,
-                stockInValue: 22000000,
-                stockOutValue: 20000000,
-                topCategories: ['Thời trang', 'Mỹ phẩm']
-            },
-            // Tuần 2
-            {
-                date: '2025-01-08',
-                stockIn: 280,
-                stockOut: 260,
-                stockInValue: 30000000,
-                stockOutValue: 28000000,
-                topCategories: ['Điện tử', 'Thực phẩm']
-            }
-            // ... thêm dữ liệu cho các tuần tiếp theo
-        ],
-        currentStock: {
-            Q1: [
-                {
-                    category: 'Điện tử',
-                    brand: 'Samsung',
-                    stock: 500,
-                    value: 250000000,
-                    minStockLevel: 100,
-                    maxStockLevel: 1000,
-                    turnoverRate: 2.5,
-                    lastRestockDate: '2025-01-01',
-                    status: 'Đủ hàng',
-                    location: 'Kho A - Kệ 1'
-                },
-                {
-                    category: 'Điện tử',
-                    brand: 'Apple',
-                    stock: 300,
-                    value: 450000000,
-                    minStockLevel: 50,
-                    maxStockLevel: 500,
-                    turnoverRate: 3.0,
-                    lastRestockDate: '2025-01-03',
-                    status: 'Đủ hàng',
-                    location: 'Kho A - Kệ 2'
-                },
-                {
-                    category: 'Thời trang',
-                    brand: 'Uniqlo',
-                    stock: 800,
-                    value: 160000000,
-                    minStockLevel: 200,
-                    maxStockLevel: 1500,
-                    turnoverRate: 4.0,
-                    lastRestockDate: '2025-01-02',
-                    status: 'Đủ hàng',
-                    location: 'Kho B - Kệ 1'
-                },
-                {
-                    category: 'Mỹ phẩm',
-                    brand: 'Innisfree',
-                    stock: 50,
-                    value: 25000000,
-                    minStockLevel: 100,
-                    maxStockLevel: 800,
-                    turnoverRate: 5.0,
-                    lastRestockDate: '2025-01-01',
-                    status: 'Sắp hết hàng',
-                    location: 'Kho C - Kệ 1'
-                },
-                {
-                    category: 'Thực phẩm',
-                    brand: 'Vinamilk',
-                    stock: 1200,
-                    value: 180000000,
-                    minStockLevel: 300,
-                    maxStockLevel: 2000,
-                    turnoverRate: 6.0,
-                    lastRestockDate: '2025-01-04',
-                    status: 'Đủ hàng',
-                    location: 'Kho D - Kệ 1'
-                }
-            ],
-            Q2: [
-                // Tương tự như Q1 nhưng với số liệu khác
-            ],
-            Q3: [
-                // Tương tự như Q1 nhưng với số liệu khác
-            ],
-            Q4: [
-                // Tương tự như Q1 nhưng với số liệu khác
-            ]
-        },
-        stockCost: {
-            weekly: [
-                {
-                    week: 'Tuần 1/2025',
-                    cost: 50000000,
-                    breakdown: {
-                        storage: 30000000,
-                        labor: 15000000,
-                        utilities: 5000000,
-                        maintenance: 8000000,
-                        insurance: 2000000,
-                        other: 1000000
+    const { data: warehouseHistory } = useQuery({
+        queryKey: ['warehouse-history'],
+        queryFn: () => Promise.resolve({ data: mockData.history })
+    })
+
+    // Tính toán tổng quan
+    const totals = useMemo(
+        () => ({
+            totalStock: warehouseStock?.data?.reduce((sum: number, item: any) => sum + item.quantity, 0) || 0,
+            totalValue: warehouseStock?.data?.reduce((sum: number, item: any) => sum + item.value, 0) || 0,
+            totalCost: warehouseCost?.data?.reduce((sum: number, item: any) => sum + item.total, 0) || 0,
+            outOfStock: warehouseStock?.data?.filter((item: any) => item.quantity <= item.minQuantity).length || 0
+        }),
+        [warehouseStock?.data, warehouseCost?.data]
+    )
+
+    // Kiểm tra dữ liệu
+    const isDataReady = warehouseStock?.data && warehouseCost?.data && warehouseHistory?.data
+
+    // Chuẩn bị dữ liệu cho biểu đồ
+    const chartData = useMemo(() => {
+        if (!isDataReady) return {}
+
+        return {
+            stockFlow: {
+                labels: warehouseHistory?.data.map((d: any) => d.date),
+                datasets: [
+                    {
+                        label: 'Nhập kho',
+                        data: warehouseHistory?.data.map((d: any) => d.stockIn),
+                        borderColor: 'rgb(53, 162, 235)',
+                        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                        yAxisID: 'y'
                     },
-                    metrics: {
-                        costPerUnit: 25000,
-                        utilizationRate: 85,
-                        efficiency: 92
+                    {
+                        label: 'Xuất kho',
+                        data: warehouseHistory?.data.map((d: any) => d.stockOut),
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        yAxisID: 'y'
                     }
-                }
-                // Thêm dữ liệu cho các tuần khác
-            ],
-            monthly: [
-                {
-                    month: 'Tháng 1/2025',
-                    cost: 200000000,
-                    breakdown: {
-                        storage: 120000000,
-                        labor: 60000000,
-                        utilities: 20000000,
-                        maintenance: 32000000,
-                        insurance: 8000000,
-                        other: 4000000
-                    },
-                    metrics: {
-                        costPerUnit: 23000,
-                        utilizationRate: 88,
-                        efficiency: 94
-                    }
-                }
-                // Thêm dữ liệu cho các tháng khác
-            ],
-            quarterly: [
-                {
-                    quarter: 'Quý 1/2025',
-                    cost: 600000000,
-                    breakdown: {
-                        storage: 360000000,
-                        labor: 180000000,
-                        utilities: 60000000,
-                        maintenance: 96000000,
-                        insurance: 24000000,
-                        other: 12000000
-                    },
-                    metrics: {
-                        costPerUnit: 22000,
-                        utilizationRate: 90,
-                        efficiency: 95
-                    }
-                }
-                // Thêm dữ liệu cho các quý khác
-            ],
-            yearly: [
-                {
-                    year: '2025',
-                    cost: 2400000000,
-                    breakdown: {
-                        storage: 1440000000,
-                        labor: 720000000,
-                        utilities: 240000000,
-                        maintenance: 384000000,
-                        insurance: 96000000,
-                        other: 48000000
-                    },
-                    metrics: {
-                        costPerUnit: 21000,
-                        utilizationRate: 92,
-                        efficiency: 96
-                    }
-                }
-            ]
-        }
-    }
-
-    // Cập nhật summaryStats khi component mount
-    useEffect(() => {
-        // Tính toán các chỉ số tổng quan
-        const currentStockData = fullMockData.currentStock.Q1
-        const totalValue = currentStockData.reduce((sum, item) => sum + item.value, 0)
-        const outOfStock = currentStockData.filter((item) => item.stock === 0).length
-        const lowStock = currentStockData.filter((item) => item.stock < item.minStockLevel).length
-        const avgTurnover = currentStockData.reduce((sum, item) => sum + item.turnoverRate, 0) / currentStockData.length
-
-        setSummaryStats({
-            totalStockValue: totalValue,
-            outOfStockItems: outOfStock,
-            lowStockItems: lowStock,
-            topSellingItems: [],
-            stockTurnoverRate: Number(avgTurnover.toFixed(2))
-        })
-    }, [])
-
-    // Hàm lọc dữ liệu theo khoảng thời gian
-    const getFilteredData = () => {
-        const currentDate = new Date('2025-01-01') // Giả sử ngày hiện tại
-        let filteredData = { ...fullMockData }
-
-        switch (timeFrame) {
-            case 'week':
-                // Lọc dữ liệu trong 7 ngày gần nhất
-                filteredData.stockInOut = fullMockData.stockInOut.filter((item) => {
-                    const itemDate = new Date(item.date)
-                    const diffTime = Math.abs(currentDate.getTime() - itemDate.getTime())
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-                    return diffDays <= 7
-                })
-                break
-            case 'month':
-                // Lọc dữ liệu trong tháng hiện tại
-                filteredData.stockInOut = fullMockData.stockInOut.filter((item) => {
-                    const itemDate = new Date(item.date)
-                    return itemDate.getMonth() === currentDate.getMonth()
-                })
-                break
-            case 'quarter':
-                // Lọc dữ liệu theo quý hiện tại
-                const currentQuarter = Math.floor(currentDate.getMonth() / 3)
-                filteredData.currentStock = fullMockData.currentStock[`Q${currentQuarter + 1}`]
-                break
-            case 'year':
-                // Sử dụng toàn bộ dữ liệu của năm
-                break
-        }
-
-        return filteredData
-    }
-
-    // Cập nhật hàm getChartData
-    const getChartData = () => {
-        const filteredData = getFilteredData()
-
-        switch (selectedTab) {
-            case 'stockInOut':
-                return {
-                    labels: filteredData.stockInOut.map((d) => formatDate(d.date, timeFrame)),
-                    datasets: [
-                        {
-                            type: 'line',
-                            label: 'Nhập kho',
-                            data: filteredData.stockInOut.map((d) => d.stockIn),
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            tension: 0.1
-                        },
-                        {
-                            type: 'line',
-                            label: 'Xuất kho',
-                            data: filteredData.stockInOut.map((d) => d.stockOut),
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            tension: 0.1
-                        }
-                    ]
-                }
-            case 'currentStock':
-                const stockData = Array.isArray(filteredData.currentStock)
-                    ? filteredData.currentStock
-                    : filteredData.currentStock.Q1
-                return {
-                    labels: stockData.map((d) => `${d.category} - ${d.brand}\n(Tồn: ${d.stock})`),
-                    datasets: [
-                        {
-                            label: 'Giá trị tồn kho (VNĐ)',
-                            data: stockData.map((d) => d.value),
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.6)',
-                                'rgba(54, 162, 235, 0.6)',
-                                'rgba(255, 206, 86, 0.6)',
-                                'rgba(75, 192, 192, 0.6)',
-                                'rgba(153, 102, 255, 0.6)',
-                                'rgba(255, 159, 64, 0.6)'
-                            ]
-                        }
-                    ]
-                }
-            case 'stockCost':
-                const costData =
-                    filteredData.stockCost[
-                        timeFrame === 'week'
-                            ? 'weekly'
-                            : timeFrame === 'month'
-                              ? 'monthly'
-                              : timeFrame === 'quarter'
-                                ? 'quarterly'
-                                : 'yearly'
-                    ]
-                return {
-                    labels: costData.map((d) => d.week || d.month || d.quarter || d.year),
-                    datasets: [
-                        {
-                            type: 'bar',
-                            label: 'Chi phí lưu kho',
-                            data: costData.map((d) => d.breakdown.storage),
-                            backgroundColor: 'rgba(54, 162, 235, 0.6)'
-                        },
-                        {
-                            type: 'bar',
-                            label: 'Chi phí nhân công',
-                            data: costData.map((d) => d.breakdown.labor),
-                            backgroundColor: 'rgba(255, 99, 132, 0.6)'
-                        },
-                        {
-                            type: 'bar',
-                            label: 'Chi phí tiện ích',
-                            data: costData.map((d) => d.breakdown.utilities),
-                            backgroundColor: 'rgba(75, 192, 192, 0.6)'
-                        },
-                        {
-                            type: 'line',
-                            label: 'Tổng chi phí',
-                            data: costData.map((d) => d.cost),
-                            borderColor: 'rgba(153, 102, 255, 1)',
-                            fill: false
-                        }
-                    ]
-                }
-            default:
-                return {
-                    labels: [],
-                    datasets: []
-                }
-        }
-    }
-
-    const options = {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'top' as const
+                ]
             },
-            title: {
-                display: true,
-                text: `Thống kê kho hàng (${
-                    selectedTab === 'stockInOut'
-                        ? 'Nhập/Xuất kho'
-                        : selectedTab === 'currentStock'
-                          ? 'Tồn kho hiện tại'
-                          : 'Chi phí kho'
-                })`
+            stockValue: {
+                labels: warehouseStock?.data.map((d: any) => d.category),
+                datasets: [
+                    {
+                        data: warehouseStock?.data.map((d: any) => d.value),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ]
+                    }
+                ]
+            },
+            costAnalysis: {
+                labels: warehouseCost?.data.map((d: any) => d.period),
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Chi phí lưu kho',
+                        data: warehouseCost?.data.map((d: any) => d.storageCost),
+                        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                        yAxisID: 'y'
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Chi phí vận hành',
+                        data: warehouseCost?.data.map((d: any) => d.operatingCost),
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        yAxisID: 'y'
+                    },
+                    {
+                        type: 'line',
+                        label: 'Tổng chi phí',
+                        data: warehouseCost?.data.map((d: any) => d.total),
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        yAxisID: 'y1'
+                    }
+                ]
             }
         }
-    }
+    }, [isDataReady, warehouseStock?.data, warehouseCost?.data, warehouseHistory?.data])
+
+    const tabs = [
+        { id: 'overview', label: 'Tổng quan' },
+        { id: 'stock', label: 'Tồn kho' },
+        { id: 'cost', label: 'Chi phí' }
+    ]
 
     return (
-        <div className='p-6'>
-            <h1 className='text-2xl font-bold mb-4'>Bảng điều khiển kho hàng</h1>
+        <div className='min-h-screen bg-gray-100 p-4'>
+            <div className='max-w-7xl mx-auto'>
+                {/* Header và Tabs */}
+                <div className='mb-8 space-y-4'>
+                    <div className='flex justify-between items-center'>
+                        <div className='flex space-x-4'>
+                            <select
+                                value={timeRangeType}
+                                onChange={(e) => setTimeRangeType(e.target.value as any)}
+                                className='border rounded-lg px-6 py-2'
+                            >
+                                <option value='week'>Theo tuần</option>
+                                <option value='month'>Theo tháng</option>
+                                <option value='quarter'>Theo quý</option>
+                                <option value='year'>Theo năm</option>
+                            </select>
+                        </div>
+                    </div>
 
-            {/* Thống kê tổng quan */}
-            <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-6'>
-                <div className='bg-white p-4 rounded-lg shadow'>
-                    <h3 className='text-lg font-semibold'>Tổng giá trị tồn kho</h3>
-                    <p className='text-2xl text-blue-600'>{summaryStats.totalStockValue.toLocaleString()} VNĐ</p>
+                    <div className='flex space-x-4 border-b border-gray-200'>
+                        {tabs.map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id as any)}
+                                className={`px-6 py-3 font-medium border-b-2 ${
+                                    activeTab === tab.id
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                                }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-                <div className='bg-white p-4 rounded-lg shadow'>
-                    <h3 className='text-lg font-semibold'>Sản phẩm hết hàng</h3>
-                    <p className='text-2xl text-red-600'>{summaryStats.outOfStockItems}</p>
-                </div>
-                <div className='bg-white p-4 rounded-lg shadow'>
-                    <h3 className='text-lg font-semibold'>Sản phẩm sắp hết</h3>
-                    <p className='text-2xl text-yellow-600'>{summaryStats.lowStockItems}</p>
-                </div>
-                <div className='bg-white p-4 rounded-lg shadow'>
-                    <h3 className='text-lg font-semibold'>Tỷ lệ luân chuyển</h3>
-                    <p className='text-2xl text-green-600'>{summaryStats.stockTurnoverRate}x</p>
-                </div>
+
+                {/* Content */}
+                {!isDataReady ? (
+                    <div className='flex justify-center items-center h-64'>
+                        <p>Đang tải dữ liệu...</p>
+                    </div>
+                ) : (
+                    <>
+                        {activeTab === 'overview' && (
+                            <>
+                                {/* Thống kê tổng quan */}
+                                <div className='grid grid-cols-4 gap-6 mb-6'>
+                                    <div className='bg-white p-6 rounded-lg border border-gray-200 shadow-sm'>
+                                        <h3 className='text-lg font-semibold mb-2'>Tổng tồn kho</h3>
+                                        <p className='text-3xl font-bold text-blue-600'>{totals.totalStock.toLocaleString()}</p>
+                                    </div>
+                                    <div className='bg-white p-6 rounded-lg border border-gray-200 shadow-sm'>
+                                        <h3 className='text-lg font-semibold mb-2'>Giá trị tồn kho</h3>
+                                        <p className='text-3xl font-bold text-green-600'>{formatCurrency(totals.totalValue)}</p>
+                                    </div>
+                                    <div className='bg-white p-6 rounded-lg border border-gray-200 shadow-sm'>
+                                        <h3 className='text-lg font-semibold mb-2'>Chi phí kho</h3>
+                                        <p className='text-3xl font-bold text-yellow-600'>{formatCurrency(totals.totalCost)}</p>
+                                    </div>
+                                    <div className='bg-white p-6 rounded-lg border border-gray-200 shadow-sm'>
+                                        <h3 className='text-lg font-semibold mb-2'>Sắp hết hàng</h3>
+                                        <p className='text-3xl font-bold text-red-600'>{totals.outOfStock}</p>
+                                    </div>
+                                </div>
+
+                                {/* Biểu đồ nhập xuất kho */}
+                                <div className='bg-white p-6 rounded-xl shadow-lg mb-8'>
+                                    <h3 className='text-lg font-semibold mb-4'>Biến động nhập xuất kho</h3>
+                                    <div className='h-80'>
+                                        <Line
+                                            data={chartData.stockFlow}
+                                            options={{
+                                                maintainAspectRatio: false,
+                                                interaction: {
+                                                    mode: 'index',
+                                                    intersect: false
+                                                },
+                                                scales: {
+                                                    y: {
+                                                        type: 'linear',
+                                                        display: true,
+                                                        position: 'left',
+                                                        title: {
+                                                            display: true,
+                                                            text: 'Số lượng'
+                                                        }
+                                                    }
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Thống kê theo danh mục */}
+                                <div className='grid grid-cols-2 gap-6 mb-8'>
+                                    <div className='bg-white p-6 rounded-xl shadow-lg'>
+                                        <h3 className='text-lg font-semibold mb-4'>Thống kê theo danh mục</h3>
+                                        <div className='h-80'>
+                                            <Bar
+                                                data={{
+                                                    labels: mockData.summary.byCategory.map((c) => c.name),
+                                                    datasets: [
+                                                        {
+                                                            label: 'Tỷ lệ nhập kho',
+                                                            data: mockData.summary.byCategory.map((c) => c.stockInRate * 100),
+                                                            backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                                                            yAxisID: 'y'
+                                                        },
+                                                        {
+                                                            label: 'Tỷ lệ xuất kho',
+                                                            data: mockData.summary.byCategory.map((c) => c.stockOutRate * 100),
+                                                            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                                                            yAxisID: 'y'
+                                                        },
+                                                        {
+                                                            type: 'line',
+                                                            label: 'Giá trị tồn kho',
+                                                            data: mockData.summary.byCategory.map((c) => c.totalValue),
+                                                            borderColor: 'rgb(255, 99, 132)',
+                                                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                                                            yAxisID: 'y1'
+                                                        }
+                                                    ]
+                                                }}
+                                                options={{
+                                                    maintainAspectRatio: false,
+                                                    interaction: {
+                                                        mode: 'index',
+                                                        intersect: false
+                                                    },
+                                                    scales: {
+                                                        y: {
+                                                            type: 'linear',
+                                                            display: true,
+                                                            position: 'left',
+                                                            title: {
+                                                                display: true,
+                                                                text: 'Tỷ lệ (%)'
+                                                            },
+                                                            min: 0,
+                                                            max: 100
+                                                        },
+                                                        y1: {
+                                                            type: 'linear',
+                                                            display: true,
+                                                            position: 'right',
+                                                            title: {
+                                                                display: true,
+                                                                text: 'Giá trị'
+                                                            },
+                                                            ticks: {
+                                                                callback: function (value) {
+                                                                    return formatCurrency(value)
+                                                                }
+                                                            },
+                                                            grid: {
+                                                                drawOnChartArea: false
+                                                            }
+                                                        }
+                                                    },
+                                                    plugins: {
+                                                        tooltip: {
+                                                            callbacks: {
+                                                                label: function (context) {
+                                                                    if (context.dataset.yAxisID === 'y1') {
+                                                                        return `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`
+                                                                    }
+                                                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Thống kê theo thương hiệu */}
+                                    <div className='bg-white p-6 rounded-xl shadow-lg'>
+                                        <h3 className='text-lg font-semibold mb-4'>Thống kê theo thương hiệu</h3>
+                                        <div className='h-80'>
+                                            <Bar
+                                                data={{
+                                                    labels: mockData.summary.byBrand.map((b) => b.name),
+                                                    datasets: [
+                                                        {
+                                                            label: 'Tỷ lệ nhập kho',
+                                                            data: mockData.summary.byBrand.map((b) => b.stockInRate * 100),
+                                                            backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                                                            yAxisID: 'y'
+                                                        },
+                                                        {
+                                                            label: 'Tỷ lệ xuất kho',
+                                                            data: mockData.summary.byBrand.map((b) => b.stockOutRate * 100),
+                                                            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                                                            yAxisID: 'y'
+                                                        },
+                                                        {
+                                                            type: 'line',
+                                                            label: 'Giá trị tồn kho',
+                                                            data: mockData.summary.byBrand.map((b) => b.totalValue),
+                                                            borderColor: 'rgb(255, 99, 132)',
+                                                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                                                            yAxisID: 'y1'
+                                                        }
+                                                    ]
+                                                }}
+                                                options={{
+                                                    maintainAspectRatio: false,
+                                                    interaction: {
+                                                        mode: 'index',
+                                                        intersect: false
+                                                    },
+                                                    scales: {
+                                                        y: {
+                                                            type: 'linear',
+                                                            display: true,
+                                                            position: 'left',
+                                                            title: {
+                                                                display: true,
+                                                                text: 'Tỷ lệ (%)'
+                                                            },
+                                                            min: 0,
+                                                            max: 100
+                                                        },
+                                                        y1: {
+                                                            type: 'linear',
+                                                            display: true,
+                                                            position: 'right',
+                                                            title: {
+                                                                display: true,
+                                                                text: 'Giá trị'
+                                                            },
+                                                            ticks: {
+                                                                callback: function (value) {
+                                                                    return formatCurrency(value)
+                                                                }
+                                                            },
+                                                            grid: {
+                                                                drawOnChartArea: false
+                                                            }
+                                                        }
+                                                    },
+                                                    plugins: {
+                                                        tooltip: {
+                                                            callbacks: {
+                                                                label: function (context) {
+                                                                    if (context.dataset.yAxisID === 'y1') {
+                                                                        return `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`
+                                                                    }
+                                                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        {activeTab === 'stock' && (
+                            <div className='space-y-6'>
+                                {/* Top sản phẩm tồn kho */}
+                                <div className='grid grid-cols-2 gap-6'>
+                                    <div className='bg-white p-6 rounded-xl shadow-lg'>
+                                        <h3 className='text-lg font-semibold mb-4'>Top sản phẩm theo giá trị tồn kho</h3>
+                                        <div className='h-80'>
+                                            <Bar
+                                                data={{
+                                                    labels: warehouseStock?.data
+                                                        .sort((a, b) => b.value - a.value)
+                                                        .slice(0, 5)
+                                                        .map((item) => item.name),
+                                                    datasets: [
+                                                        {
+                                                            label: 'Giá trị tồn kho',
+                                                            data: warehouseStock?.data
+                                                                .sort((a, b) => b.value - a.value)
+                                                                .slice(0, 5)
+                                                                .map((item) => item.value),
+                                                            backgroundColor: 'rgba(53, 162, 235, 0.5)'
+                                                        }
+                                                    ]
+                                                }}
+                                                options={{
+                                                    maintainAspectRatio: false,
+                                                    plugins: {
+                                                        tooltip: {
+                                                            callbacks: {
+                                                                label: (context) => `Giá trị: ${formatCurrency(context.parsed.y)}`
+                                                            }
+                                                        }
+                                                    },
+                                                    scales: {
+                                                        y: {
+                                                            beginAtZero: true,
+                                                            ticks: {
+                                                                callback: (value) => formatCurrency(value)
+                                                            }
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className='bg-white p-6 rounded-xl shadow-lg'>
+                                        <h3 className='text-lg font-semibold mb-4'>Top sản phẩm theo số lượng tồn kho</h3>
+                                        <div className='h-80'>
+                                            <Bar
+                                                data={{
+                                                    labels: warehouseStock?.data
+                                                        .sort((a, b) => b.quantity - a.quantity)
+                                                        .slice(0, 5)
+                                                        .map((item) => item.name),
+                                                    datasets: [
+                                                        {
+                                                            label: 'Số lượng tồn kho',
+                                                            data: warehouseStock?.data
+                                                                .sort((a, b) => b.quantity - a.quantity)
+                                                                .slice(0, 5)
+                                                                .map((item) => item.quantity),
+                                                            backgroundColor: 'rgba(75, 192, 192, 0.5)'
+                                                        }
+                                                    ]
+                                                }}
+                                                options={{
+                                                    maintainAspectRatio: false,
+                                                    plugins: {
+                                                        tooltip: {
+                                                            callbacks: {
+                                                                label: (context) =>
+                                                                    `Số lượng: ${context.parsed.y.toLocaleString()}`
+                                                            }
+                                                        }
+                                                    },
+                                                    scales: {
+                                                        y: {
+                                                            beginAtZero: true,
+                                                            ticks: {
+                                                                callback: (value) => value.toLocaleString()
+                                                            }
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Bảng chi tiết */}
+                                <div className='bg-white p-6 rounded-xl shadow-lg'>
+                                    <div className='flex justify-between items-center mb-4'>
+                                        <h3 className='text-lg font-semibold'>Chi tiết tồn kho</h3>
+                                        <div className='flex space-x-2'>
+                                            <button className='px-4 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100'>
+                                                Xuất Excel
+                                            </button>
+                                            <button className='px-4 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100'>
+                                                Lọc dữ liệu
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className='overflow-x-auto'>
+                                        <table className='min-w-full divide-y divide-gray-200'>
+                                            <thead className='bg-gray-50'>
+                                                <tr>
+                                                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                                                        Sản phẩm
+                                                    </th>
+                                                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                                                        Danh mục
+                                                    </th>
+                                                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                                                        Thương hiệu
+                                                    </th>
+                                                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                                                        Số lượng
+                                                    </th>
+                                                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                                                        Giá trị
+                                                    </th>
+                                                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                                                        Vị trí
+                                                    </th>
+                                                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                                                        Trạng thái
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className='bg-white divide-y divide-gray-200'>
+                                                {warehouseStock?.data.map((item) => (
+                                                    <tr key={item.id} className='hover:bg-gray-50'>
+                                                        <td className='px-6 py-4 whitespace-nowrap'>{item.name}</td>
+                                                        <td className='px-6 py-4 whitespace-nowrap'>{item.category}</td>
+                                                        <td className='px-6 py-4 whitespace-nowrap'>{item.brand}</td>
+                                                        <td className='px-6 py-4 whitespace-nowrap'>
+                                                            <div className='flex items-center'>
+                                                                <span className='mr-2'>{item.quantity.toLocaleString()}</span>
+                                                                {item.quantity <= item.minQuantity && (
+                                                                    <span className='text-red-500'>
+                                                                        <svg
+                                                                            className='w-5 h-5'
+                                                                            fill='currentColor'
+                                                                            viewBox='0 0 20 20'
+                                                                        >
+                                                                            <path
+                                                                                fillRule='evenodd'
+                                                                                d='M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z'
+                                                                                clipRule='evenodd'
+                                                                            />
+                                                                        </svg>
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className='px-6 py-4 whitespace-nowrap'>
+                                                            {formatCurrency(item.value)}
+                                                        </td>
+                                                        <td className='px-6 py-4 whitespace-nowrap'>{item.location}</td>
+                                                        <td className='px-6 py-4 whitespace-nowrap'>
+                                                            <span
+                                                                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                                                    item.quantity <= item.minQuantity
+                                                                        ? 'bg-red-100 text-red-800'
+                                                                        : 'bg-green-100 text-green-800'
+                                                                }`}
+                                                            >
+                                                                {item.quantity <= item.minQuantity ? 'Sắp hết hàng' : 'Đủ hàng'}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {/* Phân tích tồn kho chi tiết */}
+                                <div className='space-y-6'>
+                                    {/* Phân tích theo danh mục */}
+                                    <div className='bg-white p-6 rounded-xl shadow-lg'>
+                                        <h3 className='text-lg font-semibold mb-4'>Phân tích theo danh mục</h3>
+                                        <div className='grid grid-cols-2 gap-6'>
+                                            <div className='h-80'>
+                                                <Pie
+                                                    data={{
+                                                        labels: [...new Set(warehouseStock?.data.map((item) => item.category))],
+                                                        datasets: [
+                                                            {
+                                                                data: [
+                                                                    ...new Set(warehouseStock?.data.map((item) => item.category))
+                                                                ].map((category) => {
+                                                                    const categoryItems = warehouseStock?.data.filter(
+                                                                        (item) => item.category === category
+                                                                    )
+                                                                    return {
+                                                                        value: categoryItems.reduce(
+                                                                            (sum, item) => sum + item.value,
+                                                                            0
+                                                                        ),
+                                                                        quantity: categoryItems.reduce(
+                                                                            (sum, item) => sum + item.quantity,
+                                                                            0
+                                                                        ),
+                                                                        stockIn: categoryItems.reduce(
+                                                                            (sum, item) => sum + (item.stockIn || 0),
+                                                                            0
+                                                                        ),
+                                                                        stockOut: categoryItems.reduce(
+                                                                            (sum, item) => sum + (item.stockOut || 0),
+                                                                            0
+                                                                        )
+                                                                    }
+                                                                }),
+                                                                backgroundColor: [
+                                                                    'rgba(255, 99, 132, 0.8)',
+                                                                    'rgba(54, 162, 235, 0.8)',
+                                                                    'rgba(255, 206, 86, 0.8)'
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }}
+                                                    options={{
+                                                        maintainAspectRatio: false,
+                                                        plugins: {
+                                                            tooltip: {
+                                                                callbacks: {
+                                                                    label: (context) => {
+                                                                        const datapoint = context.dataset.data[
+                                                                            context.dataIndex
+                                                                        ] as any
+                                                                        const total = context.dataset.data.reduce(
+                                                                            (a: any, b: any) => a + b.quantity,
+                                                                            0
+                                                                        )
+                                                                        const percentage = (
+                                                                            (datapoint.quantity / total) *
+                                                                            100
+                                                                        ).toFixed(1)
+                                                                        return [
+                                                                            `Tổng số lượng: ${datapoint.quantity.toLocaleString()} (${percentage}%)`,
+                                                                            `Giá trị: ${formatCurrency(datapoint.value)}`,
+                                                                            `Nhập kho: ${datapoint.stockIn.toLocaleString()}`,
+                                                                            `Xuất kho: ${datapoint.stockOut.toLocaleString()}`,
+                                                                            `Tồn kho: ${(datapoint.stockIn - datapoint.stockOut).toLocaleString()}`
+                                                                        ]
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className='space-y-4'>
+                                                {[...new Set(warehouseStock?.data.map((item) => item.category))].map(
+                                                    (category) => {
+                                                        const categoryItems = warehouseStock?.data.filter(
+                                                            (item) => item.category === category
+                                                        )
+                                                        const totalQuantity = categoryItems.reduce(
+                                                            (sum, item) => sum + item.quantity,
+                                                            0
+                                                        )
+                                                        const totalValue = categoryItems.reduce(
+                                                            (sum, item) => sum + item.value,
+                                                            0
+                                                        )
+                                                        const stockIn = categoryItems.reduce(
+                                                            (sum, item) => sum + (item.stockIn || 0),
+                                                            0
+                                                        )
+                                                        const stockOut = categoryItems.reduce(
+                                                            (sum, item) => sum + (item.stockOut || 0),
+                                                            0
+                                                        )
+
+                                                        return (
+                                                            <div key={category} className='bg-gray-50 p-4 rounded-lg'>
+                                                                <div className='flex justify-between items-start mb-2'>
+                                                                    <h4 className='font-medium text-lg'>{category}</h4>
+                                                                    <span className='text-sm text-gray-500'>
+                                                                        {categoryItems.length} sản phẩm
+                                                                    </span>
+                                                                </div>
+                                                                <div className='grid grid-cols-2 gap-4 text-sm'>
+                                                                    <div>
+                                                                        <div className='text-gray-600'>Tổng số lượng:</div>
+                                                                        <div className='font-medium'>
+                                                                            {totalQuantity.toLocaleString()}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className='text-gray-600'>Giá trị:</div>
+                                                                        <div className='font-medium'>
+                                                                            {formatCurrency(totalValue)}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className='text-gray-600'>Nhập kho:</div>
+                                                                        <div className='font-medium'>
+                                                                            {stockIn.toLocaleString()}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className='text-gray-600'>Xuất kho:</div>
+                                                                        <div className='font-medium'>
+                                                                            {stockOut.toLocaleString()}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className='text-gray-600'>Tồn kho thực tế:</div>
+                                                                        <div className='font-medium'>
+                                                                            {(stockIn - stockOut).toLocaleString()}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className='text-gray-600'>Chênh lệch:</div>
+                                                                        <div className='font-medium'>
+                                                                            {(
+                                                                                totalQuantity -
+                                                                                (stockIn - stockOut)
+                                                                            ).toLocaleString()}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    }
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Phân tích theo thương hiệu */}
+                                    <div className='bg-white p-6 rounded-xl shadow-lg'>
+                                        <h3 className='text-lg font-semibold mb-4'>Phân tích theo thương hiệu</h3>
+                                        <div className='grid grid-cols-2 gap-6'>
+                                            <div className='h-80'>
+                                                <Pie
+                                                    data={{
+                                                        labels: [...new Set(warehouseStock?.data.map((item) => item.brand))],
+                                                        datasets: [
+                                                            {
+                                                                data: [
+                                                                    ...new Set(warehouseStock?.data.map((item) => item.brand))
+                                                                ].map((brand) => {
+                                                                    const brandItems = warehouseStock?.data.filter(
+                                                                        (item) => item.brand === brand
+                                                                    )
+                                                                    return {
+                                                                        value: brandItems.reduce(
+                                                                            (sum, item) => sum + item.value,
+                                                                            0
+                                                                        ),
+                                                                        quantity: brandItems.reduce(
+                                                                            (sum, item) => sum + item.quantity,
+                                                                            0
+                                                                        ),
+                                                                        stockIn: brandItems.reduce(
+                                                                            (sum, item) => sum + (item.stockIn || 0),
+                                                                            0
+                                                                        ),
+                                                                        stockOut: brandItems.reduce(
+                                                                            (sum, item) => sum + (item.stockOut || 0),
+                                                                            0
+                                                                        )
+                                                                    }
+                                                                }),
+                                                                backgroundColor: [
+                                                                    'rgba(255, 99, 132, 0.8)',
+                                                                    'rgba(54, 162, 235, 0.8)',
+                                                                    'rgba(255, 206, 86, 0.8)',
+                                                                    'rgba(75, 192, 192, 0.8)'
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }}
+                                                    options={{
+                                                        maintainAspectRatio: false,
+                                                        plugins: {
+                                                            tooltip: {
+                                                                callbacks: {
+                                                                    label: (context) => {
+                                                                        const datapoint = context.dataset.data[
+                                                                            context.dataIndex
+                                                                        ] as any
+                                                                        const total = context.dataset.data.reduce(
+                                                                            (a: any, b: any) => a + b.quantity,
+                                                                            0
+                                                                        )
+                                                                        const percentage = (
+                                                                            (datapoint.quantity / total) *
+                                                                            100
+                                                                        ).toFixed(1)
+                                                                        return [
+                                                                            `Tổng số lượng: ${datapoint.quantity.toLocaleString()} (${percentage}%)`,
+                                                                            `Giá trị: ${formatCurrency(datapoint.value)}`,
+                                                                            `Nhập kho: ${datapoint.stockIn.toLocaleString()}`,
+                                                                            `Xuất kho: ${datapoint.stockOut.toLocaleString()}`,
+                                                                            `Tồn kho: ${(datapoint.stockIn - datapoint.stockOut).toLocaleString()}`
+                                                                        ]
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className='space-y-4'>
+                                                {[...new Set(warehouseStock?.data.map((item) => item.brand))].map((brand) => {
+                                                    const brandItems = warehouseStock?.data.filter((item) => item.brand === brand)
+                                                    const totalQuantity = brandItems.reduce((sum, item) => sum + item.quantity, 0)
+                                                    const totalValue = brandItems.reduce((sum, item) => sum + item.value, 0)
+                                                    const stockIn = brandItems.reduce((sum, item) => sum + (item.stockIn || 0), 0)
+                                                    const stockOut = brandItems.reduce(
+                                                        (sum, item) => sum + (item.stockOut || 0),
+                                                        0
+                                                    )
+
+                                                    return (
+                                                        <div key={brand} className='bg-gray-50 p-4 rounded-lg'>
+                                                            <div className='flex justify-between items-start mb-2'>
+                                                                <h4 className='font-medium text-lg'>{brand}</h4>
+                                                                <span className='text-sm text-gray-500'>
+                                                                    {brandItems.length} sản phẩm
+                                                                </span>
+                                                            </div>
+                                                            <div className='grid grid-cols-2 gap-4 text-sm'>
+                                                                <div>
+                                                                    <div className='text-gray-600'>Tổng số lượng:</div>
+                                                                    <div className='font-medium'>
+                                                                        {totalQuantity.toLocaleString()}
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    <div className='text-gray-600'>Giá trị:</div>
+                                                                    <div className='font-medium'>
+                                                                        {formatCurrency(totalValue)}
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    <div className='text-gray-600'>Nhập kho:</div>
+                                                                    <div className='font-medium'>{stockIn.toLocaleString()}</div>
+                                                                </div>
+                                                                <div>
+                                                                    <div className='text-gray-600'>Xuất kho:</div>
+                                                                    <div className='font-medium'>{stockOut.toLocaleString()}</div>
+                                                                </div>
+                                                                <div>
+                                                                    <div className='text-gray-600'>Tồn kho thực tế:</div>
+                                                                    <div className='font-medium'>
+                                                                        {(stockIn - stockOut).toLocaleString()}
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    <div className='text-gray-600'>Chênh lệch:</div>
+                                                                    <div className='font-medium'>
+                                                                        {(totalQuantity - (stockIn - stockOut)).toLocaleString()}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'cost' && (
+                            <div className='grid grid-cols-1 gap-6'>
+                                <div className='bg-white p-6 rounded-xl shadow-lg'>
+                                    <h3 className='text-lg font-semibold mb-4'>Chi phí theo thời gian</h3>
+                                    <div className='h-80'>
+                                        <Line
+                                            data={chartData.costAnalysis}
+                                            options={{
+                                                maintainAspectRatio: false,
+                                                interaction: {
+                                                    mode: 'index',
+                                                    intersect: false
+                                                },
+                                                scales: {
+                                                    y: {
+                                                        type: 'linear',
+                                                        display: true,
+                                                        position: 'left',
+                                                        title: {
+                                                            display: true,
+                                                            text: 'Chi phí'
+                                                        },
+                                                        ticks: {
+                                                            callback: function (value) {
+                                                                return formatCurrency(value)
+                                                            }
+                                                        }
+                                                    },
+                                                    y1: {
+                                                        type: 'linear',
+                                                        display: true,
+                                                        position: 'right',
+                                                        title: {
+                                                            display: true,
+                                                            text: 'Tổng chi phí'
+                                                        },
+                                                        ticks: {
+                                                            callback: function (value) {
+                                                                return formatCurrency(value)
+                                                            }
+                                                        },
+                                                        grid: {
+                                                            drawOnChartArea: false
+                                                        }
+                                                    }
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
             </div>
-
-            {/* Tabs */}
-            <div className='flex space-x-4 mb-6'>
-                <button
-                    onClick={() => setSelectedTab('stockInOut')}
-                    className={`px-4 py-2 border rounded ${
-                        selectedTab === 'stockInOut' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-                    }`}
-                >
-                    Nhập/Xuất kho
-                </button>
-                <button
-                    onClick={() => setSelectedTab('currentStock')}
-                    className={`px-4 py-2 border rounded ${
-                        selectedTab === 'currentStock' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-                    }`}
-                >
-                    Tồn kho hiện tại
-                </button>
-                <button
-                    onClick={() => setSelectedTab('stockCost')}
-                    className={`px-4 py-2 border rounded ${
-                        selectedTab === 'stockCost' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-                    }`}
-                >
-                    Chi phí kho
-                </button>
-            </div>
-
-            {/* Bộ lọc thời gian */}
-            <div className='mb-4'>
-                <label className='mr-2'>Khoảng thời gian:</label>
-                <select
-                    value={timeFrame}
-                    onChange={(e) => setTimeFrame(e.target.value as 'week' | 'month' | 'quarter' | 'year')}
-                    className='border rounded p-2'
-                >
-                    <option value='week'>Theo tuần</option>
-                    <option value='month'>Theo tháng</option>
-                    <option value='quarter'>Theo quý</option>
-                    <option value='year'>Theo năm</option>
-                </select>
-            </div>
-
-            {/* Biểu đồ */}
-            {selectedTab === 'currentStock' ? (
-                <Pie data={getChartData()} options={options} />
-            ) : (
-                <Bar data={getChartData()} options={options} />
-            )}
         </div>
     )
 }
