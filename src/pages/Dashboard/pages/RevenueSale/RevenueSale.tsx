@@ -12,7 +12,7 @@ import {
     Title,
     Tooltip
 } from 'chart.js'
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { Bar, Doughnut, Line, Pie } from 'react-chartjs-2'
 import renvenueApi from '~/apis/renvenue.api'
 import useSetTitle from '~/hooks/useSetTitle'
@@ -371,8 +371,10 @@ export default function RevenueSale() {
                                 </div>
 
                                 <div className='grid grid-cols-2 gap-6 mb-8'>
-                                    <div className='bg-white p-6'>
-                                        <h3 className='text-lg font-semibold mb-4'>Doanh thu theo thời gian (triệu )</h3>
+                                    <div className='bg-white p-6 border border-gray-200 rounded-lg'>
+                                        <h3 className='text-[15px] font-semibold mb-4 uppercase'>
+                                            Doanh thu theo thời gian (triệu )
+                                        </h3>
                                         <div className='h-80'>
                                             <Line
                                                 data={{
@@ -416,8 +418,10 @@ export default function RevenueSale() {
                                             />
                                         </div>
                                     </div>
-                                    <div className='bg-white p-6'>
-                                        <h3 className='text-lg font-semibold mb-4'>Lợi nhuận theo thời gian (triệu )</h3>
+                                    <div className='bg-white p-6 border border-gray-200 rounded-lg'>
+                                        <h3 className='text-[15px] font-semibold mb-4 uppercase'>
+                                            Lợi nhuận theo thời gian (triệu )
+                                        </h3>
                                         <div className='h-80'>
                                             <Line
                                                 data={{
@@ -464,8 +468,8 @@ export default function RevenueSale() {
                                 </div>
 
                                 <div className='grid grid-cols-2 gap-6'>
-                                    <div className='bg-white p-6'>
-                                        <h3 className='text-lg font-semibold mb-4'>Top 5 sản phẩm bán chạy</h3>
+                                    <div className='bg-white p-6 border border-gray-200 rounded-lg'>
+                                        <h3 className='text-[15px] font-semibold mb-4 uppercase'>Top 5 sản phẩm bán chạy</h3>
                                         <div className='h-80'>
                                             <Bar
                                                 data={{
@@ -510,8 +514,8 @@ export default function RevenueSale() {
                                             />
                                         </div>
                                     </div>
-                                    <div className='bg-white p-6'>
-                                        <h3 className='text-lg font-semibold mb-4'>Top 5 sản phẩm bán chậm</h3>
+                                    <div className='bg-white p-6 border border-gray-200 rounded-lg'>
+                                        <h3 className='text-[15px] font-semibold mb-4 uppercase'>Top 5 sản phẩm bán chậm</h3>
                                         <div className='h-80'>
                                             <Bar
                                                 data={{
@@ -587,8 +591,8 @@ export default function RevenueSale() {
                         </div>
 
                         <div className='grid grid-cols-2 gap-6 mb-8'>
-                            <div className='bg-white p-6 rounded-xl shadow-lg'>
-                                <h3 className='text-lg font-semibold mb-4'>
+                            <div className='bg-white p-6 border border-gray-200 rounded-lg'>
+                                <h3 className='text-[15px] font-semibold mb-4 uppercase'>
                                     {showWorstPerforming ? 'Sản phẩm bán chậm' : 'Top sản phẩm bán chạy'}
                                 </h3>
                                 <div className='h-80'>
@@ -633,8 +637,8 @@ export default function RevenueSale() {
                                     />
                                 </div>
                             </div>
-                            <div className='bg-white p-6 rounded-xl shadow-lg'>
-                                <h3 className='text-lg font-semibold mb-4'>Top sản phẩm được đánh giá cao</h3>
+                            <div className='bg-white p-6 border border-gray-200 rounded-lg'>
+                                <h3 className='text-[15px] font-semibold mb-4 uppercase'>Top sản phẩm được đánh giá cao</h3>
                                 <div className='h-80'>
                                     <Bar
                                         data={chartData?.ratings as ChartData<'bar', number[], string>}
@@ -681,8 +685,8 @@ export default function RevenueSale() {
                             </div>
                         </div>
 
-                        <div className='bg-white p-6 rounded-xl shadow-lg'>
-                            <h3 className='text-lg font-semibold mb-4'>Chi tiết sản phẩm</h3>
+                        <div className='bg-white p-6 border border-gray-200 rounded-lg'>
+                            <h3 className='text-[15px] font-semibold mb-4 uppercase'>Chi tiết sản phẩm</h3>
                             <div className='overflow-x-auto'>
                                 <table className='min-w-full divide-y divide-gray-200'>
                                     <thead className='bg-gray-50'>
@@ -726,49 +730,51 @@ export default function RevenueSale() {
                                 <p>Đang tải dữ liệu...</p>
                             </div>
                         ) : (
-                            <div className='grid grid-cols-3 gap-6 mb-8'>
-                                <div className='bg-white p-6'>
-                                    <h3 className='text-lg font-semibold mb-4'>Thị phần theo số lượng bán</h3>
-                                    <div className='h-80'>
-                                        <Doughnut
-                                            data={chartData.brands.quantityShare}
-                                            options={{
-                                                maintainAspectRatio: false,
-                                                plugins: {
-                                                    legend: { position: 'right' },
-                                                    tooltip: {
-                                                        callbacks: {
-                                                            label: (context) =>
-                                                                `${context.label}: ${context.parsed}% (${renvenueBrands?.data[context.dataIndex].quantity_sale.toLocaleString()} sản phẩm)`
+                            <Fragment>
+                                <div className='grid grid-cols-2 gap-6 mb-8'>
+                                    <div className='bg-white p-6 border border-gray-200 rounded-lg'>
+                                        <h3 className='text-[15px] font-semibold mb-4 uppercase'>Thị phần theo số lượng bán</h3>
+                                        <div className='h-80'>
+                                            <Doughnut
+                                                data={chartData.brands.quantityShare}
+                                                options={{
+                                                    maintainAspectRatio: false,
+                                                    plugins: {
+                                                        legend: { position: 'right' },
+                                                        tooltip: {
+                                                            callbacks: {
+                                                                label: (context) =>
+                                                                    `${context.label}: ${context.parsed}% (${renvenueBrands?.data[context.dataIndex].quantity_sale.toLocaleString()} sản phẩm)`
+                                                            }
                                                         }
                                                     }
-                                                }
-                                            }}
-                                        />
+                                                }}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                                <div className='bg-white p-6'>
-                                    <h3 className='text-lg font-semibold mb-4'>Thị phần theo doanh thu</h3>
-                                    <div className='h-80'>
-                                        <Doughnut
-                                            data={chartData.brands.revenueShare}
-                                            options={{
-                                                maintainAspectRatio: false,
-                                                plugins: {
-                                                    legend: { position: 'right' },
-                                                    tooltip: {
-                                                        callbacks: {
-                                                            label: (context) =>
-                                                                `${context.label}: ${context.parsed}% (${formatCurrency(renvenueBrands?.data[context.dataIndex]?.revenue || 0)})`
+                                    <div className='bg-white p-6 border border-gray-200 rounded-lg'>
+                                        <h3 className='text-[15px] font-semibold mb-4 uppercase'>Thị phần theo doanh thu</h3>
+                                        <div className='h-80'>
+                                            <Doughnut
+                                                data={chartData.brands.revenueShare}
+                                                options={{
+                                                    maintainAspectRatio: false,
+                                                    plugins: {
+                                                        legend: { position: 'right' },
+                                                        tooltip: {
+                                                            callbacks: {
+                                                                label: (context) =>
+                                                                    `${context.label}: ${context.parsed}% (${formatCurrency(renvenueBrands?.data[context.dataIndex]?.revenue || 0)})`
+                                                            }
                                                         }
                                                     }
-                                                }
-                                            }}
-                                        />
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                                <div className='bg-white p-6'>
-                                    <h3 className='text-lg font-semibold mb-4'>Phân tích chi tiết</h3>
+                                <div className='bg-white p-6 border border-gray-200 rounded-lg'>
+                                    <h3 className='text-[15px] font-semibold mb-4 uppercase'>Phân tích chi tiết</h3>
                                     <div className='h-80'>
                                         <Bar
                                             data={chartData?.brands.details as unknown as ChartData<'bar', number[], string>}
@@ -821,7 +827,7 @@ export default function RevenueSale() {
                                         />
                                     </div>
                                 </div>
-                            </div>
+                            </Fragment>
                         )}
                     </>
                 )}
