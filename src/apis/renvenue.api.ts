@@ -1,4 +1,12 @@
-import { RenvenueBrands, RenvenueCategories, RenvenueProducts, RenvenueSale } from '~/@types/renvenue'
+import {
+    RenvenueBrands,
+    RenvenueCategories,
+    RenvenueProducts,
+    RenvenueSale,
+    RevenueWarehouseBrandsResponse,
+    RevenueWarehouseCategoriesResponse,
+    RevenueWarehouseHistoryResponse
+} from '~/@types/renvenue'
 import http from '~/utils/http'
 
 const renvenueApi = {
@@ -14,6 +22,15 @@ const renvenueApi = {
     },
     getCategories: () => {
         return http.get<RenvenueCategories[]>('/revenue/categories')
+    },
+    getWarehouseHistory: () => {
+        return http.get<RevenueWarehouseHistoryResponse[]>('/revenue/warehouses')
+    },
+    getWarehouseCategories: () => {
+        return http.get<RevenueWarehouseCategoriesResponse[]>('/revenue/warehouses/categories')
+    },
+    getWarehouseBrands: () => {
+        return http.get<RevenueWarehouseBrandsResponse[]>('/revenue/warehouses/brands')
     }
 }
 

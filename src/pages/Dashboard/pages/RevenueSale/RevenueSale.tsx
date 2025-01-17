@@ -100,7 +100,7 @@ export default function RevenueSale() {
 
         return {
             products: {
-                labels: filteredProducts.map((p) => p.name),
+                labels: filteredProducts?.map((p) => p.name),
                 datasets: [
                     {
                         type: 'bar',
@@ -467,7 +467,7 @@ export default function RevenueSale() {
                                     </div>
                                 </div>
 
-                                <div className='grid grid-cols-2 gap-6'>
+                                <div className='grid grid-cols-1 gap-6'>
                                     <div className='bg-white p-6 border border-gray-200 rounded-lg'>
                                         <h3 className='text-[15px] font-semibold mb-4 uppercase'>Top 5 sản phẩm bán chạy</h3>
                                         <div className='h-80'>
@@ -514,7 +514,7 @@ export default function RevenueSale() {
                                             />
                                         </div>
                                     </div>
-                                    <div className='bg-white p-6 border border-gray-200 rounded-lg'>
+                                    {/* <div className='bg-white p-6 border border-gray-200 rounded-lg'>
                                         <h3 className='text-[15px] font-semibold mb-4 uppercase'>Top 5 sản phẩm bán chậm</h3>
                                         <div className='h-80'>
                                             <Bar
@@ -559,7 +559,7 @@ export default function RevenueSale() {
                                                 }}
                                             />
                                         </div>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </>
                         )}

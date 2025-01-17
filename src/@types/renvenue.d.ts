@@ -34,3 +34,27 @@ export interface RenvenueCategories {
     category_id: number
     quantity_sale: number
 }
+
+export type RevenueWarehouseHistoryResponse = {
+    period: string
+    timestamp: string
+    stock_in: number
+    stock_in_value: number
+    remaining_stock: number
+}
+
+export type RevenueWarehouseCategoriesResponse = {
+    name: string
+    category_id: number
+    stock_in: number
+    stock_in_value: number
+    remaining_stock: number
+}
+
+export type RevenueWarehouseBrandsResponse = {
+    name: string
+    brand_id: number
+    stock_in: number
+    stock_in_value: number
+    remaining_stock: number
+}
